@@ -2,33 +2,50 @@
 	import { page } from '$app/stores';
 	import logo from '$lib/images/svelte-logo.svg';
 	import github from '$lib/images/github.svg';
+	import headerimg from '$lib/images/header.png';
+	import orblogo from '$lib/images/neworbdemo.jpg';
+	import boxors from '$lib/images/icon_b0x0rz.gif';
+
+	  import Webamp from './Webamp.svelte';
 </script>
 
 <header>
 	<div class="corner">
 		<a href="https://kit.svelte.dev">
-			<img src={logo} alt="SvelteKit" />
+			<img src={boxors} alt="SvelteKit" />
 		</a>
 	</div>
 
 	<nav>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
-		</svg>
 		<ul>
-			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/">Home</a>
-			</li>
+			<li class="logo" aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
+				<a href="/"><img src={orblogo} /></a>
+			</li>			
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
 				<a href="/about">About</a>
+			</li>
+			<li aria-current={$page.url.pathname === '/links' ? 'page' : undefined}>
+				<a href="/links">Links</a>
+			</li>
+			<li aria-current={$page.url.pathname === '/steam' ? 'page' : undefined}>
+				<a href="/steam">Steam</a>
+			</li>									
+			<li aria-current={$page.url.pathname.startsWith('/diablo') ? 'page' : undefined}>
+				<a href="/diablo">Diablo</a>
+			</li>
+			<li aria-current={$page.url.pathname.startsWith('/gta') ? 'page' : undefined}>
+				<a href="/gta">GTA 5</a>
+			</li>
+			<li aria-current={$page.url.pathname.startsWith('/tribes') ? 'page' : undefined}>
+				<a href="/tribes">Tribes</a>
 			</li>
 			<li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
 				<a href="/sverdle">Sverdle</a>
 			</li>
+			<li>
+				<Webamp />
+			</li>
 		</ul>
-		<svg viewBox="0 0 2 3" aria-hidden="true">
-			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
-		</svg>
 	</nav>
 
 	<div class="corner">
@@ -38,10 +55,20 @@
 	</div>
 </header>
 
-<style>
+<style lang="scss">
 	header {
 		display: flex;
 		justify-content: space-between;
+
+		.banner {
+			
+			background-image:url({headerimg});
+			background-position:50% 50%;
+			background-size: contain;
+			width:100%;
+			height:100px;
+		
+		}
 	}
 
 	.corner {
@@ -58,15 +85,20 @@
 	}
 
 	.corner img {
-		width: 2em;
-		height: 2em;
+		max-width: 2em;
+		max-height: 2em;
 		object-fit: contain;
 	}
 
 	nav {
-		display: flex;
-		justify-content: center;
-		--background: rgba(255, 255, 255, 0.7);
+		position:fixed;
+		bottom:10vh;
+		left:0vw;
+		width:100vw;
+		background:#000D;
+		border:1px solid var(--color-theme-1);
+		border-width:1px 0;
+		box-shadow:0 0 40px #bbb;
 	}
 
 	svg {
@@ -85,8 +117,8 @@
 		margin: 0;
 		height: 3em;
 		display: flex;
-		justify-content: center;
-		align-items: center;
+		justify-content: left;
+		align-items: left;
 		list-style: none;
 		background: var(--background);
 		background-size: contain;
@@ -95,6 +127,14 @@
 	li {
 		position: relative;
 		height: 100%;
+	}
+
+	nav ul li img {
+		max-height:140px;
+		margin:0 30px; 
+		border-radius:50%;
+		box-shadow:0 0 10px #000;
+
 	}
 
 	li[aria-current='page']::before {

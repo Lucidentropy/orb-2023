@@ -11,7 +11,7 @@
 	</main>
 
 	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+		<p>Clan Orb, a gaming community founded in 2000.</p>
 	</footer>
 </div>
 
@@ -39,6 +39,7 @@
 		justify-content: center;
 		align-items: center;
 		padding: 12px;
+		margin-top:100px;
 	}
 
 	footer a {
