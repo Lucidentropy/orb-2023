@@ -5,8 +5,7 @@
 	import headerimg from '$lib/images/header.png';
 	import orblogo from '$lib/images/neworbdemo.jpg';
 	import boxors from '$lib/images/icon_b0x0rz.gif';
-
-	  import Webamp from './Webamp.svelte';
+	import Webamp from './Webamp.svelte';
 </script>
 
 <header>
