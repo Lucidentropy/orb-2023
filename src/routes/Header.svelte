@@ -18,7 +18,7 @@
 	<nav>
 		<ul>
 			<li class="logo" aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/"><img src={orblogo} /></a>
+				<a href="/"><img src={orblogo} alt="Logo" /></a>
 			</li>			
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
 				<a href="/about">About</a>
