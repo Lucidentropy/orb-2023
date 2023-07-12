@@ -7,6 +7,6 @@
 	<h1>Links</h1>
 
 	<p>
-		This is le link page. testing ci/cd
+		This is le link page.
 	</p>
 </div>
