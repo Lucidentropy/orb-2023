@@ -41,6 +41,8 @@
 		impossible to cheat. It uses <code>&lt;form&gt;</code> and cookies to submit data, meaning you can
 		even play with JavaScript disabled!
 	</p>
+
+	<p><a href="/sverdle">Back To Game</a></p>
 </div>
 
 <style>

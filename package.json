@@ -35,6 +35,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"webamp": "^1.5.0"
+		"webamp": "^1.5.0",
+		"webfontloader": "^1.6.28"
 	}
 }

@@ -1,0 +1,196 @@
+@import '@fontsource/fira-mono';
+
+:root {
+	--font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	--font-mono: 'Fira Mono', monospace;
+	--color-bg-0: #666);
+	--color-bg-1: #041428;
+	--color-bg-2: hsl(224, 44%, 95%);
+	--color-theme-1: #6CF;
+	--color-theme-2: #4075a6;
+	--color-text: #6CF;
+	--column-width: 42rem;
+	--column-margin-top: 4rem;
+	font-family: var(--font-body);
+	color: var(--color-text);
+}
+
+:root {
+	--grayscale-100: #fdfdfd;
+	--grayscale-200: #f6f6f6;
+	--grayscale-300: #eaeaea;
+	--grayscale-400: #d6d6d6;
+	--grayscale-500: #bcbcbc;
+	--grayscale-600: #9b9b9b;
+	--grayscale-700: #767676;
+	--grayscale-800: #505050;
+	--grayscale-900: #272727;
+	--primary-100: #fefdfd;
+	--primary-200: #fcf5f5;
+	--primary-300: #f8e8e8;
+	--primary-400: #f2d0d0;
+	--primary-500: #e8afaf;
+	--primary-600: #dd8787;
+	--primary-700: #cb4848;
+	--primary-800: #952a2a;
+	--primary-900: #4f1616;
+	--background-50: #fcfdfd;
+	--background-100: #d8e3e4;
+	--background-200: #bacacf;
+	--background-300: #9eb1ba;
+	--background-400: #8598a7;
+	--background-500: #6e7f95;
+	--background-600: #5a657a;
+	--background-700: #44495a;
+	--background-750: #393e4c;
+	--background-800: #252630;
+	--background-900: #191920;
+	--green-100: #fbfefb;
+	--green-200: #edfaed;
+	--green-300: #d1f2d1;
+	--green-400: #a6e6a6;
+	--green-500: #63d363;
+	--green-600: #32b332;
+	--green-700: #268726;
+	--green-800: #1a5c1a;
+	--green-900: #0d2d0d;
+	--blue-100: #fdfdff;
+	--blue-200: #f5f5ff;
+	--blue-300: #e8e8fe;
+	--blue-400: #d2d2fe;
+	--blue-500: #b5b5fd;
+	--blue-600: #9090fc;
+	--blue-700: #6161fa;
+	--blue-800: #1e1ef8;
+	--blue-900: #04048c;
+	--yellow-100: #ffffe1;
+	--yellow-200: #fefe00;
+	--yellow-300: #f2f200;
+	--yellow-400: #dd0;
+	--yellow-500: #c2c200;
+	--yellow-600: #a0a000;
+	--yellow-700: #7a7a00;
+	--yellow-800: #535300;
+	--yellow-900: #292900;
+	--orange-50: #fefcf9;
+	--orange-100: #fdf5eb;
+	--orange-200: #fbe7cf;
+	--orange-300: #f6cf9f;
+	--orange-400: #f0af5f;
+	--orange-500: #e28515;
+	--orange-600: #ab6510;
+	--orange-700: #74450b;
+	--orange-800: #392205;
+	--orange-900: #261603
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0
+}
+
+ul {
+	padding-left: 1rem;
+	list-style: square
+}
+
+body,
+html {
+	max-width: 100vw;
+	height: 100%;
+	overflow-x: hidden;
+	background-color: var(--background-900);
+	color: var(--grayscale-500)
+}
+
+body {
+	min-height: 100vh;
+	margin: 0;
+	background-attachment: fixed;
+	background-color: var(--color-bg-1);
+	background-size: 100vw 100vh;
+	background-image: radial-gradient(
+			50% 50% at 50% 50%,
+			rgba(255, 255, 255, 0.75) 0%,
+			rgba(255, 255, 255, 0) 100%
+		),
+		linear-gradient(180deg, var(--color-bg-0) 0%, var(--color-bg-1) 15%, var(--color-bg-2) 50%);
+}
+
+h1,
+h2,
+p {
+	font-weight: 400;
+}
+
+p {
+	line-height: 1.5;
+}
+
+a {
+	color: var(--color-theme-1);
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+h1 {
+	font-size: 2rem;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1rem;
+}
+
+pre {
+	font-size: 16px;
+	font-family: var(--font-mono);
+	background-color: rgba(255, 255, 255, 0.45);
+	border-radius: 3px;
+	box-shadow: 2px 2px 6px rgb(255 255 255 / 25%);
+	padding: 0.5em;
+	overflow-x: auto;
+	color: var(--color-text);
+}
+
+.text-column {
+	display: flex;
+	max-width: 48rem;
+	flex: 0.6;
+	flex-direction: column;
+	justify-content: center;
+	margin: 0 auto;
+}
+
+input,
+button {
+	font-size: inherit;
+	font-family: inherit;
+}
+
+button:focus:not(:focus-visible) {
+	outline: none;
+}
+
+@media (min-width: 720px) {
+	h1 {
+		font-size: 2.4rem;
+	}
+}
+
+.visually-hidden {
+	border: 0;
+	clip: rect(0 0 0 0);
+	height: auto;
+	margin: 0;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	white-space: nowrap;
+}
