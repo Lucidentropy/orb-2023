@@ -203,7 +203,7 @@
 			</div>
             
             <div id="video-channel">
-				{currentVideo?.game || 'Loading...'}
+				{currentVideo?.game || 'Loading the POGotron...'}
 			</div>
 
 			<div id="video-random">
@@ -229,7 +229,7 @@
 		padding: 20px;
 		background: rgba(0, 0, 0, 0.6);
 		border-radius: 9px;
-		min-height: 430px;
+		// min-height: 430px;
 		max-width: calc(100vw - 10px);
 		margin: 0 auto;
 		border: 1px solid rgba(102, 204, 255, 0.8);
@@ -290,9 +290,10 @@
 		margin: -20px;
 		border-radius: 9px;
 		overflow: hidden;
-		min-height: 480px;
+		// min-height: 480px;
 		max-height: 640px;
 		text-align: center;
+		display:flex;
 
 		#bg-video {
 			display: block;
@@ -369,7 +370,7 @@
 		#video-controls {
 			display: flex;
 			position: absolute;
-			bottom: 0;
+			top: 0;
 			left: 30%;
 			font-size: 0.8rem;
 			line-height: 25px;
@@ -377,7 +378,7 @@
 			height: 25px;
 			color: #eee;
 			background-color: rgba(0, 0, 0, 0.25);
-			border-radius: 5px 5px 0 0;
+			border-radius: 0 0 5px 5px ;
 			width: 40%;
 			text-shadow: 1px 1px 1px #000;
 			overflow: hidden;

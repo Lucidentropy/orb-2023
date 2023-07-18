@@ -6,20 +6,26 @@
 	import orblogo from '$lib/images/neworbdemo.jpg';
 	import boxors from '$lib/images/icon_b0x0rz.gif';
 	// import Webamp from './Webamp.svelte';
+
+	import Icon from 'svelte-awesome/components/Icon.svelte';
+	import { steam } from 'svelte-awesome/icons';
+
 </script>
 
-<header>
-	<div class="corner">
-		<a href="https://kit.svelte.dev">
-			<img src={boxors} alt="SvelteKit" />
-		</a>
-	</div>
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Ropa+Sans:ital@0;1&display=swap" rel="stylesheet">
+</svelte:head>
 
+<header>
+	<div class="corner"></div>
+	<div class="banner" style="background-image:url({headerimg})" >
+		<a href="/" class="logo"><img src={orblogo} alt="Logo" /></a>
+	</div>
+	
 	<nav>
-		<ul>
-			<li class="logo" aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
-				<a href="/"><img src={orblogo} alt="Logo" /></a>
-			</li>			
+		<ul>		
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
 				<a href="/about">About</a>
 			</li>
@@ -27,7 +33,7 @@
 				<a href="/links">Links</a>
 			</li>
 			<li aria-current={$page.url.pathname === '/steam' ? 'page' : undefined}>
-				<a href="/steam">Steam</a>
+				<a href="/steam"><Icon data={steam} /> Steam</a>
 			</li>									
 			<li aria-current={$page.url.pathname.startsWith('/diablo') ? 'page' : undefined}>
 				<a href="/diablo">Diablo</a>
@@ -42,37 +48,50 @@
 				<a href="/sverdle">Sverdle</a>
 			</li>
 			<li>
-				<!-- <Webamp /> -->
+				<a href="https://kit.svelte.dev">
+					<img src={boxors} alt="SvelteKit" />
+				</a>
+			</li>
+			<li>
+				<a href="https://github.com/sveltejs/kit">
+					<img src={github} alt="GitHub" />
+				</a>				
 			</li>
 		</ul>
 	</nav>
 
-	<div class="corner">
-		<a href="https://github.com/sveltejs/kit">
-			<img src={github} alt="GitHub" />
-		</a>
-	</div>
+	<div class="corner"></div>
 </header>
 
 <style lang="scss">
 	header {
-		display: flex;
-		justify-content: space-between;
 
 		.banner {
-			
-			background-image:url({headerimg});
+			align-self: stretch;
 			background-position:50% 50%;
-			background-size: contain;
-			width:100%;
-			height:100px;
-		
+			background-size:auto 100%;
+			width:100vw;
+			height:130px;
+			text-align:center;
+
+			display:flex;
+			justify-content:center;
+			align-items:center;;
+
+			img {
+				max-height:125px;
+				margin:0 30px; 
+				border-radius:50%;
+				box-shadow:0 0 30px 10px #000;
+			}
 		}
 	}
 
 	.corner {
 		width: 3em;
 		height: 3em;
+		position:absolute;
+		top:0;
 	}
 
 	.corner a {
@@ -90,14 +109,17 @@
 	}
 
 	nav {
-		position:fixed;
-		bottom:10vh;
-		left:0vw;
 		width:100vw;
-		background:#000D;
-		border:1px solid var(--color-theme-1);
+		background:#0006;
+		// border:1px solid var(--color-theme-1);
 		border-width:1px 0;
-		box-shadow:0 0 40px #bbb;
+		box-shadow:0 0 40px #000;
+		display:flex;
+		justify-content:center;
+
+		svg {
+			margin-right:10px;
+		}
 	}
 
 	svg {
@@ -128,14 +150,6 @@
 		height: 100%;
 	}
 
-	nav ul li img {
-		max-height:140px;
-		margin:0 30px; 
-		border-radius:50%;
-		box-shadow:0 0 10px #000;
-
-	}
-
 	li[aria-current='page']::before {
 		--size: 6px;
 		content: '';
@@ -160,6 +174,11 @@
 		letter-spacing: 0.1em;
 		text-decoration: none;
 		transition: color 0.2s linear;
+		font-family:'Ropa Sans', sans-serif;
+
+		&:hover {
+			color:#fff;
+		}
 	}
 
 	a:hover {

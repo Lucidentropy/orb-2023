@@ -3,12 +3,15 @@
 
 </script>
 
-<h1>Diablo</h1>
+<div class="text-column">
 
-<div class="event-trackers">
-    <Timer event="WorldBoss" />
-    <Timer event="Legion" />
-    <Timer event="Helltide" />
+    <h1>Diablo</h1>
+    
+    <div class="event-trackers">
+        <Timer event="WorldBoss" />
+        <Timer event="Legion" />
+        <Timer event="Helltide" />
+    </div>
 </div>
 
 <style lang="scss">
