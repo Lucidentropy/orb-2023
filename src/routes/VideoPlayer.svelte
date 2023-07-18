@@ -23,7 +23,7 @@
                     uri = `https://giant.gfycat.com/${token}.mp4`;
                 break;
 				case 'reddit':
-					src = '';
+					src = `https://v.redd.it/${token}`;
 					uri = `https://v.redd.it/${token}/DASH_720.mp4`;
 
 			}
@@ -164,7 +164,7 @@
 <div id="outer-container">
     <div id="vid-container">
         {#if introVis}
-        <div id="intro" transition:fade class="{introVis ? 'show' : 'hide'} fade-transition">
+        <div id="intro" transition:fade|local={{ duration: 300 }} class="{introVis ? 'show' : 'hide'} fade-transition">
             <button class="close" on:click={toggleIntroVis}><Icon data={close} /></button>
             <h3>Orb Gaming Community</h3>
             <p>

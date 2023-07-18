@@ -23,6 +23,7 @@ export const videoList = {
         'reddit:gz9qlkmzpm3b1',
         'reddit:pyvwgeej4pza1',
         'reddit:g0muesbit25b1',
+        'reddit:1h5vegvl4fab1'
 
     ],
     battlefield: [
@@ -159,7 +160,7 @@ export const videoList = {
 
 
     ],
-    forzaHorizon3: [
+    forzaHorizon: [
         'gfycat:ShinyVigorousCats',
         'gfycat:BonyImportantGoral',
         'gfycat:MediumApprehensiveAustraliancattledog',
@@ -174,9 +175,21 @@ export const videoList = {
         'gfycat:ZealousSelfreliantKawala',
         'gfycat:DangerousAbleEasteuropeanshepherd',
         'gfycat:TatteredSpecificAfricanwildcat',
+        'reddit:xhp7mfw69j781',
+        'reddit:xf3x55bsjv081',
+        'reddit:q3l0sqsc38f61',
+        'reddit:nnwocunstky71',
+        'reddit:kemhdrey5l881',
+        'reddit:hqfu2vjau1z71',
+        'reddit:li7so63qa1681',
+        'reddit:jbnn3n53vho81',
+        'reddit:gtl93l94tx081',
+        'reddit:3s6vpsmhsqma1',
         '',
         '',
-
+        '',
+        '',
+        '',
 
     ],
     ghostRecon_Wildlands: [
@@ -197,22 +210,16 @@ export const videoList = {
         '',
 
     ],
-    grandTheftAuto4: [
+    grandTheftAuto: [
         'imgur:k7gQ66O',
         // 'gfycat:DesertedExcitableBordercollie',
         'gfycat:AgreeableConfusedKite',
         'gfycat:HotHandmadeEasternnewt',
         'gfycat:ShabbyComposedBelugawhale',
         'gfycat:RecklessLikelyBirdofparadise',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+        
+        
 
-    ],
-    grandTheftAutoV: [
         'imgur:uNk5woD',
         'gfycat:ForsakenNervousCorydorascatfish',
         'gfycat:FarWhimsicalCivet',
@@ -315,11 +322,25 @@ export const videoList = {
         'gfycat:ExcellentLonelyCuscus',
         'gfycat:ReliableBriefKodiakbear',
 
+        'reddit:7olqwbd91x8a1',
+        'reddit:074745vsrcy91',
+        'reddit:2np9492tyki91',
+        'reddit:16xxr0b5napa1',
+        'reddit:s6pvmtrjbwe91',
+        'reddit:1vqv35t9p6ia1',
+        'reddit:37zshv8fykp91',
+        'reddit:7sx1oiy3uzha1',
+        'reddit:o481qmb1ff5a1',
+        'reddit:m8k69ys4vkn91',
+        '',
+        '',
 
 
+
+        
 
     ],
-    justCause3: [
+    justCause: [
         'imgur:trjS6g5',
         'gfycat:CorruptAdmiredIsabellineshrike',
         'gfycat:InnocentColossalCicada',
@@ -576,6 +597,25 @@ export const videoList = {
         'gfycat:TerribleCluelessDowitcher',
         'gfycat:PopularMammothArchaeopteryx',
 
+
+        'reddit:0e0svs468zwa1',
+        'reddit:ulc0rpe1b00b1',
+        'reddit:n9euc8tli9za1',
+        'reddit:w0lno5fv1cva1',
+        'reddit:wm4ow87njvba1',
+        'reddit:haudb2sfdfba1',
+        'reddit:bjry1vjo9z5a1',
+        'reddit:ut899zsvu4oa1',
+        'reddit:ljoqx3w2z2ya1',
+        'reddit:xxyqkhwxmaca1',
+        'reddit:t3pbk5lrxfwa1',
+        'reddit:rlzzcq2o7fza1',
+        'reddit:aslhwkf6i12b1',
+        '',
+        '',
+        '',
+        '',
+
     ],
     // other: [
     //     'imgur:P8MhFTn',
@@ -747,6 +787,19 @@ export const videoList = {
         'gfycat:WickedSpiffyFulmar',
         'gfycat:TediousUnimportantDorado',
         'imgur:YdFUEtN',
+        '',
+        '',
+        '',
+        '',
+
+    ],
+    warframe: [
+        'reddit:t7n0oowz1xva1',
+        'reddit:lkt4b68mc5j91',
+        'reddit:7yqos5wu9d0b1',
+        'reddit:geztx3frl9na1',
+        '',
+        '',
         '',
         '',
         '',
