@@ -16,11 +16,11 @@
 			switch(domain){
                 case 'imgur': 
 					src = `https://imgur.com/${token}`;
-                	uri = `http://i.imgur.com/${token}.mp4`;
+                	uri = `https://i.imgur.com/${token}.mp4`;
                 break;
                 case 'gfycat':
 					src = `https://gfycat.com/gifs/detail/${token}`;
-                    uri = `http://giant.gfycat.com/${token}.mp4`;
+                    uri = `https://giant.gfycat.com/${token}.mp4`;
                 break;
 			}
 
