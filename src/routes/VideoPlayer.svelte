@@ -22,6 +22,10 @@
 					src = `https://gfycat.com/gifs/detail/${token}`;
                     uri = `https://giant.gfycat.com/${token}.mp4`;
                 break;
+				case 'reddit':
+					src = '';
+					uri = `https://v.redd.it/${token}/DASH_720.mp4`;
+
 			}
 
 			if ( !domain || !token || !uri ) return null;
@@ -93,11 +97,9 @@
 		loadVideoSource();
 	}
 
-	function currentVideoInfo(){
-
-	}
-
 	function togglePlay() {
+		if ( !videoElement ) return;
+
 		playing = !playing;
 		if (playing) {
 			videoElement.play();
@@ -125,6 +127,7 @@
 	}
 
     let introVis:boolean = true;
+    let playlistVis:boolean = true;
 	let isHovered:boolean = false;
     const toggleIntroVis = () => introVis = !introVis;
 
@@ -142,20 +145,19 @@
 		
 		window.addEventListener('keydown', handleKeydown);
 
-		loadVideoSource();
-
 		window.addEventListener('focus', () => {
-			videoElement.play();
+			if ( !playing && videoElement ) videoElement.play();
 		});
 
 		window.addEventListener('blur', () => {
-			videoElement.pause();
+			if ( playing && videoElement ) videoElement.pause();
 		});
+
+		loadVideoSource();
 	});	
-
 	onDestroy(() => {
-
-	});
+		
+	})
 
 </script>
 
@@ -217,7 +219,6 @@
         </div>
     </div>
 </div>
-
 <style lang="scss">
 
 	.fade-transition {

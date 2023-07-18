@@ -16,6 +16,15 @@ export const videoList = {
     //     '',
     //     '',
     // ],
+    breathOfTheWild: [
+        'reddit:6wgxdoaa7mcb1',
+        'reddit:aw2plrwx946b1',
+        'reddit:n0ajnblq013b1',
+        'reddit:gz9qlkmzpm3b1',
+        'reddit:pyvwgeej4pza1',
+        'reddit:g0muesbit25b1',
+
+    ],
     battlefield: [
         'gfycat:AgileMeekIrukandjijellyfish',
         'imgur:3ykvWne',
