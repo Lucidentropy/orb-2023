@@ -35,6 +35,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"svelte-awesome": "^3.2.1",
 		"webamp": "^1.5.0",
 		"webfontloader": "^1.6.28"
 	}

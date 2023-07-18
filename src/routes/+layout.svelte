@@ -1,8 +1,19 @@
 <script>
 	import Header from './Header.svelte';
 	import '../styles/styles.css';
-</script>
 
+</script>
+{@html `<!--
+ ▒█████   ██▀███   ▄▄▄▄   
+▒██▒  ██▒▓██ ▒ ██▒▓█████▄ 
+▒██░  ██▒▓██ ░▄█ ▒▒██▒ ▄██
+▒██   ██░▒██▀▀█▄  ▒██░█▀  
+░ ████▓▒░░██▓ ▒██▒░▓█  ▀█▓
+░ ▒░▒░▒░ ░ ▒▓ ░▒▓░░▒▓███▀▒
+  ░ ▒ ▒░   ░▒ ░ ▒░▒░▒   ░ 
+░ ░ ░ ▒    ░░   ░  ░    ░ 
+    ░ ░     ░      ░      
+                        ░ -->`}
 <div class="app">
 	<Header />
 
@@ -31,6 +42,8 @@
 		max-width: 64rem;
 		margin: 0 auto;
 		box-sizing: border-box;
+
+		max-width:1020px;
 	}
 
 	footer {
