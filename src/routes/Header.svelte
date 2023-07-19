@@ -5,7 +5,6 @@
 	import headerimg from '$lib/images/header.png';
 	import orblogo from '$lib/images/neworbdemo.jpg';
 	import boxors from '$lib/images/icon_b0x0rz.gif';
-	// import Webamp from './Webamp.svelte';
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { steam } from 'svelte-awesome/icons';
@@ -23,7 +22,7 @@
 	<div class="banner" style="background-image:url({headerimg})" >
 		<a href="/" class="logo"><img src={orblogo} alt="Logo" /></a>
 	</div>
-	
+	<div id="webamp-container"></div>
 	<nav>
 		<ul>		
 			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
