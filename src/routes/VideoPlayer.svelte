@@ -39,7 +39,7 @@
     }
 
 	let videoIndex:number = 0;
-	const videoSrcs = randomizeArray(videoCollection.map(obj => obj.uri));
+	const videoSrcs = randomizeArray(videoCollection.map(obj => obj?.uri));
 	const videos: string[] = videoSrcs;
 
 	let videoElement: HTMLVideoElement;

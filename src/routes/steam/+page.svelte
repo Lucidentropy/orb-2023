@@ -1,14 +1,12 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
+    let message = '';
 
-
-
-const steamK = 'STEAMKEY';
-
-        let recentlyPlayedGamesUrl = 'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' + steamK + '&steamid={STEAMID}&format=json';
-        let ownedGamesUrl = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' + steamK + '&steamid={STEAMID}&format=json';
-
-        let groupMemberListUrl = 'http://steamcommunity.com/groups/orb/memberslistxml/';
-        let playerSummaryUrl = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamK + '&steamids={STEAMIDS}&format=json';
+    onMount(async () => {
+        const res = await fetch('api/steam');
+        const data = await res.json();
+        message = data.message;
+    });
 
 
         // request.get(groupMemberListUrl).end((err, response) => {
@@ -53,6 +51,8 @@ const steamK = 'STEAMKEY';
 
 <div class="text-column">
     <h1>Steam</h1>
+
+    <pre>{message}</pre>
 </div>
 
 <style lang="scss">
