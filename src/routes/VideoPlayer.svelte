@@ -236,6 +236,7 @@
 		line-height: 20px;
 		font-size: 13px;
         width:100%;
+		z-index:0;
 	}
 	main {
 		transition: 3s ease-in box-shadow;

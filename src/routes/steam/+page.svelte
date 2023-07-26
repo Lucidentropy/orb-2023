@@ -1,12 +1,16 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    let message = '';
+	import { onMount } from 'svelte';
+    // import dotenv from 'dotenv';
+    // dotenv.config();
 
-    onMount(async () => {
-        const res = await fetch('api/steam');
-        const data = await res.json();
-        message = data.message;
-    });
+    // const steamK = process.env.STEAM;
+
+    
+    // const recentlyPlayedGamesUrl = 'http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=' + steamK + '&steamid={STEAMID}&format=json';
+    // const ownedGamesUrl = 'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=' + steamK + '&steamid={STEAMID}&format=json';
+
+    // const groupMemberListUrl = 'http://steamcommunity.com/groups/orb/memberslistxml/';
+    // const playerSummaryUrl = 'http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + steamK + '&steamids={STEAMIDS}&format=json';
 
 
         // request.get(groupMemberListUrl).end((err, response) => {
@@ -46,13 +50,26 @@
         //     });
         // });
         
+    let message = '';
+        
+    onMount(()=> {
+
+        fetch('api')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            message = data; // message will be 'world'
+        });
+        
+    })
 
 </script>
 
 <div class="text-column">
     <h1>Steam</h1>
-
-    <pre>{message}</pre>
+    <pre>
+{message}
+    </pre>
 </div>
 
 <style lang="scss">
