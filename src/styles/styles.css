@@ -151,7 +151,17 @@ a:hover {
 	text-shadow: 1px 1px 1px #000;
 	color: #fff;
 	clear: both;	
+	
 }
+
+.text-column h1 p {
+	font-size: 13px;
+	margin: 0;
+	text-transform: uppercase;
+	font-weight: normal;
+	color: #ddd;
+}
+
 
 .text-column h2 {
 	font-size: 1.2rem;

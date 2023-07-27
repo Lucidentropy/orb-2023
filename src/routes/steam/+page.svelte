@@ -50,26 +50,17 @@
         //     });
         // });
         
-    let message = '';
         
     onMount(()=> {
 
-        fetch('api')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            message = data; // message will be 'world'
-        });
-        
+     
     })
 
 </script>
 
 <div class="text-column">
     <h1>Steam</h1>
-    <pre>
-{message}
-    </pre>
+
 </div>
 
 <style lang="scss">
