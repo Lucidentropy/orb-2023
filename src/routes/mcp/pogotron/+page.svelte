@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { myDataStore, loadPogotronData, deletePogotronData } from '$lib/datastore';
-    import type { PogotronData } from '$lib/datastore';
+    import { myDataStore, loadPogotronData, deletePogotronData } from '../../../store/datastore';
+    import type { PogotronData } from '../../../store/datastore';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { close, spinner, trash, play, windowMaximize, externalLink  } from 'svelte-awesome/icons';    
