@@ -1,15 +1,31 @@
-import { getConnection } from '$lib/db';
+import type { RequestHandler } from '@sveltejs/kit';
+import { getConnection } from './db';
 
 export async function getPogotronData() {
-    const result = await db.query('SELECT * FROM pogotron');
-    return result.rows;
+    try {
+        const conn = await getConnection();
+        const [rows, fields] = await conn.execute('SELECT * FROM pogotron');
+        conn.end();
+
+        return new Response(JSON.stringify({ rows, params }), { status: 200 });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+    }
 }
 
 export async function deletePogotronData(id: number) {
-    await db.query('DELETE FROM pogotron WHERE id = ?', [id]);
+    try {
+        const conn = await getConnection();
+        await conn.execute(`DELETE FROM pogotron WHERE id = ?`, [params.id]);
+        conn.end();
+
+        return new Response(JSON.stringify({ message: 'Item deleted successfully?' }), { status: 200 });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+    }
 }
 
 export async function updatePogotronData(id: number, updatedData: PogotronData) {
-    await db.query('UPDATE pogotron SET ... WHERE id = ?', [id]);
+
     // The ... would be replaced with the actual fields you want to update
 }
