@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { myDataStore, loadPogotronData, deletePogotronData } from '$store/datastore';
-    import type { PogotronData } from '$store/datastore';
+    import { myDataStore } from '$store/datastore';
+    import { loadPogotronData, deletePogotronData } from '$models/pogotron';
+    import type { PogotronData } from '$models/pogotron';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { close, spinner, trash, play, windowMaximize, externalLink  } from 'svelte-awesome/icons';    
@@ -99,6 +100,8 @@
         const video = event.target as HTMLVideoElement;
         const errorState = video.error ? video.error.code : video.networkState;
 
+        if (!currentVideo) return false;
+
         switch (errorState) {
             case 1:
                 currentVideo.error = 'Aborted';
@@ -141,12 +144,13 @@
             isLoading = true;
             await loadPogotronData();
             videoList = $myDataStore.pogotron;
-            videoListByCategory = grouped(videoList);
+            videoListByCategory = grouped($myDataStore.pogotron);
             isLoading = false;
         } else {
             videoList = $myDataStore.pogotron;
-            videoListByCategory = grouped(videoList);
+            videoListByCategory = grouped($myDataStore.pogotron);
         }
+
 
         // console.log('vl', videoList);
         // console.log('vlbc', videoListByCategory)
@@ -212,7 +216,7 @@
         {/if}
     {:else}
         {#if isLoading}
-            <p class="loader"><Icon data={spinner} class="svg" pulse scale={3} /> <span>Loading data from API...</span></p>
+            <p class="loader shine"><Icon data={spinner} class="svg" pulse scale={3} /> <span>Loading data from API...</span></p>
         {:else}
             <p>No videos available. Either API services are down or some doofus pushed broken code to production (me).</p>
         {/if}

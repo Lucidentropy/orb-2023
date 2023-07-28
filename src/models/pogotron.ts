@@ -14,8 +14,7 @@ export interface PogotronData {
 export async function loadPogotronData() {
     const response = await fetch('/api/pogotron', { method: 'GET' });
     const data = await response.json();
-    const videoData = { pogotron: data.rows };
-    setStore(videoData);
+    setStore('pogotron', data.rows);
 }
 
 export async function deletePogotronData(id: number | string) {
@@ -24,9 +23,7 @@ export async function deletePogotronData(id: number | string) {
     if (!response.ok) {
         throw new Error('Failed to delete data');
     }
-
-    console.log('delete in datastore', id, response);
-    removeFromStore(id);
+    // removeFromStore(id);
 }
 
 export async function updatePogotronData(id: number | string, updatedData: PogotronData) {

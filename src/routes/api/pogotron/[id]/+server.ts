@@ -6,7 +6,7 @@ async function deleteHandler({ params }: RequestEvent): Promise<Response> {
         await deletePogotronData(params.id);
         return new Response(JSON.stringify({ message: 'Item deleted successfully?' }), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Something went wrong at' }), { status: 500 });
     }
 }
 

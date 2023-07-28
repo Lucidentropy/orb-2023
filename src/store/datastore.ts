@@ -1,92 +1,27 @@
 import { writable } from 'svelte/store';
-
-export interface PogotronData {
-    readonly id: number;
-    category: string;
-    domain: string;
-    token: string;
-    uploaded_by: string | null;
-    error: string;
-    duration: string;
-    src: string;
-}
+import type { PogotronData } from '$models/pogotron';
 
 interface DataStoreState {
     pogotron: PogotronData[] | null;
+    // You can add more properties here as your application grows
 }
 
-export const myDataStore = writable<DataStoreState>({ 
-    pogotron: null 
+export const myDataStore = writable<DataStoreState>({
+    pogotron: null
 });
 
 // Update store function
-export function updateStore(id: number, updatedData: PogotronData) {
-    myDataStore.update(state => {
-        const updatedPogotron = state.pogotron
-            ? state.pogotron.map(item => item.id === id ? { ...item, ...updatedData } : item)
-            : [];
-        return { ...state, pogotron: updatedPogotron };
-    });
+export function updateStore<T>(property: keyof DataStoreState, data: T[]) {
+    myDataStore.update(state => ({ ...state, [property]: data }));
 }
 
 // Remove from store function
-export function removeFromStore(id: number) {
-    myDataStore.update(state => {
-        const updatedPogotron = state.pogotron
-            ? state.pogotron.filter(item => item.id !== id)
-            : [];
-        return { ...state, pogotron: updatedPogotron };
-    });
+export function removeFromStore<T>(property: keyof DataStoreState, data: T[]) {
+    myDataStore.update(state => ({ ...state, [property]: data }));
 }
 
 // Set store function
-export function setStore(data: PogotronData[]) {
-    const videoData = { pogotron: data };
-    myDataStore.set(videoData);
-}
-
-
-export async function loadPogotronData() {
-    const response = await fetch('/api/pogotron', { method: 'GET' });
-    const data = await response.json();
-    const videoData = { pogotron : data.rows };
-    myDataStore.set(videoData);
-}
-
-export async function deletePogotronData(id: number | string) {
-    const response = await fetch(`/api/pogotron/${id}`, { method: 'DELETE' })
-    
-    if (!response.ok) {
-        throw new Error('Failed to delete data');
-    }
-    console.log('delete in datastore', id, response)
-    
-    myDataStore.update(state => {
-        const updatedPogotron = state.pogotron
-            ? state.pogotron.filter(item => item.id !== id)
-            : [];
-        return { ...state, pogotron: updatedPogotron };
-    });
-}
-
-export async function updatePogotronData(id: number | string, updatedData: PogotronData) {
-    const response = await fetch(`/api/pogotron/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData)
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to update data');
-    }
-
-    myDataStore.update(state => {
-        if (state.pogotron) {
-            const updatedPogotron = state.pogotron.map(item => item.id === id ? { ...item, ...updatedData } : item);
-            return { ...state, pogotron: updatedPogotron };
-        }
-        return state;
-    });
+export function setStore<T>(property: keyof DataStoreState, data: T[]) {
+    const dz = { [property]: data };
+    myDataStore.set(dz);
 }
