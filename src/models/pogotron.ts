@@ -1,4 +1,4 @@
-import { updateStore, removeFromStore, setStore } from '../store/datastore';
+import { updateStore, removeFromStore, setStore } from '$store/datastore';
 
 export interface PogotronData {
     readonly id: number;
@@ -19,10 +19,12 @@ export async function loadPogotronData() {
 
 export async function deletePogotronData(id: number | string) {
     const response = await fetch(`/api/pogotron/${id}`, { method: 'DELETE' });
+    const data = await response.json();
 
     if (!response.ok) {
         throw new Error('Failed to delete data');
     }
+    removeFromStore('pogotron', data.id)
     // removeFromStore(id);
 }
 

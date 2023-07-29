@@ -195,6 +195,7 @@ pre {
 	flex-direction: column;
 	justify-content: center;
 	margin: 0 auto;
+	position:relative;
 
 	background: rgba(0, 0, 0, 0.6);
 	border-radius: 9px;

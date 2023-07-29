@@ -5,7 +5,7 @@
     import type { PogotronData } from '$models/pogotron';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
-	import { close, spinner, trash, play, windowMaximize, externalLink  } from 'svelte-awesome/icons';    
+	import { close, spinner, trash, play, expand, compress, externalLink, plusCircle  } from 'svelte-awesome/icons';    
 
     let videoElement: HTMLVideoElement;
     let currentVideo:PogotronData | null = null;
@@ -93,7 +93,6 @@
         if ( !currentVideo ) return;
         deletePogotronData(currentVideo.id);
         currentVideo = null;
-        loadPogotronData();
     }
 
     function handleVideoError(event: Event) {
@@ -139,6 +138,13 @@
         deleteConfirm = !deleteConfirm;
     }
 
+    let add_domain = '', add_category = '', add_token = '';
+    let quick_add = '';
+
+    async function handleSubmit() {
+
+    }    
+
     onMount(async () => {
         if ($myDataStore.pogotron === null) {
             isLoading = true;
@@ -160,8 +166,14 @@
 <div class="text-column">
     <h1>Pogotron <p><a href="/mcp">Back to MCP</a></p></h1>
 
-    <div class="previewbox {bigmode ? 'full' : ''} {currentVideo ? '' : 'hide'}">
+    <button class="add-new-button">
+        <span class="button-content">
+            <span class="button-icon"><Icon data={plusCircle} scale={2} /></span>
+            <span class="button-text">Add New</span>
+        </span>
+    </button>
 
+    <div class="previewbox {bigmode ? 'full' : ''} {currentVideo ? '' : 'hide'}">
         {#if deleteConfirm}
             <div class="confirm">
                 <button on:click={deleteItem} class="delete shine">Confirm Delete</button>
@@ -177,6 +189,7 @@
                 {currentVideo.error}
             </div>
         {/if}
+
         <video bind:this={videoElement} on:click={togglePlay} on:error={handleVideoError} controls muted>
             <source type="video/mp4" />
             Your browser does not support the video tag.
@@ -187,15 +200,40 @@
             <p>{currentVideo.domain}</p>
             <p>{currentVideo.token}</p>
             <p><a href={currentVideo.src} target="_blank">Source <Icon data={externalLink} /></a></p>
-            
         </div>
         <div class="info">
             <button on:click={toggleConfirm}><Icon data={trash} /> Delete</button>
-            <button on:click={toggleBigMode}><Icon data={windowMaximize} /> {bigmode ?  'Itty bitty living space' : 'PHENOMENAL COSMIC POWERS'}</button>
+            <button on:click={toggleBigMode}><Icon data={bigmode ? compress : expand } /> {bigmode ?  'Itty bitty living space' : 'PHENOMENAL COSMIC POWERS'}</button>
         </div>
         {/if}
     </div>
-
+    
+    <div class="add_new">
+        <input class="quick_add" bind:value={quick_add} placeholder="Quick Add" />
+        <br><br>
+        <form on:submit|preventDefault={handleSubmit}>
+            <p>
+                <label>
+                    <input bind:value={add_category} />
+                    Game/Category
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input bind:value={add_domain} />
+                    Domain
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input bind:value={add_token} />
+                    Token
+                </label>
+            </p>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <h3>Video List</h3>
     {#if videoList !== null}
         {#if videoListByCategory}
             {#each Object.keys(videoListByCategory) as category}
@@ -225,6 +263,99 @@
 
 <style lang="scss">
 
+
+    .add-new-button {
+        width:250px;
+        padding:4px;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+
+        position:absolute;
+        top:11px;
+        right:12px;
+        box-shadow:0 0 14px 3px #000;
+    }
+
+    button:has(svg) {
+        border:0.5px outset var(--color-text);
+        background:#032d50;
+        background:linear-gradient(0deg, #000 0%, #032d50 50%, #000 100%);
+        color:inherit;
+        border-radius:4.5px;
+        margin:3px;
+        text-indent: .5em;
+        text-shadow:0 0 3px var(--color-text), 1px 1px 1px #000;
+        cursor:pointer;
+
+        .button-content {
+            width: 48px;
+            padding-top:3px;
+
+            overflow: hidden;
+            transition: opacity 0.5s ease-in-out, width 0.25s ease-in-out;
+            white-space: nowrap;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            --stroke-width:1px;
+            --stroke-color:var(--color-text);
+            background:
+                linear-gradient(to right, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 0 0,
+                linear-gradient(to right, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 0 100%,
+                linear-gradient(to left, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 100% 0,
+                linear-gradient(to left, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 100% 100%,
+                linear-gradient(to bottom, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 0 0,
+                linear-gradient(to bottom, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 100% 0,
+                linear-gradient(to top, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 0 100%,
+                linear-gradient(to top, var(--stroke-color) var(--stroke-width), transparent var(--stroke-width)) 100% 100%;
+
+            background-repeat: no-repeat;
+            background-size: 5px 10px;
+            margin:0px 0;
+
+            .button-text {
+                width:0;
+                opacity:0;
+                transition:opacity 1s ease-out, width 1.4s ease-in;
+                padding-right:8px;
+            }
+        }
+
+        &:active {
+            .button-content {
+                width:100%;
+                opacity:1;
+
+                .button-text {
+                    width:auto;
+                    opacity:1;
+                    transform: translateY(1px) translateX(3px);
+                }
+            }
+        }
+
+        &:hover {
+            border-color:#fff;
+
+            .button-content {
+                width:100%;
+                color:#fff;
+                text-shadow:0 0 3px #fff;
+                --stroke-color:#fff;
+
+                .button-text {
+                    opacity:1;
+                    width:auto;
+                } 
+            }
+        }
+    }
+
+
+
     .vidlist {
         vertical-align: middle;
 
@@ -236,6 +367,7 @@
         }
         
     }
+
 
     .previewbox.full {
         height:auto;
