@@ -36,11 +36,10 @@ export async function addPogotronData(data: PogotronData) {
 
         const conn = await getConnection();
         const [result] = await conn.execute(query, [data]);
-        console.log('addPogotronData', result);
         conn.end();
 
-        return new Response(JSON.stringify({ message: 'Item added successfully' }), { status: 200 });
+        return result;
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+        throw new Error('Something went wrong'); 
     }
 }

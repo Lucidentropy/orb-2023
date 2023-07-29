@@ -132,9 +132,9 @@
         deleteConfirm = !deleteConfirm;
     }
 
-    let add_domain = '';
+    let add_domain = 'reddit';
     let add_category = 'breathOfTheWild';
-    let add_token = '';
+    let add_token = '7xenchesoxeb1';
     
 
     async function addItem() {

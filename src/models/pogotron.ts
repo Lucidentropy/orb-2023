@@ -1,4 +1,4 @@
-import { updateStore, removeFromStore, setStore } from '$store/datastore';
+import { addToStore, updateStore, removeFromStore, setStore } from '$store/datastore';
 
 export interface PogotronData {
     readonly id: number;
@@ -29,6 +29,7 @@ export async function deletePogotronData(id: number | string) {
 }
 
 export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promise<PogotronData> {
+
     const response = await fetch('/api/pogotron', {
         method: 'POST',
         headers: {
@@ -38,11 +39,13 @@ export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promis
     });
 
     if (!response.ok) {
-        throw new Error('Failed to add data');
+        throw new Error('Failed to add data.' + response.statusText);
     }
 
     const data: PogotronData = await response.json();
-    updateStore('pogotron', [data]);
+    addToStore('pogotron', [data]);
     return data;
 }
+
+
 

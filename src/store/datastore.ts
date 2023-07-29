@@ -24,3 +24,12 @@ export function setStore<T>(property: keyof DataStoreState, data: T[]) {
     const dz = { [property]: data };
     myDataStore.set(dz);
 }
+
+// Add to store function
+export function addToStore<T>(property: keyof DataStoreState, data: T[]) {
+    myDataStore.update(state => {
+        const existingData = state[property] as T[] || [];
+        const updatedData = [...existingData, ...data];
+        return { ...state, [property]: updatedData };
+    });
+}
