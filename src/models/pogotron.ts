@@ -28,18 +28,21 @@ export async function deletePogotronData(id: number | string) {
     // removeFromStore(id);
 }
 
-export async function updatePogotronData(id: number | string, updatedData: PogotronData) {
-    const response = await fetch(`/api/pogotron/${id}`, {
-        method: 'PUT',
+export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promise<PogotronData> {
+    const response = await fetch('/api/pogotron', {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(updatedData)
+        body: JSON.stringify(newData)
     });
 
     if (!response.ok) {
-        throw new Error('Failed to update data');
+        throw new Error('Failed to add data');
     }
 
-    updateStore(id, updatedData);
+    const data: PogotronData = await response.json();
+    updateStore('pogotron', [data]);
+    return data;
 }
+

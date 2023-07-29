@@ -30,13 +30,13 @@ export async function deletePogotronData(id: number) {
     }
 }
 
-export async function putPogotronData(data: PogotronData) {
+export async function addPogotronData(data: PogotronData) {
     try {
         const query = `INSERT INTO pogotron SET ?`;
 
         const conn = await getConnection();
         const [result] = await conn.execute(query, [data]);
-        console.log('putPogotronData', result);
+        console.log('addPogotronData', result);
         conn.end();
 
         return new Response(JSON.stringify({ message: 'Item added successfully' }), { status: 200 });

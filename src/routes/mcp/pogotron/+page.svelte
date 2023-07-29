@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
     import { myDataStore } from '$store/datastore';
-    import { loadPogotronData, deletePogotronData } from '$models/pogotron';
+    import { addPogotronData, loadPogotronData, deletePogotronData } from '$models/pogotron';
     import type { PogotronData } from '$models/pogotron';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
@@ -89,12 +89,6 @@
         return item;
     }
 
-    async function deleteItem(){
-        if ( !currentVideo ) return;
-        deletePogotronData(currentVideo.id);
-        currentVideo = null;
-    }
-
     function handleVideoError(event: Event) {
         const video = event.target as HTMLVideoElement;
         const errorState = video.error ? video.error.code : video.networkState;
@@ -138,12 +132,45 @@
         deleteConfirm = !deleteConfirm;
     }
 
-    let add_domain = '', add_category = '', add_token = '';
+    let add_domain = '';
+    let add_category = 'breathOfTheWild';
+    let add_token = '';
+    
+
+    async function addItem() {
+        const newItem = await addPogotronData({ domain: add_domain, category: add_category, token: add_token });
+        videoList.push(newItem);
+        if (!videoListByCategory[newItem.category]) {
+            videoListByCategory[newItem.category] = [];
+        }
+        videoListByCategory[newItem.category].push(newItem);
+        add_domain = '';
+        add_category = '';
+        add_token = '';
+    } 
+
+    async function deleteItem(){
+        if ( !currentVideo ) return;
+        await deletePogotronData(currentVideo.id);
+        videoList = videoList.filter(item => item.id !== currentVideo.id);
+        for (const category in videoListByCategory) {
+            videoListByCategory[category] = videoListByCategory[category].filter(item => item.id !== currentVideo.id);
+        }
+        currentVideo = null;
+    }
+
     let quick_add = '';
+    function handlePaste(event: ClipboardEvent) {
+        const pastedData = event.clipboardData.getData('text');
 
-    async function handleSubmit() {
+        if ( pastedData.includes('redd') ) {
+            add_domain = 'reddit';
+            const parts = pastedData.split('/');
+            add_token = parts[parts.length -1];
+            quick_add = '';
+        }
+    }
 
-    }    
 
     onMount(async () => {
         if ($myDataStore.pogotron === null) {
@@ -209,9 +236,10 @@
     </div>
     
     <div class="add_new">
-        <input class="quick_add" bind:value={quick_add} placeholder="Quick Add" />
+        <input class="quick_add" bind:value={quick_add} on:paste={handlePaste} placeholder="Quick Add" />
+
         <br><br>
-        <form on:submit|preventDefault={handleSubmit}>
+        <form on:submit|preventDefault={addItem}>
             <p>
                 <label>
                     <input bind:value={add_category} />

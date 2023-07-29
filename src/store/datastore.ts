@@ -3,7 +3,6 @@ import type { PogotronData } from '$models/pogotron';
 
 interface DataStoreState {
     pogotron: PogotronData[] | null;
-    // You can add more properties here as your application grows
 }
 
 export const myDataStore = writable<DataStoreState>({

@@ -199,7 +199,7 @@ h2 {
   stroke-dasharray: 500;
   stroke-dashoffset: 500;
   alignment-baseline: text-before-edge;
-  animation: dash 5s linear forwards;
+  animation: dash 5s linear infinite alternate forwards;
 }
 
 .error_msg {
