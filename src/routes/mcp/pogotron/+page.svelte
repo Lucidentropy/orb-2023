@@ -7,10 +7,8 @@
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { close, spinner, trash, play, expand, compress, externalLink, plusCircle, plusSquare  } from 'svelte-awesome/icons';    
-	import { videoList } from '$lib/videoList';
 
 	setContext('transitions', { fade: fade });
-
 
     let videoElement: HTMLVideoElement;
     let currentVideo:PogotronData | null = null;
@@ -26,6 +24,7 @@
     function uncamelcase(input: string): string {
         return input
             .replace(/([A-Z])/g, ' $1')
+            .replace(/\_/g, ':' )
             .replace(/^./, (str) => str.toUpperCase());
     }
 
@@ -132,7 +131,7 @@
     }
 
     let add_domain: string = '';
-    let add_category: string = 'breathOfTheWild';
+    let add_category: string = '';
     let add_token: string = '';
     
     async function addItem() {
@@ -252,13 +251,13 @@
                     <input class="quick_add" bind:value={quick_add} on:paste={handlePaste} placeholder="Quick Add, Paste your valid url here" />
                 </div>
                 <div class="game">
-                        <label><input bind:value={add_category} placeholder="Game/Category"/></label>
+                        <label><input bind:value={add_category} placeholder="Game or Select from below"/></label>
                 </div>
                 <div class="domain">
-                    <label><input bind:value={add_domain} placeholder="Domain"/></label>
+                    <label><input bind:value={add_domain} placeholder="Domain: reddit, imgur, gfycat"/></label>
                 </div>
                 <div class="token">
-                    <label><input bind:value={add_token} placeholder="Token"/></label>
+                    <label><input bind:value={add_token} placeholder="Video Token"/></label>
                 </div>
                 <div class="submit">
                     <button type="submit">Submit</button>
@@ -273,36 +272,36 @@
         </form>
     {/if}
 
-    {#if videoListByCategory}
-        {#each Object.keys(videoListByCategory) as category}
-            <h2>{uncamelcase(category)} <i>{videoListByCategory[category].length}</i></h2>
-            <ul class="vidlist">
-            {#each videoListByCategory[category] as item (item.id)}
-                <li>
-                    {#if item && currentVideo && item.domain + item.token === currentVideo.domain + currentVideo.token}
-                        <Icon data={play} /> 
-                    {/if}
-                    <span on:click={setCurrent(item)} class={item.error ? 'haserror' : ''}>
-                        {item.id} {item.domain} {item.token}
-                    </span>
-                </li>
+    <div class="video-list">
+        {#if videoListByCategory}
+            {#each Object.keys(videoListByCategory) as category}
+                <h2>{uncamelcase(category)}</h2>
+                <p class="sub">{videoListByCategory[category].length} Video{videoListByCategory[category].length > 1 ? 's' :''}</p>
+                <div class="vidlist">
+                {#each videoListByCategory[category] as item (item.id)}
+                    <div class="{item.error ? 'haserror' : ''} domain_{item.domain}" on:click={setCurrent(item)}>
+                        {#if item && currentVideo && item.domain + item.token === currentVideo.domain + currentVideo.token}
+                            <Icon data={play} />  
+                        {:else}
+                            {item.id} {#if item.error}!{/if}    
+                        {/if}
+                    </div>
+                {/each}
+                </div>
             {/each}
-            </ul>
-        {/each}
-    {:else}
-        {#if isLoading}
-            <p class="loader shine"><Icon data={spinner} class="svg" pulse scale={3} /> <span>Loading data from API...</span></p>
         {:else}
-            <p>No videos available. Either API services are down or some doofus pushed broken code to production (me).</p>
+            {#if isLoading}
+                <p class="loader shine"><Icon data={spinner} class="svg" pulse scale={3} /> <span>Loading data from API...</span></p>
+            {:else}
+                <p>No videos available. Either API services are down or some doofus pushed broken code to production (me).</p>
+            {/if}
         {/if}
-    {/if}
+    </div>
 </div>
 
 <style lang="scss">
-
-
     .add-new-button {
-        width:250px;
+        width:150px;
         padding:4px;
         display:flex;
         align-items: center;
@@ -366,8 +365,6 @@
             }
         }
     }
-
-    
 
     button:has(svg) {
         border:0.5px outset var(--color-text);
@@ -446,20 +443,66 @@
         }
     }
 
+    .video-list {
+        h2 {
+            margin-bottom:0;
+        }
 
+        .sub {
+            font-size:12px;
+            // text-transform: uppercase;
+            margin-top:-13px;
+        }
+    }
 
     .vidlist {
         vertical-align: middle;
+        list-style: none;
 
-        span {
+        display:flex;
+        flex-wrap:wrap;
+        gap:4px;
+        z-index: 1;
+
+        & > div {
+            display:flex;
             cursor:pointer;
+            align-items: center;
+            justify-content: center;
+            width:calc(100% / 12);
+            aspect-ratio: 16 / 9;
+            border:1px solid;
+            font-size:12px;
+            text-shadow:1px 1px 1px #000;
+            border-radius:3px;
+            position:relative;
+
+            &:hover{
+                color:#fff;
+                text-shadow:0 0 3px #fff;
+                border-color:#fff;
+            }
         }
-        span.haserror {
+
+        .domain_reddit {
+            border-color:#820000;
+            background: linear-gradient(to bottom right, transparent 50%, #820000);
+        }
+        .domain_imgur {
+            border-color:#004700;
+            background: linear-gradient(to bottom right, transparent 50%, #004700);
+        }
+        .domain_gfycat {
+            border-color:#00008d;
+            background: linear-gradient(to bottom right, transparent 50%, #00008d);
+        }
+
+        .haserror {
             color:red;
+            font-weight: bold;
         }
         
     }
-
 
     .previewbox.full {
         height:auto;
@@ -504,6 +547,7 @@
         border: 1px solid var(--color-text);
         border-radius:9px;
         background-color:#000;
+        z-index: 100;
 
         .error {
             position: absolute;
