@@ -20,7 +20,7 @@
     <span>ERROR {error_no}</span>
     <span>ERROR {error_no}</span>
   </h1>
-  <h2>Server Error</h2>
+  <h2>Broken in style!</h2>
   <p class="error_msg">{error_msg}</p>
   <p><a href="/">back</a></p>
 </main>
