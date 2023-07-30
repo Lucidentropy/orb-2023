@@ -1,4 +1,5 @@
-import { addToStore, updateStore, removeFromStore, setStore } from '$store/datastore';
+import { myDataStore, addToStore, updateStore, removeFromStore, setStore } from '$store/datastore';
+import type { DataStoreState } from '$store/datastore';
 
 export interface PogotronData {
     readonly id: number;
@@ -35,13 +36,31 @@ export async function loadPogotronData() {
 
 export async function deletePogotronData(id: number | string, category: string) {
     const response = await fetch(`/api/pogotron/${id}`, { method: 'DELETE' });
-    const data = await response.json();
 
     if (!response.ok) {
         throw new Error('Failed to delete data');
     }
-    removeFromStore('pogotron', { [category]: id });
+
+    // Get the current state of the store
+    let currentState: DataStoreState;
+    myDataStore.subscribe(value => {
+        currentState = value;
+    })();
+
+    // Check if the category exists in the current state
+    if (currentState.pogotron && currentState.pogotron[category]) {
+        // Filter out the deleted item
+        const updatedData = currentState.pogotron[category].filter(item => item.id !== Number(id));
+
+        // Update the store with the new data
+        removeFromStore('pogotron', { [category]: updatedData });
+    } else {
+        console.error(`Category ${category} does not exist in the current state.`);
+    }
 }
+
+
+
 
 
 

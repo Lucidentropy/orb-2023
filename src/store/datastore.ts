@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { PogotronData } from '$models/pogotron';
 
-interface DataStoreState {
+export interface DataStoreState {
     pogotron: Record<string, PogotronData[]> | null;
 }
 
@@ -15,18 +15,11 @@ export function updateStore<T>(property: keyof DataStoreState, data: T[]) {
 }
 
 // Remove from store function
-export function removeFromStore<T>(property: keyof DataStoreState, data: { [key: string]: T }) {
+export function removeFromStore<T>(property: keyof DataStoreState, data: { [key: string]: T[] }) {
     myDataStore.update(state => {
-        const category = Object.keys(data)[0];
-        const id = Number(data[category]);
-        const existingData = state[property][category] as T[] || [];
-        const updatedData = existingData.filter(item => String(item.id) !== id);
-
-        console.log('remove', category, id)
-        return { ...state, [property]: { ...state[property], [category]: updatedData } };
+        return { ...state, [property]: { ...state[property], ...data } };
     });
 }
-
 
 // Set store function
 export function setStore<T>(property: keyof DataStoreState, data: T[]) {

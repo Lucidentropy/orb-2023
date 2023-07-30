@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { onMount, setContext } from 'svelte';
     import { myDataStore } from '$store/datastore';
     import { addPogotronData, loadPogotronData, deletePogotronData } from '$models/pogotron';
     import type { PogotronData, PogotronDataByCategory } from '$models/pogotron';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
-	import { close, spinner, trash, play, expand, compress, externalLink, plusCircle  } from 'svelte-awesome/icons';    
+	import { close, spinner, trash, play, expand, compress, externalLink, plusCircle, plusSquare  } from 'svelte-awesome/icons';    
+	import { videoList } from '$lib/videoList';
+
+	setContext('transitions', { fade: fade });
+
 
     let videoElement: HTMLVideoElement;
     let currentVideo:PogotronData | null = null;
@@ -16,6 +21,7 @@
     let isLoading:boolean = true;
     let videoListByCategory: PogotronDataByCategory | null = null;
 
+    let addNewFormVisibile:boolean = false;
 
     function uncamelcase(input: string): string {
         return input
@@ -112,25 +118,35 @@
         videoListByCategory = {...videoListByCategory};
     }
 
+    function closePreview(){
+        currentVideo = null;
+    }
+
     function toggleConfirm(){
         deleteConfirm = !deleteConfirm;
     }
 
-    let add_domain = 'reddit';
-    let add_category = 'breathOfTheWild';
-    let add_token = '7xenchesoxeb1';
-    
+    function toggleNewForm(){
+        addNewFormVisibile = !addNewFormVisibile;
+        closePreview();
+    }
 
+    let add_domain: string = '';
+    let add_category: string = 'breathOfTheWild';
+    let add_token: string = '';
+    
     async function addItem() {
         await addPogotronData({ domain: add_domain, category: add_category, token: add_token });
         add_domain = '';
-        add_category = '';
         add_token = '';
+        quick_add = 'Item Successfully Added';
+        setTimeout(() => { quick_add = ''; }, 3000);
+
     } 
 
     async function deleteItem(){
         if ( !currentVideo ) return;
-        await deletePogotronData(currentVideo.id);
+        await deletePogotronData(currentVideo.id, currentVideo.category);
         currentVideo = null;
     }
 
@@ -138,25 +154,45 @@
     function handlePaste(event: ClipboardEvent) {
         const pastedData = event.clipboardData.getData('text');
 
-        if ( pastedData.includes('redd') ) {
+        if ( pastedData.includes('v.redd.it') ) {
             add_domain = 'reddit';
             const parts = pastedData.split('/');
             add_token = parts[parts.length -1];
-            quick_add = '';
+            setTimeout(() => { quick_add = 'Successfully pasted, hit enter to save.'; }, 0);
+        }
+        if ( pastedData.includes('gfycat.com') ) {
+            add_domain = 'gfycat';
+            const parts = pastedData.split('/');
+            add_token = parts[parts.length -1];
+            setTimeout(() => { quick_add = 'Successfully pasted, hit enter to save.'; }, 0);
+        }
+        if ( pastedData.includes('imgur.com') ) {
+            add_domain = 'imgur';
+            const parts = pastedData.split('/');
+            add_token = parts[parts.length -1].split('.')[0];
+            setTimeout(() => { quick_add = 'Successfully pasted, hit enter to save.'; }, 0);
         }
     }
 
     myDataStore.subscribe(data => {
         videoListByCategory = data.pogotron;
     });
+    
+    let categories = [];
+    function setCategory(category: string) {
+        add_category = category;
+    }
 
     onMount(async () => {
         if ($myDataStore.pogotron === null) {
             isLoading = true;
             await loadPogotronData();
             isLoading = false;
+            categories = Object.keys(videoListByCategory)
+
         } else {
             videoListByCategory = $myDataStore.pogotron;
+            categories = Object.keys(videoListByCategory)
         }
     })
 </script>
@@ -164,7 +200,7 @@
 <div class="text-column">
     <h1>Pogotron <p><a href="/mcp">Back to MCP</a></p></h1>
 
-    <button class="add-new-button">
+    <button on:click={toggleNewForm} class="add-new-button">
         <span class="button-content">
             <span class="button-icon"><Icon data={plusCircle} scale={2} /></span>
             <span class="button-text">Add New</span>
@@ -172,12 +208,12 @@
     </button>
 
     <div class="previewbox {bigmode ? 'full' : ''} {currentVideo ? '' : 'hide'}">
+        <div class="close" on:click={closePreview}>
+            <Icon data={close} scale={2} />
+        </div>
         {#if deleteConfirm}
             <div class="confirm">
                 <button on:click={deleteItem} class="delete shine">Confirm Delete</button>
-            </div>
-            <div class="close" on:click={toggleConfirm}>
-                <Icon data={close} scale={2} />
             </div>
         {/if}
 
@@ -205,34 +241,38 @@
         </div>
         {/if}
     </div>
-    
-    <div class="add_new">
-        <input class="quick_add" bind:value={quick_add} on:paste={handlePaste} placeholder="Quick Add" />
 
-        <br><br>
-        <form on:submit|preventDefault={addItem}>
-            <p>
-                <label>
-                    <input bind:value={add_category} />
-                    Game/Category
-                </label>
-            </p>
-            <p>
-                <label>
-                    <input bind:value={add_domain} />
-                    Domain
-                </label>
-            </p>
-            <p>
-                <label>
-                    <input bind:value={add_token} />
-                    Token
-                </label>
-            </p>
-            <button type="submit">Submit</button>
+    {#if addNewFormVisibile}
+        <form on:submit|preventDefault={addItem} transition:fade|local={{ duration: 300 }}>
+        <div class="add-new-box">
+                <div class="status">
+
+                </div>
+                <div class="quick">
+                    <input class="quick_add" bind:value={quick_add} on:paste={handlePaste} placeholder="Quick Add, Paste your valid url here" />
+                </div>
+                <div class="game">
+                        <label><input bind:value={add_category} placeholder="Game/Category"/></label>
+                </div>
+                <div class="domain">
+                    <label><input bind:value={add_domain} placeholder="Domain"/></label>
+                </div>
+                <div class="token">
+                    <label><input bind:value={add_token} placeholder="Token"/></label>
+                </div>
+                <div class="submit">
+                    <button type="submit">Submit</button>
+                </div>
+                <div class="category">
+                    <h4>Category Select</h4>
+                    {#each categories as category}
+                        <a href="#" on:click|preventDefault={() => setCategory(category)}>{uncamelcase(category)}</a>{#if category !== categories[categories.length - 1]} &middot; {/if} 
+                    {/each}
+                </div>
+            </div>
         </form>
-    </div>
-    <h3>Video List</h3>
+    {/if}
+
     {#if videoListByCategory}
         {#each Object.keys(videoListByCategory) as category}
             <h2>{uncamelcase(category)} <i>{videoListByCategory[category].length}</i></h2>
@@ -273,6 +313,61 @@
         right:12px;
         box-shadow:0 0 14px 3px #000;
     }
+
+    .add-new-box {
+        border:1px solid var(--color-text);
+        border-radius:9px;
+        padding:10px;
+
+        display: grid;
+        grid-template-columns: 0px repeat(2, 1fr);
+        grid-template-rows: auto;
+        grid-column-gap: 0px;
+        grid-row-gap: 0px;
+        margin:10px 0;
+
+        input, button {
+            width:100%;
+            padding:9px;
+        }
+
+        h4 {
+            display:block;
+            text-align:center;
+            font-size:9px;
+            text-transform: uppercase;
+            margin-bottom:4px;
+
+        }
+
+        .status     { grid-area: 1 / 1 / 3 / 2; }
+        .quick      { 
+            grid-area: 1 / 2 / 2 / 4; 
+            input {
+                background-color:#bababa;
+                border-radius:9px 9px;
+                margin-bottom:14px;
+                color:#fff;
+                border:1px solid inset;
+            }
+        }
+        .game       { grid-area: 3 / 2 / 3 / 3; }
+        .domain     { grid-area: 2 / 2 / 3 / 3; }
+        .token      { grid-area: 2 / 4 / 3 / 3; }
+        .submit     { grid-area: 3 / 4 / 4 / 3; }
+        .category   { 
+            padding:10px;
+            grid-area: 4 / 2 / 4 / 4; 
+
+            a {
+                display:inline-block;
+                white-space:nowrap;
+                margin:0 4px;
+            }
+        }
+    }
+
+    
 
     button:has(svg) {
         border:0.5px outset var(--color-text);
@@ -470,12 +565,14 @@
         .close {
             position:absolute;
             top:5px;
-            right:5px;
+            right:10px;
             z-index: 10;
             cursor:pointer;
+            opacity: .5;
 
             &:hover {
                 color:red;
+                opacity:1;
             }
         }
 
