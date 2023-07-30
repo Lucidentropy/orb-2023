@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
     import { myDataStore } from '$store/datastore';
     import { addPogotronData, loadPogotronData, deletePogotronData } from '$models/pogotron';
-    import type { PogotronData } from '$models/pogotron';
+    import type { PogotronData, PogotronDataByCategory } from '$models/pogotron';
 
     import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { close, spinner, trash, play, expand, compress, externalLink, plusCircle  } from 'svelte-awesome/icons';    
@@ -14,29 +14,13 @@
     let deleteConfirm:boolean = false;
 
     let isLoading:boolean = true;
-    let videoList: PogotronData[] | null = null;
-
-    type PogotronDataByCategory = Record<string, PogotronData[]>;
     let videoListByCategory: PogotronDataByCategory | null = null;
+
 
     function uncamelcase(input: string): string {
         return input
             .replace(/([A-Z])/g, ' $1')
             .replace(/^./, (str) => str.toUpperCase());
-    }
-
-    function grouped(obj: PogotronData[] | null): PogotronDataByCategory | null {
-        if (obj === null) return null;
-
-        let acc: PogotronDataByCategory = {};
-        obj.forEach(row => {
-            if (!acc[row.category]) {
-                acc[row.category] = [];
-            }
-            acc[row.category].push(row);
-        });
-
-        return acc;
     }
 
 	function togglePlay() {
@@ -138,12 +122,7 @@
     
 
     async function addItem() {
-        const newItem = await addPogotronData({ domain: add_domain, category: add_category, token: add_token });
-        videoList.push(newItem);
-        if (!videoListByCategory[newItem.category]) {
-            videoListByCategory[newItem.category] = [];
-        }
-        videoListByCategory[newItem.category].push(newItem);
+        await addPogotronData({ domain: add_domain, category: add_category, token: add_token });
         add_domain = '';
         add_category = '';
         add_token = '';
@@ -152,10 +131,6 @@
     async function deleteItem(){
         if ( !currentVideo ) return;
         await deletePogotronData(currentVideo.id);
-        videoList = videoList.filter(item => item.id !== currentVideo.id);
-        for (const category in videoListByCategory) {
-            videoListByCategory[category] = videoListByCategory[category].filter(item => item.id !== currentVideo.id);
-        }
         currentVideo = null;
     }
 
@@ -171,22 +146,18 @@
         }
     }
 
+    myDataStore.subscribe(data => {
+        videoListByCategory = data.pogotron;
+    });
 
     onMount(async () => {
         if ($myDataStore.pogotron === null) {
             isLoading = true;
             await loadPogotronData();
-            videoList = $myDataStore.pogotron;
-            videoListByCategory = grouped($myDataStore.pogotron);
             isLoading = false;
         } else {
-            videoList = $myDataStore.pogotron;
-            videoListByCategory = grouped($myDataStore.pogotron);
+            videoListByCategory = $myDataStore.pogotron;
         }
-
-
-        // console.log('vl', videoList);
-        // console.log('vlbc', videoListByCategory)
     })
 </script>
 
@@ -262,24 +233,22 @@
         </form>
     </div>
     <h3>Video List</h3>
-    {#if videoList !== null}
-        {#if videoListByCategory}
-            {#each Object.keys(videoListByCategory) as category}
-                <h2>{uncamelcase(category)} <i>{videoListByCategory[category].length}</i></h2>
-                <ul class="vidlist">
-                {#each videoListByCategory[category] as item (item.id)}
-                    <li>
-                        {#if item && currentVideo && item.domain + item.token === currentVideo.domain + currentVideo.token}
-                            <Icon data={play} /> 
-                        {/if}
-                        <span on:click={setCurrent(item)} class={item.error ? 'haserror' : ''}>
-                            {item.domain} {item.token}
-                        </span>
-                    </li>
-                {/each}
-                </ul>
+    {#if videoListByCategory}
+        {#each Object.keys(videoListByCategory) as category}
+            <h2>{uncamelcase(category)} <i>{videoListByCategory[category].length}</i></h2>
+            <ul class="vidlist">
+            {#each videoListByCategory[category] as item (item.id)}
+                <li>
+                    {#if item && currentVideo && item.domain + item.token === currentVideo.domain + currentVideo.token}
+                        <Icon data={play} /> 
+                    {/if}
+                    <span on:click={setCurrent(item)} class={item.error ? 'haserror' : ''}>
+                        {item.id} {item.domain} {item.token}
+                    </span>
+                </li>
             {/each}
-        {/if}
+            </ul>
+        {/each}
     {:else}
         {#if isLoading}
             <p class="loader shine"><Icon data={spinner} class="svg" pulse scale={3} /> <span>Loading data from API...</span></p>

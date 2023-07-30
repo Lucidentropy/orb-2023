@@ -5,37 +5,54 @@ export interface PogotronData {
     category: string;
     domain: string;
     token: string;
-    uploaded_by: string | null;
-    error: string;
-    duration: string;
-    src: string;
+    uploaded_by?: string | null;
+    error?: string | null;
+    duration?: string | null;
+    src?: string | null;
+}
+
+type PogotronDataByCategory = Record<string, PogotronData[]>;
+
+export function grouped(obj: PogotronData[] | null): PogotronDataByCategory | null {
+    if (obj === null) return null;
+
+    let acc: PogotronDataByCategory = {};
+    obj.forEach(row => {
+        if (!acc[row.category]) {
+            acc[row.category] = [];
+        }
+        acc[row.category].push(row);
+    });
+
+    return acc;
 }
 
 export async function loadPogotronData() {
     const response = await fetch('/api/pogotron', { method: 'GET' });
     const data = await response.json();
-    setStore('pogotron', data.rows);
+    setStore('pogotron', grouped(data.rows));
 }
 
-export async function deletePogotronData(id: number | string) {
+export async function deletePogotronData(id: number | string, category: string) {
     const response = await fetch(`/api/pogotron/${id}`, { method: 'DELETE' });
     const data = await response.json();
 
     if (!response.ok) {
         throw new Error('Failed to delete data');
     }
-    removeFromStore('pogotron', data.id)
-    // removeFromStore(id);
+    removeFromStore('pogotron', { [category]: id });
 }
 
-export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promise<PogotronData> {
 
+
+export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promise<PogotronData> {
+    const body = JSON.stringify(newData);
     const response = await fetch('/api/pogotron', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(newData)
+        body
     });
 
     if (!response.ok) {
@@ -43,9 +60,12 @@ export async function addPogotronData(newData: Omit<PogotronData, 'id'>): Promis
     }
 
     const data: PogotronData = await response.json();
-    addToStore('pogotron', [data]);
-    return data;
+    newData.id = Number(data.insertId);
+    
+    addToStore('pogotron', { [newData.category]: [newData] });
+    return newData;
 }
+
 
 
 

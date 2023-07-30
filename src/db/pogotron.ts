@@ -1,7 +1,7 @@
 import { getConnection } from './db';
 import type { PogotronData } from '$models/pogotron';
 
-export async function getPogotronData() {
+export async function selectPogotronData() {
 
     try {
         const query = `SELECT * FROM pogotron`;
@@ -12,7 +12,7 @@ export async function getPogotronData() {
 
         return new Response(JSON.stringify({ rows }), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
 }
 
@@ -26,20 +26,21 @@ export async function deletePogotronData(id: number) {
 
         return new Response(JSON.stringify({ message: 'Item deleted successfully?' }), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: 'Something went wrong' }), { status: 500 });
+        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
 }
 
-export async function addPogotronData(data: PogotronData) {
+export async function insertPogotronData(data: PogotronData) {
     try {
-        const query = `INSERT INTO pogotron SET ?`;
-
+        const query = `INSERT INTO pogotron SET domain = ?, category = ?, token = ?`;
         const conn = await getConnection();
-        const [result] = await conn.execute(query, [data]);
+        const [result] = await conn.execute(query, [data.domain, data.category, data.token]);
         conn.end();
 
         return result;
     } catch (error) {
-        throw new Error('Something went wrong'); 
+        throw new Error(error.message);
     }
 }
+
+
