@@ -1,51 +1,34 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { onMount, onDestroy, setContext, getContext } from 'svelte';
+	import { myDataStore } from '$store/datastore';
+	import { loadPogotronData } from '$models/pogotron';
+	import type { PogotronData } from '$models/pogotron';
 
 	setContext('transitions', { fade: fade });
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { gear, play, pause, close, fastForward, fastBackward } from 'svelte-awesome/icons';
 
-	import { videoList } from '../lib/videoList';
+	// Data-related variables
+	let videoList: Record<string, PogotronData[]> | null = null;
+	let videoCollection: any[] = [];
+	let videos: string[] = [];
+	let videoIndex: number = 0;
+	let isLoading: boolean = false;
 
-	const videoCollection = Object.entries(videoList).flatMap(([key, arr]) => {
-		return arr.map(content => {
-			const [domain, token] = content.split(":");
-			let uri:string = '', src:string = '';
-			switch(domain){
-                case 'imgur': 
-					src = `https://imgur.com/${token}`;
-                	uri = `https://i.imgur.com/${token}.mp4`;
-                break;
-                case 'gfycat':
-					src = `https://gfycat.com/gifs/detail/${token}`;
-                    uri = `https://giant.gfycat.com/${token}.mp4`;
-                break;
-				case 'reddit':
-					src = `https://v.redd.it/${token}`;
-					uri = `https://v.redd.it/${token}/DASH_720.mp4`;
-
-			}
-
-			if ( !domain || !token || !uri ) return null;
-			
-			return { game: unCamelCase(key), domain, token, uri, src };
-		}).filter(Boolean);
-	});
-
-    function randomizeArray<T>(array: T[]): T[] {
-        return array.sort(() => Math.random() - 0.5);
-    }
-
-	let videoIndex:number = 0;
-	const videoSrcs = randomizeArray(videoCollection.map(obj => obj?.uri));
-	const videos: string[] = videoSrcs;
-
+	// Video player state variables
 	let videoElement: HTMLVideoElement;
-	let playing:boolean = true;
-	let error_count:number = 0;
+	let playing: boolean = true;
+	let error_count: number = 0;
+	let isHovered: boolean = false;
 
+	// UI state variables
+	let introVis: boolean = true;
+	let playlistVis: boolean = true;
+	const toggleIntroVis = () => introVis = !introVis;
+
+	// Video data type
 	type VideoType = {
 		game: string;
 		domain: string;
@@ -54,6 +37,7 @@
 		src: string;
 	};
 
+	// Current video variable
 	let currentVideo: VideoType | null | undefined;
 
 	async function loadVideoSource() {
@@ -126,15 +110,13 @@
 		return unCameler.toString();
 	}
 
-    let introVis:boolean = true;
-    let playlistVis:boolean = true;
-	let isHovered:boolean = false;
-    const toggleIntroVis = () => introVis = !introVis;
+	function randomizeArray<T>(array: T[]): T[] {
+        return array.sort(() => Math.random() - 0.5);
+    }
 
-	onMount(() => {
-
-        videoElement.addEventListener('play', () => playing = true);
-        videoElement.addEventListener('pause', () => playing = false);
+	function addEventListenersToVideoElement() {
+		videoElement.addEventListener('play', () => playing = true);
+		videoElement.addEventListener('pause', () => playing = false);
 
 		videoElement.onended = () => nextVideo();
 
@@ -142,7 +124,7 @@
 		videoElement.addEventListener('mouseleave', () => isHovered = false);
 		videoElement.addEventListener('focus', () => isHovered = true);
 		videoElement.addEventListener('blur', () => isHovered = false);
-		
+
 		window.addEventListener('keydown', handleKeydown);
 
 		window.addEventListener('focus', () => {
@@ -154,14 +136,51 @@
 		});
 
 		loadVideoSource();
-	});	
-	onDestroy(() => {
-		
-	})
+	}
 
+	onMount(async () => {
+		isLoading = true;
+		if ($myDataStore.pogotron === null) {
+			await loadPogotronData();
+		}
+		isLoading = false;
+
+		if (videoElement) {
+		addEventListenersToVideoElement();
+		}
+	});	
+
+	$: {
+		videoList = $myDataStore.pogotron;
+		videoCollection = videoList ? Object.entries(videoList).flatMap(([key, arr]) => {
+		return arr.map(content => {
+			const { domain, token } = content;
+			let uri:string = '', src:string = '';
+			switch(domain){
+			case 'imgur': 
+				src = `https://imgur.com/${token}`;
+				uri = `https://i.imgur.com/${token}.mp4`;
+			break;
+			case 'gfycat':
+				src = `https://gfycat.com/gifs/detail/${token}`;
+				uri = `https://giant.gfycat.com/${token}.mp4`;
+			break;
+			case 'reddit':
+				src = `https://v.redd.it/${token}`;
+				uri = `https://v.redd.it/${token}/DASH_720.mp4`;
+			}
+
+			if ( !domain || !token || !uri ) return null;
+			
+			return { game: unCamelCase(key), domain, token, uri, src };
+		}).filter(Boolean);
+		}) : [];
+		videos = randomizeArray(videoCollection.map(obj => obj?.uri));
+	}	
 </script>
 
 <div id="outer-container">
+	{#if videoCollection && videoCollection.length > 0}
     <div id="vid-container">
         {#if introVis}
         <div id="intro" transition:fade|local={{ duration: 300 }} class="{introVis ? 'show' : 'hide'} fade-transition">
@@ -218,6 +237,13 @@
             </div>
         </div>
     </div>
+	{:else}
+		{#if isLoading}
+			<p>Loading...</p>
+		{:else}
+			<p>No videos available.</p>
+		{/if}
+	{/if}	
 </div>
 <style lang="scss">
 

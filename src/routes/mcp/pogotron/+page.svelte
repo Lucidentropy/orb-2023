@@ -177,7 +177,7 @@
         videoListByCategory = data.pogotron;
     });
     
-    let categories = [];
+    let categories: string[] = [];
     function setCategory(category: string) {
         add_category = category;
     }
