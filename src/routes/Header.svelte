@@ -1,14 +1,50 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-	import logo from '$lib/images/svelte-logo.svg';
-	import github from '$lib/images/github.svg';
 	import headerimg from '$lib/images/header.png';
 	import orblogo from '$lib/images/neworbdemo.jpg';
 	import boxors from '$lib/images/icon_b0x0rz.gif';
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
-	import { steam } from 'svelte-awesome/icons';
+	import { arrowCircleOLeft, steam } from 'svelte-awesome/icons';
 
+	import { fade } from 'svelte/transition';
+
+	interface NavItem {
+		text: string;
+		url?: string;
+		icon?: string;
+		subItems?: NavItem[];
+	}
+
+	let navItems: NavItem[] = [
+	{
+		text: 'Home',
+		url: '/',
+	},
+	{
+		text: 'The Community',
+		subItems: [
+			{ text: 'About Orb', url: '/about' },
+			{ text: 'Links', url: '/links' },
+			{ text: 'Steam', url: '/steam' },
+		],
+	},
+	{
+		text: 'Games',
+		subItems: [
+			{ text: 'Diablo', url: '/diablo' },
+			{ text: 'GTA 5', url: '/gta' },
+			{ text: 'Sverdle', url: '/sverdle'},
+			{ text: 'Tribes', url: '/tribes' },
+			{ text: 'WoW', url: '/wow' },
+		],
+	},
+	];
+	
+	let activeItem: NavItem | null = null;
+	function toggleSubMenu(item: NavItem) {
+		activeItem = activeItem === item ? null : item;
+	}
 </script>
 
 <svelte:head>
@@ -18,51 +54,52 @@
 </svelte:head>
 
 <header>
-	<div class="corner"></div>
 	<div class="banner" style="background-image:url({headerimg})" >
 		<a href="/" class="logo"><img src={orblogo} alt="Logo" /></a>
 	</div>
 	<div id="webamp-container"></div>
-	<nav>
-		<ul>		
-			<li aria-current={$page.url.pathname === '/about' ? 'page' : undefined}>
-				<a href="/about">About</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/links' ? 'page' : undefined}>
-				<a href="/links">Links</a>
-			</li>
-			<li aria-current={$page.url.pathname === '/steam' ? 'page' : undefined}>
-				<a href="/steam"><Icon data={steam} /> Steam</a>
-			</li>									
-			<li aria-current={$page.url.pathname.startsWith('/diablo') ? 'page' : undefined}>
-				<a href="/diablo">Diablo</a>
-			</li>
-			<li aria-current={$page.url.pathname.startsWith('/gta') ? 'page' : undefined}>
-				<a href="/gta">GTA 5</a>
-			</li>
-			<li aria-current={$page.url.pathname.startsWith('/tribes') ? 'page' : undefined}>
-				<a href="/tribes">Tribes</a>
-			</li>
-			<li aria-current={$page.url.pathname.startsWith('/sverdle') ? 'page' : undefined}>
-				<a href="/sverdle">Sverdle</a>
-			</li>
-			<li>
-				<a href="https://kit.svelte.dev">
-					<img src={boxors} alt="SvelteKit" />
-				</a>
-			</li>
-			<li>
-				<a href="https://github.com/sveltejs/kit">
-					<img src={github} alt="GitHub" />
-				</a>				
-			</li>
-		</ul>
-	</nav>
 
-	<div class="corner"></div>
+	<nav>
+		{#if activeItem !== null}
+			<ul out:fade={{ duration:0 }} in:fade={{ duration:300 }} class="sub-menu">
+				<li class="back">
+					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}> <Icon data={arrowCircleOLeft} /> Back</a>
+				</li>
+				{#each activeItem.subItems as subItem (subItem.url)}
+					<li aria-current={$page.url.pathname.startsWith(subItem.url) ? 'page' : undefined}>
+						<a href={subItem.url}>{subItem.text}</a>
+					</li>	
+				{/each}
+			</ul>
+		{:else}
+			<ul>
+			{#each navItems as item}
+				<li>
+					{#if item.subItems}
+						<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}>{item.text}</a>
+					{:else}
+						{#if item.url}
+							<a href={item.url}>{item.text}</a>
+						{:else}
+							<p>{item.text}</p>
+						{/if}
+					{/if}
+				</li>
+			{/each}
+			</ul>
+		{/if}
+	</nav>
 </header>
 
 <style lang="scss">
+
+
+
+
+
+
+
+
 	header {
 
 		.banner {
@@ -86,27 +123,6 @@
 		}
 	}
 
-	.corner {
-		width: 3em;
-		height: 3em;
-		position:absolute;
-		top:0;
-	}
-
-	.corner a {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-	}
-
-	.corner img {
-		max-width: 2em;
-		max-height: 2em;
-		object-fit: contain;
-	}
-
 	nav {
 		width:100vw;
 		background:#0006;
@@ -115,9 +131,19 @@
 		box-shadow:0 0 40px #000;
 		display:flex;
 		justify-content:center;
+		transition:1s ease-out all;
 
 		svg {
 			margin-right:10px;
+		}
+
+		.back {
+			text-indent:4px;
+			opacity:.5;
+
+			&:hover {
+				opacity:1;
+			}
 		}
 	}
 
@@ -149,6 +175,12 @@
 		height: 100%;
 	}
 
+	li[aria-current='page'] {
+		a {
+			color:#fff;
+		}
+	}
+
 	li[aria-current='page']::before {
 		--size: 6px;
 		content: '';
@@ -158,10 +190,10 @@
 		top: 0;
 		left: calc(50% - var(--size));
 		border: var(--size) solid transparent;
-		border-top: var(--size) solid var(--color-theme-1);
+		border-top: var(--size) solid #fff;
 	}
 
-	nav a {
+	nav a, nav p {
 		display: flex;
 		height: 100%;
 		align-items: center;
@@ -174,6 +206,7 @@
 		text-decoration: none;
 		transition: color 0.2s linear;
 		font-family:'Ropa Sans', sans-serif;
+		cursor:pointer;
 
 		&:hover {
 			color:#fff;

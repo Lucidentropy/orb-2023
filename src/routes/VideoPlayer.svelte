@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { onMount, onDestroy, setContext, getContext } from 'svelte';
+
+	import { fade } from 'svelte/transition';
+	setContext('transitions', { fade: fade });
+
 	import { myDataStore } from '$store/datastore';
 	import { loadPogotronData } from '$models/pogotron';
 	import type { PogotronData } from '$models/pogotron';
-
-	setContext('transitions', { fade: fade });
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { gear, play, pause, close, fastForward, fastBackward } from 'svelte-awesome/icons';
@@ -239,9 +240,9 @@
     </div>
 	{:else}
 		{#if isLoading}
-			<p>Loading...</p>
+			<p>Loading the most poggers clips on the internet...</p>
 		{:else}
-			<p>No videos available.</p>
+			<p>No videos available. Either the API is dead or there just weren't any clips that were poggers enough.</p>
 		{/if}
 	{/if}	
 </div>

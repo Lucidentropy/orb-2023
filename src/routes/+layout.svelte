@@ -2,6 +2,9 @@
 	import Header from './Header.svelte';
 	import '../styles/styles.css';
 
+	import github from '$lib/images/github.svg';
+	import svelteLogo from '$lib/images/svelte-logo.svg';
+
 	import winampIcon from '$lib/images/winamp-icon.svg';
 	let isWebampLoaded = false;
 	import Webamp from './Webamp.svelte';
@@ -30,13 +33,16 @@
 	</main>
 
 	<footer>
-		
 		<p>
 			Clan Orb, a gaming community founded in 2000. 
 
 			{#if !isWebampLoaded}
     			<button on:click={loadWebamp}><img src={winampIcon} class="winamp-icon" alt="Winamp" /></button>
   			{/if}
+
+			<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" class="github"><img src={github} height=20 alt="Github Repository Link" /></a>
+			<a href="https://svelte.dev/" target="_blank" class="svelteLogo"><img src={svelteLogo} height=20 alt="Built with Svelekit" /></a>
+
 		</p>
 	</footer>
 </div>
@@ -68,10 +74,30 @@
 		align-items: center;
 		padding: 12px;
 		margin-top:100px;
+		font-size:12px;
+		opacity:.8;
+	}
+	
+	footer img {
+		vertical-align: middle;
+		max-height: 32px;
+		
 	}
 
 	footer a {
 		font-weight: bold;
+	}
+
+	footer .winamp-icon {
+		filter: saturate(.5)
+	}
+
+	footer .github {
+		filter: invert();
+	}
+
+	footer .svelteLogo {
+		filter: saturate(0)
 	}
 
 
