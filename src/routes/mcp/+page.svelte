@@ -1,6 +1,6 @@
 <script lang="ts">
 
-
+  const thanks = () => alert('The beans have been restocked. Thank you.');
 </script>
 
 <div class="text-column">
@@ -11,6 +11,7 @@
         </span></h1>
     <ul>
         <li><a href="/mcp/pogotron">Pogotron</a></li>
+        <li><a href="/mcp/" on:click={thanks}>Restock Beans</a></li>
     </ul>
 </div>
 
