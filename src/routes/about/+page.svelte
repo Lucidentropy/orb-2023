@@ -1,6 +1,6 @@
 <svelte:head>
 	<title>About</title>
-	<meta name="description" content="About this app" />
+	<meta name="description" content="About Orb" />
 </svelte:head>
 
 <script>
