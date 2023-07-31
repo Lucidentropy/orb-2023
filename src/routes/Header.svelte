@@ -25,6 +25,7 @@
 		text: 'The Community',
 		subItems: [
 			{ text: 'About Orb', url: '/about' },
+			{ text: 'Joining Orb', url: '/join'},
 			{ text: 'Links', url: '/links' },
 			{ text: 'Steam', url: '/steam' },
 		],
@@ -41,7 +42,9 @@
 	},
 	];
 	
-	let activeItem: NavItem | null = null;
+	let activeItem: NavItem | null = navItems.find(item =>
+	item.subItems?.find(subItem => $page.url.pathname.startsWith(subItem.url))) || null;
+
 	function toggleSubMenu(item: NavItem) {
 		activeItem = activeItem === item ? null : item;
 	}
@@ -63,11 +66,15 @@
 		{#if activeItem !== null}
 			<ul out:fade={{ duration:0 }} in:fade={{ duration:300 }} class="sub-menu">
 				<li class="back">
-					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}> <Icon data={arrowCircleOLeft} /> Back</a>
+					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}>
+						<Icon data={arrowCircleOLeft} /> Back
+					</a>
 				</li>
 				{#each activeItem.subItems as subItem (subItem.url)}
 					<li aria-current={$page.url.pathname.startsWith(subItem.url) ? 'page' : undefined}>
-						<a href={subItem.url}>{subItem.text}</a>
+						<a href={subItem.url}>
+							{subItem.text}
+						</a>
 					</li>	
 				{/each}
 			</ul>

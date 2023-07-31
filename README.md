@@ -1,38 +1,35 @@
-# create-svelte
+# ORB-2023
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This is the repo for clanorb.com, a gaming community I founded in 2000. I got into web development that same year for the sole reason of making a website for my gaming clan. It has become my career and I continue developing this site to this day as motivation and time allows.
 
-## Creating a project
+## Technologies Used
 
-If you're seeing this, you've probably already done this step. Congrats!
+This project was an exploration into a variety of technologies I have never used before but wanted to learn, primarily TypeScript and Svelte; please don't be surprised if you see some contrived implementations as I iterate over this project and learn optimal practices.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+- **Svelte/SvelteKit**: The core of the application is built using Svelte, a modern reactive JavaScript framework, and SvelteKit, a framework for building extremely high-performance web apps.
+- **TypeScript**: TypeScript, a statically typed superset of JavaScript, is used throughout the project to ensure type safety and improve IDE experience.
+- **Vite**: Vite is used as the build tool for its fast and lean development experience.
+- **MySQL2**: MySQL2 is used to interact with MySQL databases.
+- **Webamp**: Webamp, a reimplementation of Winamp 2.9 in HTML5 and JavaScript, is used for audio playback.
+- **xml2js**: xml2js is used for parsing XML data.
+- **chatGTP**: chatGPT 4.0 with Recombinant AI was used heavily for assistance with code refactoring.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Project Structure
 
-## Developing
+- `src`: Contains the source code for the application.
+  - `routes`: Contains the Svelte components for each route in the application.
+  - `lib`: Contains various assets such as images and fonts.
+  - `models`: Contains TypeScript models.
+  - `store`: Contains Svelte stores.
+  - `styles`: Contains CSS styles.
+- `static`: Contains static files such as audio files and favicons.
+- `package.json`: Defines the project's npm dependencies.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Development Scripts
 
-```bash
-npm run dev
+- `npm run dev`: Runs the application in development mode.
+- `npm run build`: Builds the application for production.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## Contributing
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+I'm not expecting any pull requests at random, but should you be interested in contributing to this project, and are a member of our community, please contact me on discord.

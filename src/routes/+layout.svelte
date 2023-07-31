@@ -37,11 +37,11 @@
 			Clan Orb, a gaming community founded in 2000. 
 
 			{#if !isWebampLoaded}
-    			<button on:click={loadWebamp}><img src={winampIcon} class="winamp-icon" alt="Winamp" /></button>
+    			<button on:click={loadWebamp} title="A relic of an ancient time."><img src={winampIcon} class="winamp-icon" alt="Winamp" /></button>
   			{/if}
 
-			<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" class="github"><img src={github} height=20 alt="Github Repository Link" /></a>
-			<a href="https://svelte.dev/" target="_blank" class="svelteLogo"><img src={svelteLogo} height=20 alt="Built with Svelekit" /></a>
+			<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" class="github" title="This is an open source project, view on github."><img src={github} height=20 alt="Github Repository Link" /></a>
+			<a href="https://svelte.dev/" target="_blank" class="svelteLogo" title="Built with Svelte/Sveltekit"><img src={svelteLogo} height=20 alt="Built with Svelekit" /></a>
 
 		</p>
 	</footer>

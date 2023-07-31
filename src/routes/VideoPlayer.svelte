@@ -188,9 +188,7 @@
             <button class="close" on:click={toggleIntroVis}><Icon data={close} /></button>
             <h3>Orb Gaming Community</h3>
             <p>
-                Founded in 2000, Orb is an online gaming community dedicated to the belief that online gaming
-                should be about fun and good times with friends, not score, items, or being the best. Sense of
-                humor required.
+                Founded in 2000, Orb is a multi-game multi-generational online gaming community dedicated to the belief that online gaming should be about fun and good times with friends. Sense of humor required.
             </p>
         </div>
         {/if}
