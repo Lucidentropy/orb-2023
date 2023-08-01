@@ -25,8 +25,4 @@
 		align-items: center;
 		flex: 0.6;
 	}
-
-	h1 {
-		width: 100%;
-	}
 </style>
