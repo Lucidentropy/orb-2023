@@ -90,7 +90,7 @@
 
 <div class="text-column">
 	<h1>Sverdle</h1>
-	<p>This was no written by me, but was included in Svelte when I started this project; I've kept it as something fun to play with.</p>
+	<p>I did not write this, but it was included in Svelte when I started this project; I've kept it as most people helping me test the site ended up having fun with it.</p>
 	<form
 		method="POST"
 		action="?/enter"

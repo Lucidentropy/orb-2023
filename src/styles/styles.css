@@ -110,7 +110,7 @@ body {
 	min-height: 100vh;
 	margin: 0;
 	background: url(/src/lib/images/footer-bg.png) bottom center repeat-x fixed,
-		url(/src/lib/images/star-bg.png) 50% 130px repeat-x scroll;
+		url(/src/lib/images/star-bg.png) 50% 0 repeat-x scroll;
 	background-size: 100% auto;
 }
 
