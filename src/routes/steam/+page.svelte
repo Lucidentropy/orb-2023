@@ -4,42 +4,19 @@
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { steam } from 'svelte-awesome/icons';
-
-    let steamData: any;
+    // import { fetchSteamData } from '$models/steam';
+    import steamData from '$lib/json/steam.json';
+    // let steamData: any;
     let members: any;
     let group: any;
-
+    console.log('get thata data', steamData)
     onMount(async () => {
-        try {
-            steamData = (await import('$lib/json/steam.json')).default;
-        } catch (error) {
-            console.error('Failed to import steam.json:', error);
-            // Handle the error or set a default value for steamData
-            steamData = { /* default value */ };
-        }
-
-        members = steamData ? steamData.memberList.members[0].players : false;
-        group = steamData ? steamData.memberList.groupDetails[0] : false;
-
-        if (members) {
-            members = members.sort((a, b) => {
-                const nameA = a.personaname.toUpperCase().replace('} ', '}');
-                const nameB = b.personaname.toUpperCase().replace('} ', '}');
-                // Sort orb tags higher
-                if (nameA.startsWith('{') !== nameB.startsWith('{')) {
-                    return nameA.startsWith('{') ? -1 : 1;
-                }
-                return nameA > nameB ? 1 : (nameA < nameB ? -1 : 0);
-            });
-        }
-        if (group){
-            group.summary[0] = group.summary[0].replace(/<br\s*\/?>/gi, '\n');
-            group.summary[0] = group.summary[0].replace(/<[^>]+>/g, '');
-            group.summary[0] = group.summary[0].replace(/\[.*?\]/g, '');
-            group.summary[0] = group.summary[0].replace(/Clan Orb/g, '');
-        }
+        // steamData = await fetchSteamData();
+        members = steamData.memberList.members[0].players;
+        group = steamData.memberList.groupDetails[0];
     });
 </script>
+
 
 
 <div class="text-column">
