@@ -1,34 +1,20 @@
-<script context="module">
-export async function load({ fetch }) {
-    const res = await fetch('/api/steam');
-    const steamData = await res.text();
-    return { props: { steamData } };
-}
-</script>
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import trouble from '$lib/images/troubleshooting.jpg';
+    import { onMount } from 'svelte';
+    import Icon from 'svelte-awesome/components/Icon.svelte';
+    import { steam } from 'svelte-awesome/icons';
+    import trouble from '$lib/images/troubleshooting.jpg';
 
-	import Icon from 'svelte-awesome/components/Icon.svelte';
-	import { steam } from 'svelte-awesome/icons';
-    
+    let steamData: any = null;
 
-    import { fetchSteamData } from '$models/steam';
-    // import steamData from '$lib/json/steam.json';
-    
-   
-
-    let steamData: any;
-    let members: any;
-    let group: any;
     onMount(async () => {
-        steamData = await fetchSteamData();
-        members = steamData.memberList.members[0].players;
-        group = steamData.memberList.groupDetails[0];
+        const response = await fetch('/api/steam');
+        if (response.ok) {
+            steamData = await response.json();
+        } else {
+            console.error('Failed to fetch steam data');
+        }
     });
 </script>
-
-
 
 <div class="text-column">
     <h1>
@@ -39,47 +25,46 @@ export async function load({ fetch }) {
         
         <p>Orb Members</p>
     </h1>
-    <pre>{steamData}</pre>
-    {#if steamData && group && members}
+    {#if steamData}
         <div id="steam-members">
             <div class="info">
                 <div class="left">
-                    <img class="steamAvatar" src={group.avatarFull[0]} alt={`${group.groupURL[0]} Avatar`}/>
+                    <img class="steamAvatar" src={steamData.avatarFull} alt={`${steamData.groupURL} Avatar`}/>
                 </div>
                 <div class="right">
-                    <a href={`http://steamcommunity.com/groups/${group.groupURL[0]}`} target="_blank">
-                        <h3>{`http://steamcommunity.com/groups/${group.groupURL[0]}`}</h3>
+                    <a href={`http://steamcommunity.com/groups/${steamData.groupURL}`} target="_blank">
+                        <h3>{`http://steamcommunity.com/groups/${steamData.groupURL}`}</h3>
                     </a>
 
-                    <p class="summary">{group.summary[0]}</p>
+                    <p class="summary">{steamData.summary}</p>
                     
                     <ul class="counts">
-                        <li>{group.memberCount[0]} Members</li>
-                        <li class="online">{group.membersOnline[0]} Online</li>
-                        <li class="ingame">{group.membersInGame[0]} In Game</li>
-                        <li class="chat">{group.membersInChat[0]} In Chat</li>
+                        <li>{steamData.memberCount} Members</li>
+                        <li class="online">{steamData.status.membersOnline} Online</li>
+                        <li class="ingame">{steamData.status.membersInGame} In Game</li>
+                        <li class="chat">{steamData.status.membersInChat} In Chat</li>
                     </ul>
                 </div>
             </div>
 
             <div class="memberlist">
-                {#each members as player}
-                <div class={player.personastate == 1 ? 'online' : ''}>
-                    {#if player.communityvisibilitystate === 3 && player.profilestate === 1}
-                        <a href={player.profileurl} target="_blank">
+                {#each steamData.members as player}
+                    <div class={player.personastate == 1 ? 'online' : ''}>
+                        {#if player.communityvisibilitystate === 3 && player.profilestate === 1}
+                            <a href={player.profileurl} target="_blank">
+                                <img class="avatar" src={player.avatarfull} alt="{player.personaname}'s Steam Avatar" />
+                            </a>
+                        {:else}
                             <img class="avatar" src={player.avatarfull} alt="{player.personaname}'s Steam Avatar" />
-                        </a>
-                    {:else}
-                        <img class="avatar" src={player.avatarfull} alt="{player.personaname}'s Steam Avatar" />
-                    {/if}
-                    <p class="name">
-                        {player.personaname}
-                        {#if player.realname}
-                            <span>{player.realname}</span>
                         {/if}
-                    </p>
-                    <p class="online"></p>
-                </div>
+                        <p class="name">
+                            {player.personaname}
+                            {#if player.realname}
+                                <span>{player.realname}</span>
+                            {/if}
+                        </p>
+                        <p class="online"></p>
+                    </div>
                 {/each}
             </div>
         </div>
