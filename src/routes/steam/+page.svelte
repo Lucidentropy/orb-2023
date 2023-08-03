@@ -4,14 +4,18 @@
 
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { steam } from 'svelte-awesome/icons';
-    // import { fetchSteamData } from '$models/steam';
-    import steamData from '$lib/json/steam.json';
-    // let steamData: any;
+    
+
+    import { fetchSteamData } from '$models/steam';
+    // import steamData from '$lib/json/steam.json';
+    
+   
+
+    let steamData: any;
     let members: any;
     let group: any;
-    console.log('get thata data', steamData)
     onMount(async () => {
-        // steamData = await fetchSteamData();
+        steamData = await fetchSteamData();
         members = steamData.memberList.members[0].players;
         group = steamData.memberList.groupDetails[0];
     });
@@ -24,10 +28,11 @@
         <span class="steam-icon">
             <Icon data={steam} scale={3} />
         </span>
-    Steam Community
-    
-    <p>Orb Members</p>
+        Steam Community
+        
+        <p>Orb Members</p>
     </h1>
+    <pre>{steamData}</pre>
     {#if steamData && group && members}
         <div id="steam-members">
             <div class="info">

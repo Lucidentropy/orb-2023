@@ -8,6 +8,7 @@
   import { page } from '$app/stores';
   const error_no = $page.status;
   const error_msg = $page.error?.message;
+  console.error($page.error);
 </script>
 
 <main>
