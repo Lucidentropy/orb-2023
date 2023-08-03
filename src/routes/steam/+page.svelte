@@ -1,3 +1,10 @@
+<script context="module">
+export async function load({ fetch }) {
+    const res = await fetch('/api/steam');
+    const steamData = await res.text();
+    return { props: { steamData } };
+}
+</script>
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import trouble from '$lib/images/troubleshooting.jpg';
