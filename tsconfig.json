@@ -11,12 +11,14 @@
 		"strict": true,
 		"baseUrl": ".",
 		"paths": {
-			"$lib/*": ["src/lib/*"],
-			"$db/*": ["src/db/*"],
-			"$models/*": ["src/models/*"],
-			"$routes/*": ["src/routes/*"],
-			"$store/*": ["src/store/*"],
-			"$styles/*": ["src/styles/*"]
+			"$lib":["./src/lib"],
+			"$lib/*":["./src/lib/*"],			
+			"$lib/*": ["./src/lib/*"],
+			"$db/*": ["./src/db/*"],
+			"$models/*": ["./src/models/*"],
+			"$routes/*": ["./src/routes/*"],
+			"$store/*": ["./src/store/*"],
+			"$styles/*": ["./src/styles/*"]
 		}
 	}
 }

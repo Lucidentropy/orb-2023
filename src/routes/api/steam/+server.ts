@@ -1,13 +1,66 @@
 import axios from 'axios';
 import xml2js from 'xml2js';
-import type { SteamData } from '$models/steam'; 
+import type { SteamData } from '$models/steam';
+import type { StoreCache } from '$models/storeCache'; 
+
 import dotenv from 'dotenv';
 dotenv.config();
+import { getConnection } from '$db/db';
 
 export async function GET() {
-    const steamData = await fetchSteamXML();
+    const { cache, updated } = await fetchStoreCache();
+    let steamData = JSON.parse(cache);
+
+    if (isDataOld(updated)) {
+        steamData = await fetchSteamXML();
+        updateStoreCache(steamData);
+    }
+
     return new Response(JSON.stringify(steamData), { status: 200 });
 }
+
+const isDataOld = (updated: Date): boolean => {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    return updated < oneDayAgo;
+}
+
+async function fetchStoreCache(): Promise<StoreCache> {
+    try {
+        const query = `SELECT cache, updated FROM storecache WHERE store = 'steam'`;
+        const conn = await getConnection();
+        const [result] = await conn.execute(query) as any[];
+        conn.end();
+
+        if (result.length > 0) {
+            return {
+                cache: result[0].cache,
+                updated: new Date(result[0].updated),
+            };
+        } else {
+            const steamData = await fetchSteamXML();
+            return {
+                cache: JSON.stringify(steamData),
+                updated: new Date()
+            };
+        }
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+
+async function updateStoreCache(steamData: SteamData) {
+    try {
+        const query = `UPDATE storecache SET cache = ?, updated = NOW() WHERE store = 'steam'`;
+        const conn = await getConnection();
+        await conn.execute(query, [JSON.stringify(steamData)]);
+        conn.end();
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
 
 async function fetchSteamXML(): Promise<SteamData> {
     const url = 'https://steamcommunity.com/groups/orb/memberslistxml/';
@@ -39,8 +92,7 @@ async function fetchSteamXML(): Promise<SteamData> {
     group.summary[0] = group.summary[0].replace(/Clan Orb/g, '');
     group.summary[0] = group.summary[0].trim();
     
-        
-    return {
+    const result = {
         groupID: parseInt(json.memberList.groupID64[0]),
         groupName: group.groupName[0],
         groupURL: group.groupURL[0],
@@ -57,4 +109,7 @@ async function fetchSteamXML(): Promise<SteamData> {
         },
         members
     }
+
+    updateStoreCache(result);
+    return result;
 }
