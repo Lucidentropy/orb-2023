@@ -3,19 +3,29 @@
     import Icon from 'svelte-awesome/components/Icon.svelte';
     import { steam } from 'svelte-awesome/icons';
     import trouble from '$lib/images/troubleshooting.jpg';
+	import { myDataStore } from '$store/datastore';
 
     let steamData: any = null;
     let loading: boolean = true;
+    
     onMount(async () => {
-        loading = true;
-        const response = await fetch('/api/steam');
-        if (response.ok) {
-            steamData = await response.json();
-            loading = false;
-        } else {
-            console.error('Failed to fetch steam data');
-        }
-    });
+            loading = true;
+
+            if (myDataStore.steamData) {
+                steamData = myDataStore.steamData;
+                loading = false;
+            } else {
+                const response = await fetch('/api/steam');
+                if (response.ok) {
+                    steamData = await response.json();
+                    myDataStore.steamData = steamData;
+                    loading = false;
+                } else {
+                    console.error('Failed to fetch steam data');
+                }
+            }
+        });
+
 </script>
 
 <div class="text-column">
