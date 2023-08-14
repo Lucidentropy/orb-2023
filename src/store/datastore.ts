@@ -1,33 +1,32 @@
 import { writable } from 'svelte/store';
 import type { PogotronData } from '$models/pogotron';
+import type { SteamData } from '$models/steam';
 
 export interface DataStoreState {
     pogotron: Record<string, PogotronData[]> | null;
+    steam: SteamData | null;
 }
 
 export const myDataStore = writable<DataStoreState>({
-    pogotron: null
+    pogotron: null,
+    steam: null
 });
 
-// Update store function
 export function updateStore<T>(property: keyof DataStoreState, data: T[]) {
     myDataStore.update(state => ({ ...state, [property]: data }));
 }
 
-// Remove from store function
 export function removeFromStore<T>(property: keyof DataStoreState, data: { [key: string]: T[] }) {
     myDataStore.update(state => {
         return { ...state, [property]: { ...state[property], ...data } };
     });
 }
 
-// Set store function
 export function setStore<T>(property: keyof DataStoreState, data: T[]) {
     const dz = { [property]: data };
     myDataStore.set(dz);
 }
 
-// Add to store function
 export function addToStore<T>(property: keyof DataStoreState, data: Record<string, T[]>) {
     myDataStore.update(state => {
         const existingData = state[property] as Record<string, T[]> || {};

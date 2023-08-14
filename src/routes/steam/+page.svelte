@@ -5,11 +5,13 @@
     import trouble from '$lib/images/troubleshooting.jpg';
 
     let steamData: any = null;
-
+    let loading: boolean = true;
     onMount(async () => {
+        loading = true;
         const response = await fetch('/api/steam');
         if (response.ok) {
             steamData = await response.json();
+            loading = false;
         } else {
             console.error('Failed to fetch steam data');
         }
@@ -68,10 +70,14 @@
                 {/each}
             </div>
         </div>
+    {:else}
+        {#if loading}
+            Reticulating Splines
         {:else}
-        <h2>API Failure</h2>
-        <p>No Steam Data to work with. There was a local API error, a compiler error, or Steam made a breaking change to their API.</p>
-        <img src={trouble} alt="Various dudes trying to figure this computer out." />
+            <h2>API Failure</h2>
+            <p>No Steam Data to work with. There was a local API error, a compiler error, or Steam made a breaking change to their API.</p>
+            <img src={trouble} alt="Various dudes trying to figure this computer out." />
+        {/if}
     {/if}
 </div>
 
