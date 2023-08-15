@@ -82,7 +82,7 @@
         </div>
     {:else}
         {#if loading}
-            Reticulating Splines
+            Reticulating Splines...
         {:else}
             <h2>API Failure</h2>
             <p>No Steam Data to work with. There was a local API error, a compiler error, or Steam made a breaking change to their API.</p>

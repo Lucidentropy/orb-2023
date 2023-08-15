@@ -4,12 +4,12 @@ import type { SteamData } from '$models/steam';
 
 export interface DataStoreState {
     pogotron: Record<string, PogotronData[]> | null;
-    steam: SteamData | null;
+    steamData: SteamData | null;
 }
 
 export const myDataStore = writable<DataStoreState>({
     pogotron: null,
-    steam: null
+    steamData: null
 });
 
 export function updateStore<T>(property: keyof DataStoreState, data: T[]) {

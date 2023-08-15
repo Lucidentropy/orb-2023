@@ -1,7 +1,7 @@
 
 <svelte:head>
 	<title>{error_no} - {error_msg}</title>
-	<meta name="description" content="404" />
+	<meta name="description" content="{error_no}" />
 </svelte:head>
 
 <script>

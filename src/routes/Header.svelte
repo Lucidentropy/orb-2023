@@ -40,6 +40,10 @@
 			{ text: 'WoW', url: '/wow' },
 		],
 	},
+	{
+		text: 'Login',
+		url : '/login'
+	}
 	];
 	
 	let activeItem: NavItem | null = navItems.find(item =>
