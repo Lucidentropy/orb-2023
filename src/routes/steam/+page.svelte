@@ -44,8 +44,8 @@
                     <img class="steamAvatar" src={steamData.avatarFull} alt={`${steamData.groupURL} Avatar`}/>
                 </div>
                 <div class="right">
-                    <a href={`http://steamcommunity.com/groups/${steamData.groupURL}`} target="_blank">
-                        <h3>{`http://steamcommunity.com/groups/${steamData.groupURL}`}</h3>
+                    <a href={`https://steamcommunity.com/groups/${steamData.groupURL}`} target="_blank">
+                        <h3>{`https://steamcommunity.com/groups/${steamData.groupURL}`}</h3>
                     </a>
 
                     <p class="summary">{steamData.summary}</p>

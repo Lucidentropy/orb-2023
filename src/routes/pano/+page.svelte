@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
     <link rel="stylesheet" href="https://cdn.pannellum.org/2.3/pannellum.css">
 </svelte:head>
 
