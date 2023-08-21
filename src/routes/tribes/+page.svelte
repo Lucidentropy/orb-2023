@@ -43,3 +43,61 @@
     </ul>
 
 </div>
+
+<style lang="scss">
+
+    .twocol {
+        display:flex;
+        width:100%;
+
+        div {
+            // width:50%;
+            img {
+                max-width: 100%;
+            }
+        }
+    }
+.orbskin {
+        max-width:35%;
+    img {
+     border-radius: 5px;
+    }
+}
+
+.downloads {
+    text-align: center;
+    padding:0 20px;
+    width:65%;
+    & > a {
+        font-weight: bold;
+        display: inline-block;
+        background-color: #00a5e2;
+        color: #000;
+        border-radius: 5px;
+        padding: 5px 9px;
+        margin: 15px 0 4px;
+        text-shadow: 1px 1px 1px #ccc;
+    }
+    p {
+        margin: 0 20px 10px 0;
+    }
+}
+
+#tribesMasterList {
+    text-align: center;
+    th {
+        color: #fff;
+        font-weight: bold;
+        padding: 5px;
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+    td {
+        border: 1px solid #002129;
+        padding: 0px 5px;
+    }
+    .name {
+        text-align: left;
+    }
+}
+</style>
