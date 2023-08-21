@@ -22,56 +22,56 @@ import { onMount, onDestroy } from 'svelte';
                         duration: 5.322286
                     },
                     {
-                        url: "/audio/Foregone Destruction.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Foregone Destruction.mp3"
                     },
                     {
                         metaData: {
                             artist: "Chrono Trigger",
                             title: "Battle With Magus"
                         },
-                        url: "/audio/Chrono Trigger - Battle with Magus.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Chrono Trigger - Battle with Magus.mp3"
                     },
                     { 
                         metaData: {
                             artist: "Donkey Kong Country",
                             title: "Aquatic Ambience"
                         },
-                        url: "/audio/Donkey Kong Country 1 - Aquatic Ambience.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Donkey Kong Country 1 - Aquatic Ambience.mp3"
                     },
                     { 
                         metaData: {
                             artist: "F-Zero",
                             title: "Big Blue"
                         },
-                        url: "/audio/F-Zero - Big Blue.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/F-Zero - Big Blue.mp3"
                     },
                     { 
                         metaData: {
                             artist: "Megaman X",
                             title: "Password Screen"
                         },
-                        url: "/audio/Megaman X - Password.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Megaman X - Password.mp3"
                     },
                     { 
                         metaData: {
                             artist: "The Legend of Zelda",
                             title: "Overworld"
                         },
-                        url: "/audio/Legend of Zelda - Overworld.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Legend of Zelda - Overworld.mp3"
                     },
                     { 
                         metaData: {
                             artist: "Earthbound",
                             title: "Giygas Final Battle"
                         },
-                        url: "/audio/Earthbound - Giygas Final Battle.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Earthbound - Giygas Final Battle.mp3"
                     },
                     { 
                         metaData: {
                             artist: "Final Fantasy VII",
                             title: "One Winged Angel"
                         },
-                        url: "/audio/Final Fantasy VII - One Winged Angel.mp3"
+                        url: "https://clanorb.s3.us-west-1.amazonaws.com/public/audio/Final Fantasy VII - One Winged Angel.mp3"
                     }
                 ],
             });

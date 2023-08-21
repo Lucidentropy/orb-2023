@@ -10,7 +10,7 @@
             if (pannellum) {
             pannellum.viewer("panorama", {
                 type: "equirectangular",
-                panorama: "/images/wd2pano.jpg",
+                panorama: "https://clanorb.s3.us-west-1.amazonaws.com/public/images/pano/wd2pano.jpg",
             });
             }
         };

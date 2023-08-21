@@ -1,9 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import headerimg from '$lib/images/header.png';
-	import orblogo from '$lib/images/neworbdemo.jpg';
-	import boxors from '$lib/images/icon_b0x0rz.gif';
-
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { arrowCircleOLeft, steam } from 'svelte-awesome/icons';
 
@@ -33,12 +29,21 @@
 	{
 		text: 'Games',
 		subItems: [
-			{ text: 'Diablo', url: '/diablo' },
-			{ text: 'GTA 5', url: '/gta' },
+			// { text: 'Diablo', url: '/diablo' },
+			// { text: 'GTA 5', url: '/gta' },
 			{ text: 'Sverdle', url: '/sverdle'},
 			{ text: 'Tribes', url: '/tribes' },
-			{ text: 'WoW', url: '/wow' },
+			{ text: 'Palia' , url: '/palia' },
+			// { text: 'WoW', url: '/wow' },
 		],
+	},
+	{
+		text: 'Other',
+		subItems: [
+			{ text: 'Panoramas', url: '/pano' },
+			{ text: 'Name Generator', url: '/namegen'},
+			{ text: 'Actually nothing'}
+		]
 	},
 	{
 		text: 'Login',
@@ -61,8 +66,8 @@
 </svelte:head>
 
 <header>
-	<div class="banner" style="background-image:url({headerimg})" >
-		<a href="/" class="logo"><img src={orblogo} alt="Logo" /></a>
+	<div class="banner" style="background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/header.png')" >
+		<a href="/" class="logo"><img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/neworbdemo.jpg" alt="Logo" /></a>
 	</div>
 	<div id="webamp-container"></div>
 

@@ -1,5 +1,14 @@
-<script lang="ts">
+<script context="module">
+	export async function load({ session }) {
+    return { 
+      props: { user: session.user || false } 
+    }
+  }
+</script>
 
+<script lang="ts">
+  export let user;
+  console.log('user:', user)
   const thanks = () => alert('The beans have been restocked. Thank you.');
 </script>
 
@@ -9,10 +18,11 @@
             <p class="mcp">Hello, Mr. Dillinger. Thanks for coming back early<span class="caret">_</span>
             </p>
         </span></h1>
-    <ul>
-        <li><a href="/mcp/pogotron">Pogotron</a></li>
-        <li><a href="/mcp/" on:click={thanks}>Restock Beans</a></li>
-    </ul>
+        
+          <ul>
+              <li><a href="/mcp/pogotron">Pogotron</a></li>
+              <li><a href="/mcp/" on:click={thanks}>Restock Beans</a></li>
+          </ul>
 </div>
 
 <style>

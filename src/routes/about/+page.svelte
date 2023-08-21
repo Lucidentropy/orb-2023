@@ -5,9 +5,6 @@
 
 <script>
 	const orbTag = "{-o-}";
-
-	import calvin from '$lib/images/calvinhobbesctf.jpg';
-
 </script>
 
 <style>
@@ -26,7 +23,7 @@
     <p>Before cable internet was broadly available, it was important that you found servers with the lowest ping, that is, unless you live in Hawaii where every server has a high ping. I would hop between servers until I found one with a local community I liked playing with, settling on a server called Oklahoma RR Tribes.</p>
     <p>I tried joining other clans at the time, but was immediately dissapointed at how uncool they were to each other. In the spirit of "fine, I'll make my own, with blackjack", I thought it over for a few days, and a few server regulars and I got together and Orb was created, by 4 members, Lucid (at the time known as Raven), Cells, Doom Train, and Vorax-1.</p>
     <p>Orb has since evolved into a multi-game community with real life road trips, weddings, and yearly meetups.</p>
-    <img src={calvin} alt="Calvin and Hobbes stealing the flag."/>
+    <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/calvinhobbesctf.jpg" alt="Calvin and Hobbes stealing the flag."/>
     <h2>The Orb philosophy is simple.</h2>
     <p> Orb is a community of people who feel that online gaming is a fun experience to be shared with friends. We're a collection of humans, we can't be perfect, but we don't accept drama or fighting as the norm.
         We want others to see us as respectful, funny, mature, and fun to be around, people who understand how to have fun without doing it at the expense of others.</p>

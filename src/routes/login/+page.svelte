@@ -1,47 +1,57 @@
-<script lang="ts">
-    import { userData } from '$store/user';
-    import { onMount } from 'svelte';
+<script context="module">
+	/** * @type {import('@sveltejs/kit').Load} */
+	export async function load({ session }) {
+    return { 
+      props: { userData: session.userData || false } 
+    }
+  }
+</script>
+
+<script>
+  export let userData;
+  console.log('userData', userData)
 
     async function loginWithDiscord() {
         const res = await fetch('/api/discord');
         const { url } = await res.json();
         window.location.href = url;
     }
-
-    $: {
-        console.log('User data changed:', $userData);
-    }
-
-    function logout() {
-        $userData = null;
-    }
-
-    onMount(async () => {
-        console.log('user?', $userData);
-    });
-    
 </script>
 
 <div class="text-column">
     <h1>Login <p>Gain Access to all things important</p></h1>
-    user is : {$userData}
-    {#if $userData}
+    
+    {#if userData}
         <div>
-            <h2>Welcome, {$userData.username} ({$userData.global_name})!</h2>
-            <img src={`https://cdn.discordapp.com/avatars/${$userData.id}/${$userData.avatar}.png`} alt="Avatar" />
-            <p>Email: {$userData.email}</p>
-            <p>Locale: {$userData.locale}</p>
-            <p>Verified: {$userData.verified ? 'Yes' : 'No'}</p>
-            <button on:click={logout}>Logout</button>
+            <h2>Welcome, {userData.username} ({userData.global_name})!</h2>
+            <img src={`https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`} alt="Avatar" />
+            <p>Email: {userData.email}</p>
+            <p>Locale: {userData.locale}</p>
+            <p>Verified: {userData.verified ? 'Yes' : 'No'}</p>
+            <!-- <button on:click={logout}>Logout</button> -->
 
         </div>
     {:else}
-        <div>
-            <h2>Login</h2>
+        <div class="login-box">
+            <p>The Orb Website uses Discord OAuth 2.0 for user authentication.</p>
+            
             <button on:click={loginWithDiscord}>Login with Discord</button>
         </div>
     {/if}
-
-
 </div>
+
+<style lang="scss">
+    .login-box {
+        padding:10px;
+        background-color:#444;
+        border-radius:5px;
+        text-align: center;
+
+        button {
+            padding:5px;
+            box-shadow:0 0 10px #333;
+            margin:10px auto;
+        }
+    }
+</style>
 
