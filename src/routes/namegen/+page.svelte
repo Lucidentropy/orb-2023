@@ -44,7 +44,8 @@ const names = [
   "Roll Fizzlebeef",
   "Lunk Drywall",
   "Stiff Shakestone",
-  "Thump Peqwich"
+  "Thump Peqwich",
+  "Dave Ryder"
 ];
 
   const nameGenerated = writable('');
@@ -58,11 +59,12 @@ const names = [
 <div class="text-column">
     <h1>Super Useful Name Generator</h1>
     <p>Prepare yourself for a revolutionary name-finding experience, unparalleled in the annals of computational monikerology! </p>
-    <p>Need to sound more heroic at the gym? Want to intimidate your enemies in online gaming? With a computational method that takes into account your personal preferences, astrological alignment, favorite sandwich, and the color of your third pet's eyes, our name generator will provide you with a name that could very well solve all of your life's problems. </p>
+    <p>Need to sound more heroic at the gym? Want to intimidate your enemies in online gaming? With a computational method that takes into account your personal preferences, conductivity, physical dimensions, sandwich preferences, and overall beefiness, our name generator will provide you with a name that could very well solve all of your life's problems. Your destiny awaits, all at the click of a button. Join us, won't you, on this exciting journey to discover your next child/sim's name.</p>
     <div class="center">
         <div class="generated">{$nameGenerated || ''}</div>
         <button on:click={generate}>Initiate Name Generating Dynos</button>
     </div>
+    <small><a href="https://mst3k.fandom.com/wiki/MST3K_820_-_Space_Mutiny" target="_blank">Context</a></small>
 </div>
 
 <style lang="scss">
@@ -75,6 +77,13 @@ const names = [
 
 .center{
     text-align:center;
+}
+
+small {
+    font-size:10px;
+    text-align: right;
+    margin-top:10px;
+    opacity:.25;
 }
 
 </style>

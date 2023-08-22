@@ -314,6 +314,8 @@
 
 	.keyboard button,
 	.keyboard button:disabled {
+		background:none;
+		text-shadow:none;
 		--size: min(8vw, 4vh, 40px);
 		background-color: white;
 		color: black;
