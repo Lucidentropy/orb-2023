@@ -25,7 +25,7 @@
 
 <div class="text-column">
     <h1>Panoramic Gallery</h1>
-    <p> This feature will be a gallery of panoramic game images.</p>
+    <p> This feature will be a gallery of panoramic game images. Here's an image from Watch Dogs 2 to show you how it'll work.</p>
 
     <div id="panorama"></div>
 

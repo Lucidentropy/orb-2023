@@ -202,11 +202,29 @@ pre {
 	border: 1px solid rgba(102, 204, 255, 0.8);
 	padding:30px;
 }
-
+    background: linear-gradient(0deg, #000 0%, #032d50 50%, #000 100%);
+    color: inherit;
+    border-radius: 4.5px;
 input,
 button {
 	font-size: inherit;
 	font-family: inherit;
+}
+
+button {
+		padding: 9px;
+		background: linear-gradient(0deg, #000 0%, #032d50 50%, #000 100%);
+		color: inherit;
+		border-radius: 4.5px;
+		color: var(--color-text);
+		border-color: var(--color-text);
+		border-radius: 5px;
+		border-width:1px;
+		cursor:pointer;
+		text-shadow:1px 1px 1px #000;
+}
+button:hover {
+	border-color:#fff;
 }
 
 button:focus:not(:focus-visible) {
