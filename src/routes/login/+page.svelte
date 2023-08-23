@@ -12,7 +12,7 @@
   console.log('userData', userData)
 
     async function loginWithDiscord() {
-        const res = await fetch('/api/discord');
+        const res = await fetch('/api/discordAuthUrl');
         const { url } = await res.json();
         window.location.href = url;
     }
