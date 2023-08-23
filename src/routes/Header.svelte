@@ -147,7 +147,7 @@
 		box-shadow:0 0 40px #000;
 		display:flex;
 		justify-content:center;
-		transition:1s ease-out all;
+		// transition:1s ease-out all;
 
 		svg {
 			margin-right:10px;

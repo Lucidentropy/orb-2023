@@ -182,16 +182,16 @@
 
 <div id="outer-container">
 	{#if videoCollection && videoCollection.length > 0}
+	{#if introVis}
+	<div id="intro" transition:fade|local={{ duration: 300 }} class="{introVis ? 'show' : 'hide'} fade-transition">
+		<button class="close" on:click={toggleIntroVis}><Icon data={close} /></button>
+		<h3>Orb Gaming Community</h3>
+		<p>
+			Founded in 2000, Orb is a multi-game multi-generational online gaming community dedicated to the belief that online gaming should be about fun and good times with friends. Sense of humor required.
+		</p>
+	</div>
+	{/if}
     <div id="vid-container">
-        {#if introVis}
-        <div id="intro" transition:fade|local={{ duration: 300 }} class="{introVis ? 'show' : 'hide'} fade-transition">
-            <button class="close" on:click={toggleIntroVis}><Icon data={close} /></button>
-            <h3>Orb Gaming Community</h3>
-            <p>
-                Founded in 2000, Orb is a multi-game multi-generational online gaming community dedicated to the belief that online gaming should be about fun and good times with friends. Sense of humor required.
-            </p>
-        </div>
-        {/if}
         <video bind:this={videoElement} on:click={togglePlay} id="bg-video" muted>
             <source type="video/mp4" />
             Your browser does not support the video tag.
@@ -251,7 +251,7 @@
   }
 
 	#outer-container {
-		padding: 20px;
+		// padding: 20px;
 		background: rgba(0, 0, 0, 0.6);
 		border-radius: 9px;
 		// min-height: 430px;
@@ -262,6 +262,77 @@
 		font-size: 13px;
         width:100%;
 		z-index:0;
+		position:relative;
+		overflow:hidden;
+
+		& > p {
+			padding:20px;
+		}
+
+		#intro {
+			position: absolute;
+			// bottom: 10%;
+			// left: 15%;
+			text-align: center;
+			padding: 20px;
+			border-radius: 10px;
+			// width: 70%;
+			z-index: 1;
+			background-color: rgba(0, 0, 0, 0.75);
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+			line-height: 1.15rem;
+			opacity: 0;
+			transition: 0.25s linear all;
+
+			&.show {
+				opacity: 1;
+			}
+
+			h3 {
+				font-size: 1.5rem;
+				color: #fff;
+				margin: 0 0 10px;
+				font-family: 'Ropa Sans';
+			}
+
+			&:hover {
+				background-color: rgba(0, 0, 0, 0.9);
+			}
+
+			&:hover .close {
+				opacity: 1;
+			}
+		}
+
+
+        button {
+            all:unset;
+        }
+
+		.close {
+			position: absolute;
+			top: 0;
+			right: 0;
+			cursor: pointer;
+			color: #0cf;
+			// opacity: 0;
+			transition: 0.15s linear all;
+			padding: 5px 8px;
+			font-size: 15px;
+			line-height: 1em;
+			text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+			z-index: 3;
+
+			&:hover {
+				transform: scale(1.25);
+				color: red;
+			}
+
+			&:active {
+				transition: none;
+				color: #fff;
+			}
+		}
 	}
 	main {
 		transition: 3s ease-in box-shadow;
@@ -313,8 +384,8 @@
 
 	#vid-container {
 		position: relative;
-		margin: -20px;
-		border-radius: 9px;
+		// margin: -20px;
+		border-radius: 0 0 9px 9px;
 		overflow: hidden;
 		// min-height: 480px;
 		max-height: 640px;
@@ -330,85 +401,23 @@
 			margin: 0 auto;
 		}
 
-        button {
-            all:unset;
-        }
 
-		.close {
-			position: absolute;
-			top: 0;
-			right: 0;
-			cursor: pointer;
-			color: #0cf;
-			// opacity: 0;
-			transition: 0.15s linear all;
-			padding: 5px 8px;
-			font-size: 15px;
-			line-height: 1em;
-			text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
-			z-index: 3;
 
-			&:hover {
-				transform: scale(1.25);
-				color: red;
-			}
-
-			&:active {
-				transition: none;
-				color: #fff;
-			}
-		}
-
-		#intro {
-			position: absolute;
-			bottom: 10%;
-			left: 15%;
-			text-align: center;
-			padding: 20px;
-			border-radius: 10px;
-			width: 70%;
-			z-index: 1;
-			background-color: rgba(0, 0, 0, 0.75);
-			box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
-			line-height: 1.15rem;
-			opacity: 0;
-			transition: 0.25s linear all;
-
-			&.show {
-				opacity: 1;
-			}
-
-			h3 {
-				font-size: 1.5rem;
-				color: #fff;
-				margin: 0 0 10px;
-			}
-
-			&:hover {
-				background-color: rgba(0, 0, 0, 0.9);
-			}
-
-			&:hover .close {
-				opacity: 1;
-			}
-		}
 
 		#video-controls {
 			display: flex;
 			position: absolute;
-			top: 0;
-			left: 30%;
+			bottom: 0;
 			font-size: 0.8rem;
 			line-height: 25px;
 			z-index: 1;
 			height: 25px;
 			color: #eee;
 			background-color: rgba(0, 0, 0, 0.25);
-			border-radius: 0 0 5px 5px ;
-			width: 40%;
+			width: 100%;
 			text-shadow: 1px 1px 1px #000;
 			overflow: hidden;
-			opacity: 0.5;
+			opacity: 0.25;
 			transition: 0.25s linear opacity;
 
             button {
