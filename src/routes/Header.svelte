@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { arrowCircleOLeft, steam } from 'svelte-awesome/icons';
+	import DiscordStatus from './DiscordStatus.svelte';
 
 	import { fade } from 'svelte/transition';
 
@@ -104,18 +105,12 @@
 			{/each}
 			</ul>
 		{/if}
+
+		<DiscordStatus />
 	</nav>
 </header>
 
 <style lang="scss">
-
-
-
-
-
-
-
-
 	header {
 
 		.banner {
@@ -141,12 +136,15 @@
 
 	nav {
 		width:100vw;
+		max-width:1020px;
+		margin: 0 auto;
 		background:#0006;
 		// border:1px solid var(--color-theme-1);
 		border-width:1px 0;
 		box-shadow:0 0 40px #000;
 		display:flex;
 		justify-content:center;
+		position:relative;
 		// transition:1s ease-out all;
 
 		svg {
