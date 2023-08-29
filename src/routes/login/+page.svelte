@@ -19,7 +19,7 @@
 </script>
 
 <div class="text-column">
-    <h1>Login <p>Gain Access to all things important</p></h1>
+    <h1>Login <p>Release TRON JA 307020</p></h1>
     
     {#if userData}
         <div>
@@ -33,9 +33,11 @@
         </div>
     {:else}
         <div class="login-box">
-            <p>The Orb Website uses Discord OAuth 2.0 for user authentication.</p>
+            <p>Login with your Discord account.</p>
             
             <button on:click={loginWithDiscord}>Login with Discord</button>
+
+            <p>Contact Lucid if your account is not flagged for access.</p>
         </div>
     {/if}
 </div>
@@ -43,7 +45,10 @@
 <style lang="scss">
     .login-box {
         padding:10px;
-        background-color:#444;
+    background-color:#000;
+    box-shadow:none;
+    text-shadow:0 0 3px #fff;
+    color:#fff;
         border-radius:5px;
         text-align: center;
 

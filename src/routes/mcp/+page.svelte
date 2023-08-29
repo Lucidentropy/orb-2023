@@ -8,24 +8,40 @@
 
 <script lang="ts">
   export let user;
-  console.log('user:', user)
   const thanks = () => alert('The beans have been restocked. Thank you.');
 </script>
 
 <div class="text-column">
     <h1 class="glitch">
         <span>Master Control Program 
-            <p class="mcp">Hello, Mr. Dillinger. Thanks for coming back early<span class="caret">_</span>
-            </p>
+            <!-- <p class="mcp">Hello, Mr. Dillinger. Thanks for coming back early<span class="caret">_</span></p> -->
         </span></h1>
-        
+        {#if user}
           <ul>
               <li><a href="/mcp/pogotron">Pogotron</a></li>
               <li><a href="/mcp/" on:click={thanks}>Restock Beans</a></li>
           </ul>
+        {:else}
+          <pre>
+            Your Access suspended
+            Please report to Dillinger
+            Immediately
+            Authorization: Master Control
+            Program
+            
+            End of Line<span class="caret">_</span>
+          </pre>
+        {/if}
 </div>
 
 <style>
+  pre {
+    text-transform: uppercase;
+    background-color:#000;
+    box-shadow:none;
+    text-shadow:0 0 3px #fff;
+    color:#fff;
+  }
     .mcp {
         font-family: Courier, monospace;
         color:#0F0;
