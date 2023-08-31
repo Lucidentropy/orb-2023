@@ -644,6 +644,9 @@ function resetCollectionStates() {
 		if (key === 'location') {
 			values.delete('Kilima Valley, Bahari Bay');
 		}
+        if(key === 'rarity') {
+            console.log('vals', values)
+        }
 		return ['All', ...Array.from(values)];
 	}
 
@@ -719,8 +722,13 @@ function resetCollectionStates() {
                             <div class="tooltip-content rarity-{bug.rarity.toLowerCase()}">
                                 <h4>{bug.name}</h4>
                                 <p>{@html bug.tooltip.replace(/\n/g, '<br><br>')}</p>
-                                <h5>Bug</h5>
-                                <p>Value: Item Cannot Be Sold</p>
+                                <div class="bottom">
+                                    <div class="rule">
+                                        <svg id="visual" viewBox="0 0 450 10" width="450" height="10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><path d="M0 7L10.7 6.8C21.3 6.7 42.7 6.3 64.2 6.3C85.7 6.3 107.3 6.7 128.8 6.5C150.3 6.3 171.7 5.7 193 4.8C214.3 4 235.7 3 257 2.5C278.3 2 299.7 2 321.2 2.7C342.7 3.3 364.3 4.7 385.8 5.2C407.3 5.7 428.7 5.3 439.3 5.2L450 5L450 11L439.3 11C428.7 11 407.3 11 385.8 11C364.3 11 342.7 11 321.2 11C299.7 11 278.3 11 257 11C235.7 11 214.3 11 193 11C171.7 11 150.3 11 128.8 11C107.3 11 85.7 11 64.2 11C42.7 11 21.3 11 10.7 11L0 11Z" stroke-linecap="round" stroke-linejoin="miter"></path></svg>
+                                    </div>
+                                    <h5>Bug</h5>
+                                    <p>Value: Item Cannot Be Sold</p>
+                                </div>
                             </div>
                         </div>
                     {/if}
@@ -747,7 +755,8 @@ function resetCollectionStates() {
 
         <button on:click={resetCollectionStates}>Reset Your Collection</button>
     </div>
-
+    <br>
+    <a href="/palia">Back to Palia</a>
 </div>
 
 <style lang="scss">
@@ -794,7 +803,7 @@ function resetCollectionStates() {
         h5 {
             font-family: "Merriweather", sans-serif;
             font-size:23px;
-            margin-top:10px;
+            margin-top:0;
 
         }
 
@@ -803,22 +812,60 @@ function resetCollectionStates() {
             display:block;
         }
 
+        .bottom {
+            margin:5px -25px -25px;
+            padding:0 25px 15px 25px;
+            .rule {
+                margin:15px -25px -10px;
+                transform:translateY(-15px)
+            }
+
+
+            svg {
+                height:10px;
+                width:100%;
+            }
+        }
 
         &.rarity-common {
             background-color:#0c1b38;
+            .bottom {
+                background-color:#364052;
+            }
+            .rule {
+                fill:#364052;
+            }
         }
 
 
         &.rarity-uncommon {
             background-color:#21461f;
+            .bottom {
+                background-color:#477c3a;
+            }
+            .rule {
+                fill:#477c3a;
+            }
         }        
 
         &.rarity-epic {
             background-color:#573ed2;
+            .bottom {
+                background-color:#3f2f8a;
+            }
+            .rule {
+                fill:#3f2f8a;
+            }            
         }
 
         &.rarity-rare {
             background-color:#226570;
+            .bottom {
+                background-color:#097c8a;
+            }
+            .rule {
+                fill:#097c8a;
+            }            
         }
     }
     #container {
