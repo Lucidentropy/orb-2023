@@ -645,7 +645,7 @@ function resetCollectionStates() {
 			values.delete('Kilima Valley, Bahari Bay');
 		}
         if(key === 'rarity') {
-            console.log('vals', values)
+
         }
 		return ['All', ...Array.from(values)];
 	}
@@ -684,7 +684,7 @@ function resetCollectionStates() {
 
 <div class="text-column" transition:fade={{ duration: 0 }}>
     <h1>Palia Bug Collector</h1>
-    <p>Click any bug to mark that youv'e collected it and again to mark it as starred. Your progress will be saved with this browser.</p>
+    <p>Click any bug to mark that you've collected it, and again to mark it as starred. Your progress will be saved with this browser.</p>
     <h2>Kilima and Bahari Bug Collector</h2>
     <div id="container">
         
@@ -727,7 +727,9 @@ function resetCollectionStates() {
                                         <svg id="visual" viewBox="0 0 450 10" width="450" height="10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><path d="M0 7L10.7 6.8C21.3 6.7 42.7 6.3 64.2 6.3C85.7 6.3 107.3 6.7 128.8 6.5C150.3 6.3 171.7 5.7 193 4.8C214.3 4 235.7 3 257 2.5C278.3 2 299.7 2 321.2 2.7C342.7 3.3 364.3 4.7 385.8 5.2C407.3 5.7 428.7 5.3 439.3 5.2L450 5L450 11L439.3 11C428.7 11 407.3 11 385.8 11C364.3 11 342.7 11 321.2 11C299.7 11 278.3 11 257 11C235.7 11 214.3 11 193 11C171.7 11 150.3 11 128.8 11C107.3 11 85.7 11 64.2 11C42.7 11 21.3 11 10.7 11L0 11Z" stroke-linecap="round" stroke-linejoin="miter"></path></svg>
                                     </div>
                                     <h5>Bug</h5>
-                                    <p>Value: Item Cannot Be Sold</p>
+                                    <p>Value: <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/palia/coin.webp" height=20 valign="middle" alt="coin" /> 
+                                        {bug.collectionState == 2 ? bug.starred_value : bug.base_value} Gold
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -889,6 +891,7 @@ function resetCollectionStates() {
             margin-top: 0;
             border-top: 0;
             border-radius: 0 0 20px 20px;
+            padding-bottom:20px;
         }
 
         &>div {
