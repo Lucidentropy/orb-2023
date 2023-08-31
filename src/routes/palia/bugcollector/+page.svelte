@@ -693,6 +693,10 @@
     
 </script>
 
+<svelte:head>
+	<title>Orb - Palia Bug Collector</title>
+	<meta name="description" content="Track your bug collecting accomplishments." />
+</svelte:head>
 
 <div class="text-column" transition:fade={{ duration: 0 }}>
     <h1>Palia Bug Collector</h1>
