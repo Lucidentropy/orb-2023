@@ -2,4 +2,6 @@
     <h1>Palia</h1>
 
     <p>NPC bookmarker is in development.</p>
+
+    <a href="/palia/bugcollector">Bug Collector</a>
 </div>

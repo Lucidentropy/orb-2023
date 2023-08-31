@@ -8,7 +8,7 @@
 	<h2>Orb on Other Platforms</h2>
 	<ul>
 		<li><a target="_blank" href="https://steamcommunity.com/groups/Orb">Orb Steam Page</a></li>
-		<li><a target="_blank" href="https://discord.gg/BHNHrky">Orb Discord Invite Link</a></li>
+		<li><a target="_blank" href="https://discord.gg/3ZHQfaR3ky">Orb Discord Invite Link</a></li>
 		<li><a target="_blank" href="https://socialclub.rockstargames.com/crew/clan_orb">Orb GTA 5 Online Crew</a></li>
 	</ul>
 
