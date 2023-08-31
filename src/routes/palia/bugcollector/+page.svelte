@@ -632,10 +632,11 @@
 	const filters = ['rarity', 'location', 'timeofday'];
 	let selectedFilters: Record<string, string> = {};
 	let pillStyles: Record<string, string> = {};
+    const defaultPillStyle = 'width: 38px; left: 120px;'
 
 	filters.forEach((filter) => {
 		selectedFilters[filter] = 'All';
-		pillStyles[filter] = 'width: 38px; left: 120px;';
+		pillStyles[filter] = defaultPillStyle;
 	});
 
 	function getUniqueValues(key: keyof Bug): string[] {
@@ -665,6 +666,17 @@
 		selectedFilters[type] = value;
 		pillStyles[type] = style;
 	}
+
+    function resetFilters() {
+        for (const key in selectedFilters) {
+            selectedFilters[key] = 'All';
+        }
+        for (const key in pillStyles) {
+            pillStyles[key] = defaultPillStyle;
+        }
+        selectedFilters = { ...selectedFilters };
+    }
+
 
 	$: filteredBugs = bugs.filter((bug) => {
 		return filters.every((filter) => {
@@ -755,7 +767,8 @@
             {/if}
         </div>
 
-        <button on:click={resetCollectionStates}>Reset Your Collection</button>
+        <button on:click={resetCollectionStates}>Reset Your Collection</button> <button on:click={resetFilters}>Reset Filters</button>
+
     </div>
     <br>
     <a href="/palia">Back to Palia</a>
