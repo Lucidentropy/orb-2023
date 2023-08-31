@@ -4,7 +4,7 @@
     import Icon from 'svelte-awesome/components/Icon.svelte';
     import { check } from 'svelte-awesome/icons';
 
-	const bugDB = [
+const bugDB = [
 		{
 			key: 'AncAmbBee',
 			name: 'Ancient Amber Beetle',
@@ -16,7 +16,8 @@
 			group: 'Running',
 			base_value: '360',
 			starred_value: '540',
-			collection_state: 0
+			collection_state: 0,
+            sort: 8
 		},
 		{
 			key: 'AzuSto',
@@ -29,7 +30,8 @@
 			group: 'Jumping',
 			base_value: '150',
 			starred_value: '225',
-			collection_state: 0
+			collection_state: 0,
+            sort: 38
 		},
 		{
 			key: 'BahBee',
@@ -42,7 +44,8 @@
 			group: 'Dashing',
 			base_value: '39',
 			starred_value: '58',
-			collection_state: 0
+			collection_state: 0,
+            sort: 26
 		},
 		{
 			key: 'BahCra',
@@ -55,462 +58,498 @@
 			group: 'Running',
 			base_value: '16',
 			starred_value: '24',
-			collection_state: 0
+			collection_state: 0,
+            sort: 12
 		},
 		{
 			key: 'BahGlo',
 			name: 'Bahari Glowbug',
             tooltip: `A local species of bioluminescent fauna. Discovered by Professor Bonlin Amepongo.
-Found in the fields of Bahari Bay during the evening and night.`,
+    Found in the fields of Bahari Bay during the evening and night.`,
 			rarity: 'Rare',
 			timeofday: 'Evening, Night',
 			location: 'Bahari Bay',
 			group: 'Flying',
 			base_value: '145',
 			starred_value: '217',
-			collection_state: 0
+			collection_state: 0,
+            sort: 32
 		},
 		{
 			key: 'BriBut',
 			name: 'Brighteye Butterfly',
             tooltip: `Whenever you see the sun out, you can see the eyes of this intricately patterned butterfly looking around Bahari Bay.
-Found in the Forests of Bahari Bay during the morning and day.`,
+    Found in the Forests of Bahari Bay during the morning and day.`,
 			rarity: 'Rare',
 			timeofday: 'Morning, Day',
 			location: 'Bahari Bay',
 			group: 'Flying',
 			base_value: '110',
 			starred_value: '165',
-			collection_state: 0
+			collection_state: 0,
+            sort: 37
 		},
 		{
 			key: 'BruDra',
 			name: 'Brushtail Dragonfly',
             tooltip: `The tail of this Dragonfly is so bright and vibrant, some early Majiri were said to have used it as a paintbrush.
-Found around the lake in Kilima, as well as rivers and ponds in Bahari Bay.`,
+    Found around the lake in Kilima, as well as rivers and ponds in Bahari Bay.`,
 			rarity: 'Common',
 			timeofday: 'All Day',
 			location: 'Kilima Valley, Bahari Bay',
 			group: 'Dashing',
 			base_value: '13',
 			starred_value: '19',
-			collection_state: 0
+			collection_state: 0,
+            sort: 7
 		},
 		{
 			key: 'CerCic',
 			name: 'Cerulean Cicada',
             tooltip: `The call of this cicada is so soothing, it was said to be the inspiration for Ayana's fourth symphony.
-Found attached to trees in Bahari Bay during the morning and day.`,
+    Found attached to trees in Bahari Bay during the morning and day.`,
 			rarity: 'Uncommon',
 			timeofday: 'Morning, Day',
 			location: 'Bahari Bay',
 			group: 'Flying',
 			base_value: '60',
 			starred_value: '90',
-			collection_state: 0
+			collection_state: 0,
+            sort: 23
 		},
 		{
 			key: 'ComBarCic',
 			name: 'Common Bark Cicada',
             tooltip: `A common cicada.
-Found attached to trees in Bahari Bay during the morning and day.`,
+    Found attached to trees in Bahari Bay during the morning and day.`,
 			rarity: 'Common',
 			timeofday: 'Morning, Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '21',
 			starred_value: '31',
-			collection_state: 0
+			collection_state: 0,
+            sort: 22
 		},
 		{
 			key: 'ComBluBut',
 			name: 'Common Blue Butterfly',
             tooltip: `Ever resilient. Butterflies of this type can be found in almost every climate in Palia.
-Found all around Kilima and Bahari Bay during the morning and day.`,
+    Found all around Kilima and Bahari Bay during the morning and day.`,
 			rarity: 'Common',
 			timeofday: 'Morning, Day',
 			location: 'Kilima Valley, Bahari Bay',
 			group: '',
 			base_value: '13',
 			starred_value: '19',
-			collection_state: 0
+			collection_state: 0,
+            sort: 11
 		},
 		{
 			key: 'ComFieCri',
 			name: 'Common Field Cricket',
             tooltip: `Field crickets can be found anywhere you can find a field.
-Found all around Kilima and Bahari Bay.`,
+    Found all around Kilima and Bahari Bay.`,
 			rarity: 'Common',
 			timeofday: 'All Day',
 			location: 'Kilima Valley, Bahari Bay',
 			group: '',
 			base_value: '16',
 			starred_value: '24',
-			collection_state: 0
+			collection_state: 0,
+            sort: 10
 		},
 		{
 			key: 'DusBut',
 			name: 'Duskwing Butterfly',
             tooltip: `A beautiful butterfly with wings the color of dusk. Unique to the Kilima Valley.
-Found around the Dragon Shrine in Kilima during the morning and day.`,
+    Found around the Dragon Shrine in Kilima during the morning and day.`,
 			rarity: 'Uncommon',
 			timeofday: 'Morning, Day',
 			location: 'Kilima Valley',
 			group: 'Flying',
 			base_value: '34',
 			starred_value: '51',
-			collection_state: 0
+			collection_state: 0,
+            sort: 18
 		},
 		{
 			key: 'FaiMan',
 			name: 'Fairy Mantis',
             tooltip: `A mantis from early Majiri legend only recently confirmed to exist by modern entomologists. Said to have magical properties.
-Found in the fields of Bahari Bay.`,
+    Found in the fields of Bahari Bay.`,
 			rarity: 'Epic',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '360',
 			starred_value: '540',
-			collection_state: 0
+			collection_state: 0,
+            sort: 21
 		},
 		{
 			key: 'FirDra',
 			name: 'Firebreathing Dragonfly',
             tooltip: `This Dragonfly is notoriously difficult to catch, in part due to its fiery breath.
-Found in the fields of Kilima.`,
+    Found in the fields of Kilima.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '125',
 			starred_value: '187',
-			collection_state: 0
+			collection_state: 0,
+            sort: 6
 		},
 		{
 			key: 'GarLad',
 			name: 'Garden Ladybug',
             tooltip: `A black and red ladybug, popular for controlling garden pests.
-Has a chance to be found when foraging in the fields of Bahari Bay.`,
+    Has a chance to be found when foraging in the fields of Bahari Bay.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: 'Running',
 			base_value: '46',
 			starred_value: '69',
-			collection_state: 0
+			collection_state: 0,
+            sort: 15
 		},
 		{
 			key: 'GarLea',
 			name: 'Garden Leafhopper',
             tooltip: `The Garden Leafhopper is such a delight in Palia that many children keep them as pets. They are said to bring good luck.
-Found in the fields and Badruu's Farm in Kilima. Also has a chance to be found when foraging in Kilima.`,
+    Found in the fields and Badruu's Farm in Kilima. Also has a chance to be found when foraging in Kilima.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: 'Jumping',
 			base_value: '49',
 			starred_value: '63',
-			collection_state: 0
+			collection_state: 0,
+            sort: 1
 		},
 		{
 			key: 'GarMan',
 			name: 'Garden Mantis',
             tooltip: `Nothing to see here. Just your garden variety mantis.
-Found around the lake in Kilima. Also has a chance to be found when foraging around the lake in Kilima.`,
+    Found around the lake in Kilima. Also has a chance to be found when foraging around the lake in Kilima.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: 'Jumping',
 			base_value: '36',
 			starred_value: '54',
-			collection_state: 0
+			collection_state: 0,
+            sort: 2
 		},
 		{
 			key: 'GarMil',
 			name: 'Garden Millipede',
             tooltip: `A brown and green millipede that loves feasting on garden crops.
-Found in the fields of Kilima. Also has a chance to be found when foraging in the fields of Kilima`,
+    Found in the fields of Kilima. Also has a chance to be found when foraging in the fields of Kilima`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: 'Running',
 			base_value: '36',
 			starred_value: '54',
-			collection_state: 0
+			collection_state: 0,
+            sort: 21
 		},
 		{
 			key: 'GarSna',
 			name: 'Garden Snail',
             tooltip: `A snail that has evolved over time to look like a leaf. Good for hiding from predators, bad for hiding from the Leafstalker Mantis.
-Found along the coast and in forests of Bahari Bay.`,
+    Found along the coast and in forests of Bahari Bay.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: 'Running',
 			base_value: '36',
 			starred_value: '54',
-			collection_state: 0
+			collection_state: 0,
+            sort: 35
 		},
 		{
 			key: 'GolGloBee',
 			name: 'Golden Glory Bee',
             tooltip: `A rare bee, imported from the Akwindu province. Mead made from this bee's honey is said to be heavily consumed by the Queen of the province and her family.
-Has a chance to be found when chopping trees in Kilima during the morning and day.`,
+    Has a chance to be found when chopping trees in Kilima during the morning and day.`,
 			rarity: 'Rare',
 			timeofday: 'Morning, Day',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '125',
 			starred_value: '187',
-			collection_state: 0
+			collection_state: 0,
+            sort: 34
 		},
 		{
 			key: 'GosVeiMot',
 			name: 'Gossamer Veil Moth',
             tooltip: `The wings of this moth are so thin that some say you can see a peek of the Dragon Realm by looking through them.
-Found in the fields of Kilima during the evening and night.`,
+    Found in the fields of Kilima during the evening and night.`,
 			rarity: 'Rare',
 			timeofday: 'Evening, Night',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '110',
 			starred_value: '165',
-			collection_state: 0
+			collection_state: 0,
+            sort: 16
 		},
 		{
 			key: 'HaiMil',
 			name: 'Hairy Millipede',
             tooltip: `A millipede with a hair growth problem.
-Found in the forests of Bahari Bay.`,
+    Found in the forests of Bahari Bay.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '120',
 			starred_value: '180',
-			collection_state: 0
+			collection_state: 0,
+            sort: 3
 		},
 		{
 			key: 'InkDra',
 			name: 'Inky Dragonfly',
             tooltip: `This stealthy Dragonfly is used as a component in various black dyes and inks.
-Found around rivers and ponds in Bahari Bay.`,
+    Found around rivers and ponds in Bahari Bay.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: 'Dashing',
 			base_value: '49',
 			starred_value: '73',
-			collection_state: 0
+			collection_state: 0,
+            sort: 9
 		},
 		{
 			key: 'JewDra',
 			name: 'Jewelwing Dragonfly',
             tooltip: `A Dragonfly with wings as bright and colorful as any precious stone.
-Found near a cave entrance on a cliff in Bahari Bay.`,
+    Found near a cave entrance on a cliff in Bahari Bay.`,
 			rarity: 'Epic',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '360',
 			starred_value: '540',
-			collection_state: 0
+			collection_state: 0,
+            sort: 19
 		},
 		{
 			key: 'KilNigMot',
 			name: 'Kilima Night Moth',
             tooltip: `While beautiful, the Kilima night moth is so prevalent on hot summer nights that some consider it to be a pest. Keep away from stored cloth.
-Found all around Kilima and Bahari Bay during the evening and night.`,
+    Found all around Kilima and Bahari Bay during the evening and night.`,
 			rarity: 'Common',
 			timeofday: 'Evening, Night',
 			location: 'Kilima Valley, Bahari Bay',
 			group: 'Idle',
 			base_value: '13',
 			starred_value: '18',
-			collection_state: 0
+			collection_state: 0,
+            sort: 14
 		},
 		{
 			key: 'LeaMan',
 			name: 'Leafstalker Mantis',
             tooltip: `An herbivorous mantis that exclusively eats leaves.
-Has a chance to be found when foraging in the forests of Bahari Bay.`,
+    Has a chance to be found when foraging in the forests of Bahari Bay.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: 'Jumping',
 			base_value: '120',
 			starred_value: '180',
-			collection_state: 0
+			collection_state: 0,
+            sort: 13
 		},
 		{
 			key: 'LunFaiMot',
 			name: 'Lunar Fairy Moth',
             tooltip: `The Lunar Fairy Moth is said to have a very special connection to the Dragon Moon, and is said to only appear at special times during its cycle.
-Found in the fields and forests of Bahari Bay during the evening and night.`,
+    Found in the fields and forests of Bahari Bay during the evening and night.`,
 			rarity: 'Uncommon',
 			timeofday: 'Evening, Night',
 			location: 'Bahari Bay',
 			group: 'Flying',
 			base_value: '34',
 			starred_value: '51',
-			collection_state: 0
+			collection_state: 0,
+            sort: 29
 		},
 		{
 			key: 'PapLanBug',
 			name: 'Paper Lantern Bug',
             tooltip: `This bug glows as brightly as a colorful feast day lantern taking flight into the Palian night sky.
-Found along the coast and in forests of Bahari Bay during the evening and night.`,
+    Found along the coast and in forests of Bahari Bay during the evening and night.`,
 			rarity: 'Common',
 			timeofday: 'Evening, Night',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '16',
 			starred_value: '24',
-			collection_state: 0
+			collection_state: 0,
+            sort: 36
 		},
 		{
 			key: 'PriLad',
 			name: 'Princess Ladybug',
             tooltip: `A very regal looking lady bug, made popular by the children's fairytale, The Princess Who Turned Into A Ladybug.
-Found around the lake in Kilima.`,
+    Found around the lake in Kilima.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '145',
 			starred_value: '217',
-			collection_state: 0
+			collection_state: 0,
+            sort: 20
 		},
 		{
 			key: 'ProStaBee',
 			name: 'Proudhorned Stag Beetle',
             tooltip: `The horns of this stag beetle are said to resemble that of the Proudhorned Sernuk.
-Has a chance to be found when mining in Kilima.`,
+    Has a chance to be found when mining in Kilima.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: 'Running',
 			base_value: '46',
 			starred_value: '96',
-			collection_state: 0
+			collection_state: 0,
+            sort: 28
 		},
 		{
 			key: 'RaiBut',
 			name: 'Rainbow-Tipped Butterfly',
             tooltip: `Ancient legends say this rare butterfly got its beautiful coloring from dipping the tip of its wings in a Well of Flow.
-Found in the Fields of Bahari Bay during the morning and day.`,
+    Found in the Fields of Bahari Bay during the morning and day.`,
 			rarity: 'Epic',
 			timeofday: 'Morning, Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '360',
 			starred_value: '540',
-			collection_state: 0
+			collection_state: 0,
+            sort: 4
 		},
 		{
 			key: 'RasBee',
 			name: 'Raspberry Beetle',
             tooltip: `A beetle whose entire diet consists of raspberries.
-Found around Badruu's Farm in Kilima.`,
+    Found around Badruu's Farm in Kilima.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '145',
 			starred_value: '217',
-			collection_state: 0
+			collection_state: 0,
+            sort: 24
 		},
 		{
 			key: 'SciCen',
 			name: 'Scintillating Centipede',
             tooltip: `A rare centipede with a shiny hard shell.
-Has a chance to be found when mining in Bahari Bay.`,
+    Has a chance to be found when mining in Bahari Bay.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '120',
 			starred_value: '180',
-			collection_state: 0
+			collection_state: 0,
+            sort: 27
 		},
 		{
 			key: 'SpiCra',
 			name: 'Spineshell Crab',
             tooltip: `A crab with a very spiny shell.
-Found along the coast of Bahari Bay.`,
+    Found along the coast of Bahari Bay.`,
 			rarity: 'Uncommon',
 			timeofday: 'All Day',
 			location: 'Bahari Bay',
 			group: 'Running',
 			base_value: '46',
 			starred_value: '69',
-			collection_state: 0
+			collection_state: 0,
+            sort: 33
 		},
 		{
 			key: 'SpiCic',
 			name: 'Spitfire Cicada',
             tooltip: `A spirited cicada, whose bark is worse than its bite.
-Found attached to trees in Bahari Bay during the morning and day.`,
+    Found attached to trees in Bahari Bay during the morning and day.`,
 			rarity: 'Rare',
 			timeofday: 'Morning, Day',
 			location: 'Bahari Bay',
 			group: '',
 			base_value: '145',
 			starred_value: '217',
-			collection_state: 0
+			collection_state: 0,
+            sort: 31
 		},
 		{
 			key: 'SpoMan',
 			name: 'Spotted Mantis',
             tooltip: `A rare mantis with a beautiful set of spots.
-Found around the Dragon Shrine in Kilima.`,
+    Found around the Dragon Shrine in Kilima.`,
 			rarity: 'Rare',
 			timeofday: 'All Day',
 			location: 'Kilima Valley',
 			group: '',
 			base_value: '120',
 			starred_value: '180',
-			collection_state: 0
+			collection_state: 0,
+            sort: 17
 		},
 		{
 			key: 'SpoSti',
 			name: 'Spotted Stinkbug',
             tooltip: `A bug known more for his strong musk than its striking colors.
-Found all around Kilima and Bahari Bay.`,
+    Found all around Kilima and Bahari Bay.`,
 			rarity: 'Common',
 			timeofday: 'All Day',
 			location: 'Kilima Valley, Bahari Bay',
 			group: 'Running',
 			base_value: '16',
 			starred_value: '24',
-			collection_state: 0
+			collection_state: 0,
+            sort: 25
 		},
 		{
 			key: 'StrSna',
 			name: 'Stripeshell Snail',
             tooltip: `A snail with such distinctive stripes, that its shell was once used as currency among the early Majiri.
-Found along the coast in Bahari Bay.`,
+    Found along the coast in Bahari Bay.`,
 			rarity: 'Rare',
 			timeofday: 'Evening, Night',
 			location: 'Bahari Bay',
 			group: 'Running',
 			base_value: '120',
 			starred_value: '180',
-			collection_state: 0
+			collection_state: 0,
+            sort: 30
 		},
 		{
 			key: 'VamCra',
 			name: 'Vampire Crab',
             tooltip: `An invasive species of crab that sucks the life out of the local population.
-Found around the Flooded Fortress in Bahari Bay during the evening and night.`,
+    Found around the Flooded Fortress in Bahari Bay during the evening and night.`,
 			rarity: 'Rare',
 			timeofday: 'Evening, Night',
 			location: 'Bahari Bay',
 			group: 'Running',
 			base_value: '145',
 			starred_value: '217',
-			collection_state: 0
+			collection_state: 0,
+            sort: 5
 		}
 	];
 
@@ -534,7 +573,10 @@ Found around the Flooded Fortress in Bahari Bay during the evening and night.`,
 		return split.map((word) => word.substring(0, 3)).join('');
 	}
 
-	let bugs = bugDB.map((bug) => ({
+    const sortedBugs = bugDB.sort((a, b) => a.sort - b.sort);
+    
+
+	let bugs = sortedBugs.map((bug) => ({
 		...bug,
 		key: getShortKey(bug.name),
         showTooltip: false
