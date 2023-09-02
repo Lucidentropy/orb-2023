@@ -168,10 +168,10 @@
 				src = `https://imgur.com/${token}`;
 				uri = `https://i.imgur.com/${token}.mp4`;
 			break;
-			case 'gfycat':
-				src = `https://gfycat.com/gifs/detail/${token}`;
-				uri = `https://giant.gfycat.com/${token}.mp4`;
-			break;
+			// case 'gfycat':
+			// 	src = `https://gfycat.com/gifs/detail/${token}`;
+			// 	uri = `https://giant.gfycat.com/${token}.mp4`;
+			// break;
 			case 'reddit':
 				src = `https://v.redd.it/${token}`;
 				uri = `https://v.redd.it/${token}/DASH_720.mp4`;
@@ -1033,11 +1033,11 @@
 					let token = itoken.split(':')[1];
 
 					switch (type) {
-						case 'gfycat':
-							webm = 'http://giant.gfycat.com/' + token + '.webm';
-							mp4 = 'http://giant.gfycat.com/' + token + '.mp4';
-							poster = 'http://thumbs.gfycat.com/' + token + '-poster.jpg';
-							break;
+						// case 'gfycat':
+						// 	webm = 'http://giant.gfycat.com/' + token + '.webm';
+						// 	mp4 = 'http://giant.gfycat.com/' + token + '.mp4';
+						// 	poster = 'http://thumbs.gfycat.com/' + token + '-poster.jpg';
+						// 	break;
 						case 'imgur':
 							webm = 'http://i.imgur.com/' + token + '.webm';
 							mp4 = 'http://i.imgur.com/' + token + '.mp4';
@@ -1110,21 +1110,21 @@
 
 		<video
 			id="bg-video"
-			poster="http://thumbs.gfycat.com/PlumpIdioticKoalabear-poster.jpg"
+			poster=""
 			muted=""
 		>
 			<source
 				class="webmSource"
-				src="http://giant.gfycat.com/PlumpIdioticKoalabear.webm"
+				src=""
 				type="video/webm"
 			/>
 			<source
 				class="mp4Source"
-				src="http://giant.gfycat.com/PlumpIdioticKoalabear.mp4"
+				src=""
 				type="video/mp4"
 			/>
 			<img
-				src="http://thumbs.gfycat.com/PlumpIdioticKoalabear-poster.jpg"
+				src=""
 				alt="Poster"
 				title="Sorry, your browser doesn't support HTML5 video."
 			/>
