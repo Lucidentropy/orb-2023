@@ -22,6 +22,7 @@
 	let videoElement: HTMLVideoElement;
 	let playing: boolean = true;
 	let error_count: number = 0;
+	const error_tolerance: number = 10;
 	let isHovered: boolean = false;
 
 	// UI state variables
@@ -57,12 +58,12 @@
 			currentVideo = videoCollection.find(obj => obj?.uri === sourceUrl)
 		} catch (error) {
 			error_count++;
-			console.error(`Video error ${error_count}:`, error);
+			console.error(`Video error ${error_count} of ${error_tolerance}:`, error);
 
-			if ( error_count < 10 ) {
+			if ( error_count <= error_tolerance ) {
 				nextVideo();
 			} else {
-				console.error('Aborting nextVideo(), greater than 10 errors.')
+				console.error('Aborting nextVideo(), greater than ' +error_tolerance+' errors.')
 			}
 		}
 	}
@@ -137,6 +138,10 @@
 		});
 
 		loadVideoSource();
+	}
+
+	function resetErrorCount() {
+		error_count = 0;
 	}
 
 	onMount(async () => {
@@ -243,6 +248,12 @@
 			<p>No videos available. Either the API is dead or there just weren't any clips that were poggers enough.</p>
 		{/if}
 	{/if}	
+
+	{#if error_count >= error_tolerance}
+		<p class="error">There were a high number of errors from the video player, pausing autoplay. <button on:click={resetErrorCount}>Reset Error Counter</button></p>
+	{/if}
+
+	<p class="infobottom">The POGotron : Clips and highlights from the internet of various games we play. Not all clips feature members of Orb.</p>
 </div>
 <style lang="scss">
 
@@ -269,8 +280,25 @@
 			padding:20px;
 		}
 
+		.infobottom {
+			padding:5px 0;
+			text-align:center;
+			margin:0;
+			font-size:12px;
+			opacity:.5;
+		}
+
+		.error {
+			text-align:center;
+
+			button {
+				cursor:pointer;
+				text-decoration: underline;;
+			}
+		}
+
 		#intro {
-			position: absolute;
+			// position: absolute;
 			// bottom: 10%;
 			// left: 15%;
 			text-align: center;

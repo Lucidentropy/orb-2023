@@ -28,6 +28,11 @@
 
 </script>
 
+<svelte:head>
+	<title>Orb - Steam Community</title>
+	<meta name="description" content="The Orb Steam community." />
+</svelte:head>
+
 <div class="text-column">
     <h1>
         <span class="steam-icon">

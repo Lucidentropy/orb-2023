@@ -18,6 +18,11 @@
     }
 </script>
 
+<svelte:head>
+	<title>Orb - Login</title>
+	<meta name="description" content="Login with your Discord account." />
+</svelte:head>
+
 <div class="text-column">
     <h1>Login <p>Release TRON JA 307020</p></h1>
     

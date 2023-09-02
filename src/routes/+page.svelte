@@ -7,8 +7,8 @@
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Clan Orb, a gaming community" />
+	<title>Orb</title>
+	<meta name="description" content="Clan Orb, a  multi-game multi-generational online gaming community founded in 2000." />
 </svelte:head>
 
 <section>

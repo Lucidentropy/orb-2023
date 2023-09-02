@@ -1,3 +1,8 @@
+<svelte:head>
+	<title>Orb - Tribes</title>
+	<meta name="description" content="Orb in Starseige:Tribes, the original game we were founded in." />
+</svelte:head>
+
 <div class="text-column">
     <h1>Tribes <p>the original</p></h1>
 

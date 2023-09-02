@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>Links</title>
-	<meta name="description" content="Orb Links" />
+	<title>Orb - Links</title>
+	<meta name="description" content="Links and Resources" />
 </svelte:head>
 
 <div class="text-column">

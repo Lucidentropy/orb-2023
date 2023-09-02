@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>About</title>
-	<meta name="description" content="About Orb" />
+	<title>Orb - About Orb</title>
+	<meta name="description" content="Learn about the Orb community and our origins." />
 </svelte:head>
 
 <script>

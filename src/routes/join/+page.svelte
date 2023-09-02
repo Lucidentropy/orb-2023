@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>Joining Orb</title>
-	<meta name="description" content="Joining Orb" />
+	<title>Orb - Joining Orb</title>
+	<meta name="description" content="How to join our community and get in touch." />
 </svelte:head>
 
 <script>

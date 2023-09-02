@@ -695,12 +695,13 @@
 
 <svelte:head>
 	<title>Orb - Palia Bug Collector</title>
-	<meta name="description" content="Track your bug collecting accomplishments." />
+	<meta name="description" content="Track your bug collecting accomplishments in Palia." />
 </svelte:head>
 
 <div class="text-column" transition:fade={{ duration: 0 }}>
     <h1>Palia Bug Collector</h1>
     <p>Click any bug to mark that you've collected it, and again to mark it as starred. Your progress will be saved with this browser.</p>
+    <p>This page is still going through some testing/feature development and has not been built for mobile yet, <em>it may have bugs</em>.
     <h2>Kilima and Bahari Bug Collector</h2>
     <div id="container">
         

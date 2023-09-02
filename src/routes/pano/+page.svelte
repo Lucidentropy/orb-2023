@@ -19,6 +19,8 @@
 </script>
 
 <svelte:head>
+    <title>Orb - Panoramic Gallery</title>
+	<meta name="description" content="A page to show off 360 degree panoramic game shots." />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
     <link rel="stylesheet" href="https://cdn.pannellum.org/2.3/pannellum.css">
 </svelte:head>

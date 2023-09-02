@@ -11,6 +11,11 @@
   const thanks = () => alert('The beans have been restocked. Thank you.');
 </script>
 
+<svelte:head>
+	<title>Orb - Master Control Program</title>
+	<meta name="description" content="ENCOM Clearance required." />
+</svelte:head>
+
 <div class="text-column">
     <h1 class="glitch">
         <span>Master Control Program 

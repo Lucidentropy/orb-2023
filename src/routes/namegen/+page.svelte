@@ -56,6 +56,11 @@ const names = [
   }
 </script>
 
+<svelte:head>
+	<title>Orb - Name Generator</title>
+	<meta name="description" content="The beefiest name generator you've ever seen." />
+</svelte:head>
+
 <div class="text-column">
     <h1>Super Useful Name Generator</h1>
     <p>Prepare yourself for a revolutionary name-finding experience, unparalleled in the annals of computational monikerology! </p>
