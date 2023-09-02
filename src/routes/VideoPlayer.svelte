@@ -60,10 +60,10 @@
 			error_count++;
 			console.error(`Video error ${error_count} of ${error_tolerance}:`, error);
 
-			if ( error_count <= error_tolerance ) {
-				nextVideo();
-			} else {
+			if ( error_count >= error_tolerance ) {
 				console.error('Aborting nextVideo(), greater than ' +error_tolerance+' errors.')
+			} else {
+				nextVideo();
 			}
 		}
 	}
@@ -142,6 +142,7 @@
 
 	function resetErrorCount() {
 		error_count = 0;
+		nextVideo();
 	}
 
 	onMount(async () => {
@@ -250,11 +251,12 @@
 	{/if}	
 
 	{#if error_count >= error_tolerance}
-		<p class="error">There were a high number of errors from the video player, pausing autoplay. <button on:click={resetErrorCount}>Reset Error Counter</button></p>
+		<p class="error">Error threshold for pogotron reached, pausing autoplay. <button on:click={resetErrorCount}>Reset Error Counter</button></p>
 	{/if}
-
-	<p class="infobottom">The POGotron : Clips and highlights from the internet of various games we play. 
+	{#if introVis}
+		<p class="infobottom">The POGotron : Clips and highlights from the internet of various games we play. 
 		Not all clips feature members of Orb.</p>
+	{/if}
 </div>
 <style lang="scss">
 

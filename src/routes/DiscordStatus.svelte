@@ -120,7 +120,7 @@
 
 
         &:hover {
-            background-color:#000B;
+            background-color:#000D;
             z-index: 10;
             border:1px solid var(--color-text);
             margin:0 -1px;
