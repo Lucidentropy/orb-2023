@@ -39,13 +39,13 @@
             Discord Status Unavailable<br />
             <a href={discordURL} target="_blank">Join Orb Discord <span><Icon data={signIn}/></span></a>
         {:else}
-            Discord<br />
+            <strong>Discord</strong><br />
             Loading ...
         {/if}
         
     {:else}
         <img src={discordicon} class="icon" />
-        Discord<br />
+        <strong>Discord</strong><br />
 
         {discord.presence_count} Online
         {#if inChat !== 0}
@@ -134,6 +134,10 @@
             }
         }
 
+        strong {
+            font-weight:bold;
+        }
+
         .icon {
             aspect-ratio:1;
             height:30px;
@@ -198,6 +202,7 @@
 	@media (max-width: 960px) {
 		.discord-status {
 			top:-60px;
+            text-shadow:1px 1px 1px #000;
 		}
 	}
 </style>

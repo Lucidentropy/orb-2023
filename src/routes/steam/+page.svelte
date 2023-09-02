@@ -109,14 +109,13 @@
         display: flex;
         flex-direction: row;
         .left {
-            width: 185px;
+            min-width: 185px;
             margin-right:15px;
             display:flex;
             align-items: center;
 
         }
         .right {
-            width: calc(100% - 200px);
 
             h3 {
                 margin:10px 0 10px;
@@ -159,8 +158,18 @@
         }
         .summary {
             font-size:14px;
+            width:90%;
+            margin:0 auto;
         }
     }
+
+	@media (max-width: 960px) {
+		 .info {
+			flex-direction: column;
+            align-items: center;
+            text-align:center;
+		}
+	}    
     .memberlist {
         display: flex;
         flex-wrap: wrap;
