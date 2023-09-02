@@ -69,7 +69,7 @@ const names = [
 
 <style lang="scss">
 .generated {
-    height:1.5em;
+    min-height:1.5em;
     font-size:50px;
     color:#fff;
     text-align:center;
