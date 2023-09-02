@@ -195,5 +195,9 @@
             }
         }
     }
-
+	@media (max-width: 960px) {
+		.discord-status {
+			top:-60px;
+		}
+	}
 </style>
