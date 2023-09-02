@@ -253,7 +253,8 @@
 		<p class="error">There were a high number of errors from the video player, pausing autoplay. <button on:click={resetErrorCount}>Reset Error Counter</button></p>
 	{/if}
 
-	<p class="infobottom">The POGotron : Clips and highlights from the internet of various games we play. Not all clips feature members of Orb.</p>
+	<p class="infobottom">The POGotron : Clips and highlights from the internet of various games we play. 
+		Not all clips feature members of Orb.</p>
 </div>
 <style lang="scss">
 
@@ -281,11 +282,12 @@
 		}
 
 		.infobottom {
-			padding:5px 0;
+			padding:5px 10px;
 			text-align:center;
 			margin:0;
 			font-size:12px;
 			opacity:.5;
+			white-space:pre-line;
 		}
 
 		.error {
