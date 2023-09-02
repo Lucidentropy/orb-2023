@@ -28,7 +28,9 @@
             <th>Version</th>
             <th>Server Type</th>
         </tr>
-        <!-- You'll need to loop through masterList to generate the rows -->
+        <tr>
+            <td colspan="7">Master server query is down temporarily fixing a technical issue.</td>
+        </tr>
     </table>
     <h2>Links</h2>
     <ul>
@@ -49,16 +51,30 @@
     .twocol {
         display:flex;
         width:100%;
+        align-items: center;        
 
         div {
-            // width:50%;
+            min-width:50%;
             img {
                 max-width: 100%;
             }
         }
     }
+
+    @media (max-width: 768px) {
+        .twocol {
+            flex-direction: row;
+            flex-direction: column-reverse;
+            justify-content: center;
+            align-items: center;
+        }
+    }
 .orbskin {
         max-width:35%;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        text-align:center;
     img {
      border-radius: 5px;
     }
@@ -67,7 +83,7 @@
 .downloads {
     text-align: center;
     padding:0 20px;
-    width:65%;
+    // width:65%;
     & > a {
         font-weight: bold;
         display: inline-block;
