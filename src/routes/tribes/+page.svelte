@@ -60,6 +60,7 @@ function sort(column) {
 
     <p>Orb was founded in Tribes as well as contributed of the game's several widely used mods such as Annhilation, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
     <h2>Download</h2>
+    <p>Note: Since tribes0.com has gone down, I am searching for updated archives of these files.</p>
     <div class="twocol">
         <div class="downloads">
             <a href="https://www.tribes0.com/FullTribes_1.41.zip" target="_blank">Download Original Tribes<i class="fa fa-download"></i></a>
