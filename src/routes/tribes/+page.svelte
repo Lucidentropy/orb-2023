@@ -98,6 +98,7 @@ function sort(column) {
         </table>
     {/if}
     <h2>Links</h2>
+    <p>Please note - Tribes is a game from 1998, many of these sites will fade away over time. I've attempted to keep as many links to old resources here as possible.</p>
     <ul>
         <li><a href="https://library.theexiled.pwnageservers.com/category.php?id=167" target="_blank">Starsiege: Tribes - TheExiled Library</a></li>
         <li><a href="https://www.tribalwar.com/forums/showthread.php?t=607313" target="_blank">Tribes 1 Resource Thread - TribalWar</a></li>
