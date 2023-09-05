@@ -7,30 +7,33 @@
     let sortDirection = 1;
     let loading = true;
 
-function sort(column) {
-    if (sortKey === column) {
-        sortDirection = -sortDirection;
-    } else {
-        sortKey = column;
-        sortDirection = 1;
-    }
+    $: totalPlayers = serverList.reduce((acc, server) => acc + server.currentPlayers, 0);
+    $: totalServers = serverList.length;
 
-    serverList = serverList.sort((a, b) => {
-        const keys = sortKey.split('.');
-        let aValue = a;
-        let bValue = b;
-
-        // Traverse through the keys to get the nested property value
-        for (let key of keys) {
-            aValue = aValue[key];
-            bValue = bValue[key];
+    function sort(column) {
+        if (sortKey === column) {
+            sortDirection = -sortDirection;
+        } else {
+            sortKey = column;
+            sortDirection = 1;
         }
 
-        if (aValue < bValue) return -sortDirection;
-        if (aValue > bValue) return sortDirection;
-        return 0;
-    });
-}
+        serverList = serverList.sort((a, b) => {
+            const keys = sortKey.split('.');
+            let aValue = a;
+            let bValue = b;
+
+            // Traverse through the keys to get the nested property value
+            for (let key of keys) {
+                aValue = aValue[key];
+                bValue = bValue[key];
+            }
+
+            if (aValue < bValue) return -sortDirection;
+            if (aValue > bValue) return sortDirection;
+            return 0;
+        });
+    }
 
 
     onMount(async () => {
@@ -79,13 +82,14 @@ function sort(column) {
     {#if loading}
         <p>Fetching data from master server...</p>
     {:else}
+       <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
         <table id="tribesMasterList" width="100%" border="0">
             <tr>
                 <th on:click={() => sort('name')}>Server Name</th>
-                <th on:click={() => sort('server.game')}>Mission Type</th>
-                <th on:click={() => sort('map')}>Mission Name</th>
+                <th on:click={() => sort('server.game')}>Type</th>
+                <th on:click={() => sort('map')}>Mission</th>
                 <th on:click={() => sort('currentPlayers')}>Players</th>
-                <th on:click={() => sort('server.mods')}>Server Type</th>
+                <th on:click={() => sort('server.mods')}>Server Type/Mods</th>
             </tr>
             {#each serverList as server}
                 <tr>
@@ -144,6 +148,14 @@ function sort(column) {
         text-align:center;
     img {
      border-radius: 5px;
+    }
+}
+
+.counts {
+    margin:0 0 10px;
+    text-align:center;
+    strong {
+        color:#fff;
     }
 }
 
