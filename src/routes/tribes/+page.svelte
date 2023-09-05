@@ -1,3 +1,42 @@
+<script>
+    import { onMount } from 'svelte';
+
+    let masterServerQuery = [];
+    let serverList = [];
+    let sortKey = '';
+    let sortDirection = 1;
+    let loading = true;
+
+    function sort(column) {
+        if (sortKey === column) {
+            sortDirection = -sortDirection;
+        } else {
+            sortKey = column;
+            sortDirection = 1;
+        }
+
+        serverList = serverList.sort((a, b) => {
+            if (a[sortKey] < b[sortKey]) return -sortDirection;
+            if (a[sortKey] > b[sortKey]) return sortDirection;
+            return 0;
+        });
+    }
+    onMount(async () => {
+        try {
+            const response = await fetch('/api/tribes/master');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            masterServerQuery = await response.json();
+            serverList = masterServerQuery.servers
+        } catch (error) {
+            console.error("Failed to fetch server list:", error);
+        } finally {
+            loading = false;
+        }
+    });
+</script>
+
 <svelte:head>
 	<title>Orb - Tribes</title>
 	<meta name="description" content="Orb in Starseige:Tribes, the original game we were founded in." />
@@ -23,20 +62,29 @@
         </div>
     </div>
     <h2>Tribes 1 Realtime Master Server List</h2>
-    <table id="tribesMasterList" width="100%">
-        <tr>
-            <th>Server Name</th>
-            <th>Mission Type</th>
-            <th>Mission Name</th>
-            <th>Players</th>
-            <th>Address</th>
-            <th>Version</th>
-            <th>Server Type</th>
-        </tr>
-        <tr>
-            <td colspan="7">Master server query is down temporarily fixing a technical issue.</td>
-        </tr>
-    </table>
+
+    {#if loading}
+        <p>Fetching data from master server...</p>
+    {:else}
+        <table id="tribesMasterList" width="100%" border="0">
+            <tr>
+                <th on:click={() => sort('name')}>Server Name</th>
+                <th on:click={() => sort('server.game')}>Mission Type</th>
+                <th on:click={() => sort('map')}>Mission Name</th>
+                <th on:click={() => sort('currentPlayers')}>Players</th>
+                <th on:click={() => sort('server.mods')}>Server Type</th>
+            </tr>
+            {#each serverList as server}
+                <tr>
+                    <td class="name">{server.name}</td>
+                    <td>{server.server.game}</td>
+                    <td>{server.map}</td>
+                    <td>{server.currentPlayers}/{server.maxPlayers}</td>
+                    <td>{server.server.mods}</td>
+                </tr>
+            {/each}
+        </table>
+    {/if}
     <h2>Links</h2>
     <ul>
         <li><a href="https://library.theexiled.pwnageservers.com/category.php?id=167" target="_blank">Starsiege: Tribes - TheExiled Library</a></li>
@@ -106,19 +154,22 @@
 
 #tribesMasterList {
     text-align: center;
+    border-collapse: collapse;
     th {
         color: #fff;
         font-weight: bold;
         padding: 5px;
         text-transform: uppercase;
         font-size: 10px;
+        cursor:pointer;
     }
     td {
         border: 1px solid #002129;
-        padding: 0px 5px;
+        padding: 2px 5px;
     }
     .name {
         text-align: left;
+        white-space: nowrap;
     }
 }
 </style>
