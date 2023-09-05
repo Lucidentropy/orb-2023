@@ -7,20 +7,32 @@
     let sortDirection = 1;
     let loading = true;
 
-    function sort(column) {
-        if (sortKey === column) {
-            sortDirection = -sortDirection;
-        } else {
-            sortKey = column;
-            sortDirection = 1;
+function sort(column) {
+    if (sortKey === column) {
+        sortDirection = -sortDirection;
+    } else {
+        sortKey = column;
+        sortDirection = 1;
+    }
+
+    serverList = serverList.sort((a, b) => {
+        const keys = sortKey.split('.');
+        let aValue = a;
+        let bValue = b;
+
+        // Traverse through the keys to get the nested property value
+        for (let key of keys) {
+            aValue = aValue[key];
+            bValue = bValue[key];
         }
 
-        serverList = serverList.sort((a, b) => {
-            if (a[sortKey] < b[sortKey]) return -sortDirection;
-            if (a[sortKey] > b[sortKey]) return sortDirection;
-            return 0;
-        });
-    }
+        if (aValue < bValue) return -sortDirection;
+        if (aValue > bValue) return sortDirection;
+        return 0;
+    });
+}
+
+
     onMount(async () => {
         try {
             const response = await fetch('/api/tribes/master');
