@@ -186,9 +186,10 @@
 
     background:#000 top right;
     background-size:contain;
+    background-repeat: no-repeat;
     box-shadow:0 0 8px #000;
     font-size:13px;
-    color: #D88E00;    
+    color: #D88E00;
     cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-hand.cur"), default;
 
     &.bg1 {
