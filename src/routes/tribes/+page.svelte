@@ -61,6 +61,7 @@
 
     function closeModal() {
         showModal = false;
+        history.replaceState(null, null, ' ');
     }
 
 function transformText(text) {
@@ -123,6 +124,12 @@ function transformText(text) {
             serverList = masterServerQuery.servers;
 
             randomBg = Math.floor(Math.random() * 3) + 1;
+
+            const serverIpFromHash = window.location.hash.substring(1);
+            if (serverIpFromHash && serverList.some(server => server.address === serverIpFromHash)) {
+                openModal(serverIpFromHash);
+            }
+
         } catch (error) {
             console.error("Failed to fetch server list:", error);
         } finally {
@@ -247,7 +254,10 @@ function transformText(text) {
                 <th on:click={() => sort('server.mods')}>Server Type/Mods</th>
             </tr>
             {#each serverList as server}
-                <tr on:click={() => openModal(server.address)}>
+                <tr on:click={() => {
+                    openModal(server.address);
+                    window.location.hash = server.address;
+                }}>
                     <td>
                         <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
                     </td>
