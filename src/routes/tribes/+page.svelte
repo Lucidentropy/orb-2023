@@ -228,8 +228,13 @@
         display:none;
     }
 }
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     #tribesMasterList tr *:nth-child(2) {
+        display:none;
+    }
+}
+@media (max-width: 550px) {
+    #tribesMasterList tr *:nth-child(5) {
         display:none;
     }
 }
