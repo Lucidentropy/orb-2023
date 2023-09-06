@@ -223,4 +223,14 @@
         white-space: nowrap;
     }
 }
+@media (max-width: 800px) {
+    #tribesMasterList tr *:nth-child(3) {
+        display:none;
+    }
+}
+@media (max-width: 600px) {
+    #tribesMasterList tr *:nth-child(2) {
+        display:none;
+    }
+}
 </style>
