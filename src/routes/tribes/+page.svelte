@@ -174,7 +174,8 @@ function transformText(text) {
 
             <div class="info">
                 <span>Server Name</span>  <div>{serverData.server.name}</div>
-                <span>Ping</span>  <div>{serverData.server.ping} (Loss: {serverData.server.packetLoss}%)</div>
+                <span>Ping</span>  <div>{serverData.server.ping}
+                    {#if serverData.server.packetLoss > 0} (Loss: {serverData.server.packetLoss}%) {/if}</div>
                 <span>IP Address</span>  <div>{serverData.server.address}</div>
                 <span>Version</span>  <div>{serverData.game.version}</div>
                 <span>Mods</span>  <div>{serverData.game.mods}</div>
