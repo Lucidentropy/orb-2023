@@ -87,7 +87,10 @@
        <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
         <table id="tribesMasterList" width="100%" border="0" class="bg{randomBg}">
             <tr>
+                <th>Conn</th>
+                <th>Status</th>
                 <th on:click={() => sort('name')}>Server Name</th>
+                <th on:click={() => sort('ping')}>Ping</th>
                 <th on:click={() => sort('server.game')}>Type</th>
                 <th on:click={() => sort('map')}>Mission</th>
                 <th on:click={() => sort('currentPlayers')}>Players</th>
@@ -95,7 +98,19 @@
             </tr>
             {#each serverList as server}
                 <tr>
+                    <td>
+                        <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
+                    </td>
+                    <td>
+                        {#if server.server.needpass} 
+                            <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-server-locked.gif" />
+                        {/if}
+                        {#if server.server.dedicated} 
+                            <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-server-dedicated.gif" />
+                        {/if}                        
+                    </td>
                     <td class="name">{server.name}</td>
+                    <td>{server.ping}</td>
                     <td>{server.server.game}</td>
                     <td>{server.map}</td>
                     <td>{server.currentPlayers}/{server.maxPlayers}</td>
@@ -227,6 +242,24 @@
         text-align: left;
         white-space: nowrap;
     }
+
+    .conn {
+        border-radius: 100%;
+        height:10px;
+        aspect-ratio:1;
+        display:block;
+        margin:0 auto;
+        &.good {
+            background-color:#3cec07;
+        }
+        &.okay {
+           background-color:#f4ca3d; 
+        }
+        &.bad {
+            background-color:red;
+        }
+    }
+
     &::before {
         content: "";
         position: absolute;
@@ -251,18 +284,20 @@
         z-index: -1;
     }
 }
+@media (max-width: 900px) {
+    #tribesMasterList tr *:nth-child(5),
+    #tribesMasterList tr *:nth-child(2),
+    #tribesMasterList tr *:nth-child(1) {
+        display:none;
+    }
+}
 @media (max-width: 800px) {
-    #tribesMasterList tr *:nth-child(3) {
+    #tribesMasterList tr *:nth-child(4) {
         display:none;
     }
 }
-@media (max-width: 650px) {
-    #tribesMasterList tr *:nth-child(2) {
-        display:none;
-    }
-}
-@media (max-width: 550px) {
-    #tribesMasterList tr *:nth-child(5) {
+@media (max-width: 700px) {
+    #tribesMasterList tr *:nth-child(7) {
         display:none;
     }
 }
