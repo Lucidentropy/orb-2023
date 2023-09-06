@@ -36,6 +36,82 @@
         });
     }
 
+    let lastRefreshed = null;
+
+    async function refreshData() {
+        const now = Date.now();
+        if (!lastRefreshed || now - lastRefreshed > 5000) {
+            // Fetch the master list again
+            const response = await fetch('http://new.clanorb.com/api/tribes/master');
+            serverList = await response.json();
+            lastRefreshed = now;
+        } else {
+            alert("Please wait a few seconds before refreshing again.");
+        }
+    }
+
+    let showModal = false;
+    let serverData = {};
+
+    async function openModal(serverIP) {
+        const response = await fetch(`/api/tribes/${serverIP}`);
+        serverData = await response.json();
+        showModal = true;
+    }
+
+    function closeModal() {
+        showModal = false;
+    }
+
+function transformText(text) {
+    const tagMappings = {
+        '<jc>': '<div class="jc">',
+        '<f1>': '<span class="f1">',
+        '<f2>': '<span class="f2">'
+    };
+
+    const endTagMappings = {
+        '<jc>': '</div>',
+        '<f1>': '</span>',
+        '<f2>': '</span>'
+    };
+
+    let stack = [];
+    
+    // Clip off the very first character
+    text = text.slice(1);
+
+    // Omit all text after "team name"
+    const teamNameIndex = text.indexOf("Team Name");
+    if (teamNameIndex !== -1) {
+        text = text.slice(0, teamNameIndex);
+    }
+
+    const namePZoneIndex = text.indexOf("Name\tPZone");
+    if (namePZoneIndex !== -1) {
+        text = text.slice(0, namePZoneIndex);
+    }    
+
+    let transformedText = text;
+
+    for (let tag in tagMappings) {
+        let regex = new RegExp(tag, 'g');
+        transformedText = transformedText.replace(regex, (match) => {
+            stack.push(tag);
+            return tagMappings[tag];
+        });
+    }
+
+    // Append the end tags based on the stack
+    while (stack.length) {
+        let tag = stack.pop();
+        transformedText += endTagMappings[tag];
+    }
+
+    return transformedText;
+}
+
+
 
     onMount(async () => {
         try {
@@ -81,11 +157,85 @@
     </div>
     <h2>Tribes 1 Realtime Master Server List</h2>
 
+{#if showModal}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div class="modal-underlay" on:click={closeModal}></div>
+    <div class="modal green-border">
+        <div class="inner">
+            <!-- Server Details -->
+
+            <div class="info">
+                <span>Server Name</span>  <div>{serverData.server.name}</div>
+                <span>Mods</span>  <div>{serverData.game.mods}</div>
+                <span>IP Address</span>  <div>{serverData.server.address}</div>
+                <span>Mission</span>  <div>{serverData.server.map} ({serverData.game.game})</div>
+                <span>Version</span>  <div>{serverData.game.version}</div>
+                <span>Dedicated?</span>  <div>{serverData.game.dedicated ? 'YES' : 'NO'}</div>
+                <span>Ping</span>  <div>{serverData.server.ping} (Loss: {serverData.server.packetLoss}%)</div>
+                <span>Password?</span>  <div>{serverData.game.needpass ? 'YES' : 'NO'}</div>
+            </div>
+
+            
+            <div class="desc green-border">
+                <p>{@html transformText(serverData.server.description)}</p>
+                <span class="f1 f2 jc"></span>
+            </div>
+
+            <div class="details green-border">
+                <table>
+                    <tr>
+                        <th>Team Name</th>
+                        <th>Score</th>
+                        <th>Players</th>
+                    </tr>
+                    {#each serverData.teams as team}
+                        <tr>
+                            
+                            <td>{team.name}</td>
+                            <td>{team.score}</td>
+                            <td>{team.playercount}</td>
+                        </tr>
+                    {/each}
+                </table>
+
+                <table>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Team</th>
+                        <th>Score</th>
+                        <th>Ping</th>
+                        <th>PL</th>
+                        <th>Kills</th>
+                    </tr>
+                    {#each serverData.players as player}
+                        <tr>
+                            
+                            <td>{player.name}</td>
+                            <td>{serverData.teams.find(t => t.id === player.team).name}</td>
+                            <td>{player.score}</td>
+                            <td>{player.ping}</td>
+                            <td>{player.packetLoss}</td>
+                            <td></td>
+                        </tr>
+                    {/each}
+                </table>
+            </div>
+        </div>
+        <div class="buttons">
+            <!-- <button on:click={closeModal}>Refresh</button> -->
+            <button on:click={closeModal}>Done</button>
+        </div>
+    </div>
+{/if}
+
+
+
     {#if loading}
         <p>Establishing uplink with satellite network...</p>
     {:else}
        <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
-        <table id="tribesMasterList" width="100%" border="0" class="bg{randomBg}">
+       <!-- <button on:click={refreshData}>Refresh</button> -->
+        <table id="tribesMasterList" width="100%" border="0" class="green-border bg{randomBg}">
             <tr>
                 <th>Conn</th>
                 <th>Status</th>
@@ -97,7 +247,7 @@
                 <th on:click={() => sort('server.mods')}>Server Type/Mods</th>
             </tr>
             {#each serverList as server}
-                <tr>
+                <tr on:click={() => openModal(server.address)}>
                     <td>
                         <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
                     </td>
@@ -134,6 +284,13 @@
 </div>
 
 <style lang="scss">
+
+    :root {
+	    --bright-green: #3cec07;;
+        --dark-green:#336600;
+        --light-orange:#FFD07B;
+        --dark-orange:#D88E00;
+    }
 
     .twocol {
         display:flex;
@@ -204,8 +361,7 @@
     background-repeat: no-repeat;
     box-shadow:0 0 8px #000;
     font-size:13px;
-    color: #D88E00;
-    outline:1px solid #3cec07;
+    color: var(--dark-orange);
     padding:2px;
     z-index: 1;
 
@@ -223,19 +379,20 @@
 
     th {
         background-color:#002800;
-        color:#FFD07B;        
+        color:var(--light-orange);        
         
-        font-weight: bold;
+        // font-weight: bold;
         padding: 5px;
         text-transform: uppercase;
         font-size: 10px;
         cursor:pointer;
+        text-shadow:-1px 1px 0px #000;
     }
     tr:hover {
         color:#fff;
     }
     td {
-        border: 1px solid #336600;
+        border: 1px solid var(--dark-green);
         padding: 2px 5px;
     }
     .name {
@@ -250,7 +407,7 @@
         display:block;
         margin:0 auto;
         &.good {
-            background-color:#3cec07;
+            background-color:var(--bright-green);
         }
         &.okay {
            background-color:#f4ca3d; 
@@ -260,6 +417,136 @@
         }
     }
 
+
+}
+
+.modal {
+    --grid-size: 10px;
+    color:var(--dark-orange);
+    background:
+        linear-gradient(0deg, transparent calc(var(--grid-size) - 1px), green calc(var(--grid-size) - 1px), green var(--grid-size), transparent var(--grid-size)) repeat-y,
+        linear-gradient(90deg, transparent calc(var(--grid-size) - 1px), green calc(var(--grid-size) - 1px), green var(--grid-size), transparent var(--grid-size)) repeat-x,
+        #000;
+    background-size: var(--grid-size) var(--grid-size);
+    background-repeat:repeat;
+    padding:20px;
+    font-size:14px;
+    cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-arrow.cur"), default;
+
+    width:600px;
+    max-width:100%;
+
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10 !important;
+    max-width:95vw;
+
+    .desc, .details {
+        position:relative;
+        margin:20px 20px;
+        padding:5px;
+    }
+
+    .details {
+        table {
+            min-width:90%;
+            margin-bottom:10px;
+            text-align:left;
+            
+            th {
+                color:var(--dark-orange);
+                font-weight: normal;;
+            }
+            td {
+                color:#fff;
+            }
+        }
+    }
+
+    .desc {
+        white-space: pre-line;
+        .jc {
+            text-align:center !important;
+        }
+        .f1 {
+            color:var(--light-orange) !important;
+        }
+        .f2 {
+            color:#fff !important;
+        }
+    }
+
+    .inner {
+        background-color:#000;
+        padding-bottom:20px;
+    }
+
+    .info {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 2px;
+        padding-top:10px;
+        margin:0 5px;
+        font-weight: normal;;
+
+        span {
+            color: var(--light-orange);
+            text-align:right;
+            padding-right:4px;
+        }
+        
+        div {
+            color:var(--dark-orange);
+            white-space: nowrap;
+        }
+    }
+
+    .buttons {
+        text-align:right;
+        padding-top:10px;
+        button {
+            
+            all:unset;
+            text-transform:uppercase;
+            font-weight: bold;
+            padding: 0 3px;
+            margin-left:10px;
+            
+            cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-hand.cur"), default;
+            color:#000;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 7px #fff,
+                0 0 5px var(--bright-green),
+                0 0 7px var(--bright-green),
+                0 0 9px var(--bright-green),
+                0 0 11px var(--bright-green),
+                0 0 17px var(--bright-green);
+
+            
+            border:2px solid var(--bright-green);
+            border-width:2px 0;
+        }
+    }
+}
+    .modal-underlay {
+        position:fixed;
+        height:100vh;
+        width:100vw;
+        background-color:#0009;
+        z-index: 10;
+        top:0;
+        left:0;
+    
+    }
+
+.green-border {
+    outline:1px solid var(--bright-green);
+    position:relative;
+    z-index: 1;
+
     &::before {
         content: "";
         position: absolute;
@@ -267,8 +554,8 @@
         left: -4px;
         right: -4px;
         bottom: 0;
-        border-left: 1px solid #3cec07;
-        border-right: 1px solid #3cec07;
+        border-left: 1px solid var(--bright-green);
+        border-right: 1px solid var(--bright-green);
         z-index: -1;
     }
 
@@ -279,8 +566,8 @@
         left: 0;
         right: 0;
         bottom: -4px;
-        border-top: 1px solid #3cec07;
-        border-bottom: 1px solid #3cec07;
+        border-top: 1px solid var(--bright-green);
+        border-bottom: 1px solid var(--bright-green);
         z-index: -1;
     }
 }
@@ -297,11 +584,14 @@
     }
 }
 @media (max-width: 700px) {
-    #tribesMasterList tr *:nth-child(7) {
+    #tribesMasterList tr *:nth-child(8),
+    #tribesMasterList tr *:nth-child(6) {
         display:none;
     }
+
+    .modal .info {
+         grid-template-columns: repeat(2, 1fr); 
+    }
 }
-
-
 
 </style>
