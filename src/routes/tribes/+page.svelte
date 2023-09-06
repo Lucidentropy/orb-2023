@@ -82,7 +82,7 @@
     <h2>Tribes 1 Realtime Master Server List</h2>
 
     {#if loading}
-        <p>Fetching data from master server...</p>
+        <p>Establishing uplink with satellite network...</p>
     {:else}
        <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
         <table id="tribesMasterList" width="100%" border="0" class="bg{randomBg}">
@@ -239,7 +239,7 @@
         padding: 2px 5px;
     }
     .name {
-        text-align: left;
+        // text-align: left;
         white-space: nowrap;
     }
 
