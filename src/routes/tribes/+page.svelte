@@ -63,8 +63,7 @@
 <div class="text-column">
     <h1>Tribes <p>the original</p></h1>
 
-
-    <p>Orb was founded in Tribes as well as contributed of the game's several widely used mods such as Annhilation, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
+    <p>Orb was founded in Tribes as well as contributed to several of the game's several widely used mods such as Annhilation, Tribes RPG, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
     <h2>Download</h2>
     <p>Note: Since tribes0.com has gone down, I am searching for updated archives of these files.</p>
     <div class="twocol">
@@ -183,6 +182,7 @@
 #tribesMasterList {
     text-align: center;
     border-collapse: collapse;
+    position:relative;
 
     background:#000 top right;
     background-size:contain;
@@ -190,6 +190,10 @@
     box-shadow:0 0 8px #000;
     font-size:13px;
     color: #D88E00;
+    outline:1px solid #3cec07;
+    padding:2px;
+    z-index: 1;
+
     cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-hand.cur"), default;
 
     &.bg1 {
@@ -223,6 +227,29 @@
         text-align: left;
         white-space: nowrap;
     }
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -4px;
+        right: -4px;
+        bottom: 0;
+        border-left: 1px solid #3cec07;
+        border-right: 1px solid #3cec07;
+        z-index: -1;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: 0;
+        right: 0;
+        bottom: -4px;
+        border-top: 1px solid #3cec07;
+        border-bottom: 1px solid #3cec07;
+        z-index: -1;
+    }
 }
 @media (max-width: 800px) {
     #tribesMasterList tr *:nth-child(3) {
@@ -239,4 +266,7 @@
         display:none;
     }
 }
+
+
+
 </style>
