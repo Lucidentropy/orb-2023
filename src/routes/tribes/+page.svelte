@@ -6,6 +6,7 @@
     let sortKey = '';
     let sortDirection = 1;
     let loading = true;
+    let randomBg = 1;
 
     $: totalPlayers = serverList.reduce((acc, server) => acc + server.currentPlayers, 0);
     $: totalServers = serverList.length;
@@ -43,7 +44,9 @@
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             masterServerQuery = await response.json();
-            serverList = masterServerQuery.servers
+            serverList = masterServerQuery.servers;
+
+            randomBg = Math.floor(Math.random() * 3) + 1;
         } catch (error) {
             console.error("Failed to fetch server list:", error);
         } finally {
@@ -83,7 +86,7 @@
         <p>Fetching data from master server...</p>
     {:else}
        <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
-        <table id="tribesMasterList" width="100%" border="0">
+        <table id="tribesMasterList" width="100%" border="0" class="bg{randomBg}">
             <tr>
                 <th on:click={() => sort('name')}>Server Name</th>
                 <th on:click={() => sort('server.game')}>Type</th>
@@ -114,7 +117,6 @@
         <li><a href="https://t1m1.pu.net/" target="_blank">https://t1m1.pu.net/</a></li>
         <li><a href="https://www.pcrpg.org/" target="_blank">Particle's Custom RPG</a></li>
     </ul>
-
 </div>
 
 <style lang="scss">
@@ -181,16 +183,39 @@
 #tribesMasterList {
     text-align: center;
     border-collapse: collapse;
+
+    background:#000 top right;
+    background-size:contain;
+    box-shadow:0 0 8px #000;
+    font-size:13px;
+    color: #D88E00;    
+    cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-hand.cur"), default;
+
+    &.bg1 {
+        background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribesbg1.gif');
+    }
+    &.bg2 {
+        background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribesbg2.gif');
+    }
+    &.bg3 {
+        background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribesbg3.gif');
+    }        
+
     th {
-        color: #fff;
+        background-color:#002800;
+        color:#FFD07B;        
+        
         font-weight: bold;
         padding: 5px;
         text-transform: uppercase;
         font-size: 10px;
         cursor:pointer;
     }
+    tr:hover {
+        color:#fff;
+    }
     td {
-        border: 1px solid #002129;
+        border: 1px solid #336600;
         padding: 2px 5px;
     }
     .name {
