@@ -227,6 +227,7 @@ function transformText(text) {
                     {/each}
                 </table>
             </div>
+            <p class="note">Bookmark this URL to return directly to this server.</p>
         </div>
         <div class="buttons">
             <!-- <button on:click={closeModal}>Refresh</button> -->
@@ -455,7 +456,7 @@ function transformText(text) {
 
     .desc, .details {
         position:relative;
-        margin:20px 20px;
+        margin:20px 20px 10px;
         padding:5px;
     }
 
@@ -490,7 +491,7 @@ function transformText(text) {
 
     .inner {
         background-color:#000;
-        padding-bottom:20px;
+        padding-bottom:10px;
     }
 
     .info {
@@ -498,7 +499,7 @@ function transformText(text) {
         grid-template-columns: repeat(4, 1fr); 
         gap: 2px;
         padding-top:10px;
-        margin:0 5px;
+        margin:0 10px;
         font-weight: normal;;
 
         span {
@@ -539,6 +540,11 @@ function transformText(text) {
             border:2px solid var(--bright-green);
             border-width:2px 0;
         }
+    }
+    .note {
+        text-align:center;
+        font-size:11px;
+        margin:0;
     }
 }
     .modal-underlay {
