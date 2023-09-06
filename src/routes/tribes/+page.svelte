@@ -66,9 +66,9 @@
 
 function transformText(text) {
     const tagMappings = {
-        '<jc>': '<div class="jc">',
-        '<f1>': '<span class="f1">',
-        '<f2>': '<span class="f2">'
+        '<jc>': '<div style="text-align:center">',
+        '<f1>': '<span style="color:#FFD07B;">',
+        '<f2>': '<span style="color:#fff;">'
     };
 
     const endTagMappings = {
@@ -108,6 +108,7 @@ function transformText(text) {
         let tag = stack.pop();
         transformedText += endTagMappings[tag];
     }
+    transformedText = transformedText.trim();
 
     return transformedText;
 }
@@ -173,12 +174,12 @@ function transformText(text) {
 
             <div class="info">
                 <span>Server Name</span>  <div>{serverData.server.name}</div>
-                <span>Mods</span>  <div>{serverData.game.mods}</div>
-                <span>IP Address</span>  <div>{serverData.server.address}</div>
-                <span>Mission</span>  <div>{serverData.server.map} ({serverData.game.game})</div>
-                <span>Version</span>  <div>{serverData.game.version}</div>
-                <span>Dedicated?</span>  <div>{serverData.game.dedicated ? 'YES' : 'NO'}</div>
                 <span>Ping</span>  <div>{serverData.server.ping} (Loss: {serverData.server.packetLoss}%)</div>
+                <span>IP Address</span>  <div>{serverData.server.address}</div>
+                <span>Version</span>  <div>{serverData.game.version}</div>
+                <span>Mods</span>  <div>{serverData.game.mods}</div>
+                <span>Dedicated?</span>  <div>{serverData.game.dedicated ? 'YES' : 'NO'}</div>
+                <span>Mission</span>  <div>{serverData.server.map} ({serverData.game.game})</div>
                 <span>Password?</span>  <div>{serverData.game.needpass ? 'YES' : 'NO'}</div>
             </div>
 
@@ -478,14 +479,9 @@ function transformText(text) {
 
     .desc {
         white-space: pre-line;
-        .jc {
-            text-align:center !important;
-        }
-        .f1 {
-            color:var(--light-orange) !important;
-        }
-        .f2 {
-            color:#fff !important;
+        p {
+            font-weight: bold;
+            margin:0;
         }
     }
 
@@ -500,7 +496,7 @@ function transformText(text) {
         gap: 2px;
         padding-top:10px;
         margin:0 10px;
-        font-weight: normal;;
+        font-weight: bold;
 
         span {
             color: var(--light-orange);
