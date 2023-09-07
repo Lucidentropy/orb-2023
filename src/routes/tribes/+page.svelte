@@ -64,56 +64,60 @@
         history.replaceState(null, null, ' ');
     }
 
-function transformText(text) {
-    const tagMappings = {
-        '<jc>': '<div style="text-align:center">',
-        '<f1>': '<span style="color:#FFD07B;">',
-        '<f2>': '<span style="color:#fff;">'
-    };
+    function transformText(text) {
+        const tagMappings = {
+            '<jc>': '<div style="text-align:center">',
+            '<f0>': '<span style="color:#D88E00;">',
+            '<f1>': '<span style="color:#FFD07B;">',
+            '<f2>': '<span style="color:#fff;">'
+        };
 
-    const endTagMappings = {
-        '<jc>': '</div>',
-        '<f1>': '</span>',
-        '<f2>': '</span>'
-    };
+        const endTagMappings = {
+            '<jc>': '</div>',
+            '<f0>': '</span>',
+            '<f1>': '</span>',
+            '<f2>': '</span>'
+        };
 
-    let stack = [];
-    
-    // Clip off the very first character
-    text = text.slice(1);
+        let stack = [];
+        text = text.slice(1);
+        let transformedText = text;
 
-    // Omit all text after "team name"
-    const teamNameIndex = text.indexOf("Team Name");
-    if (teamNameIndex !== -1) {
-        text = text.slice(0, teamNameIndex);
+        const truncatablePatterns = [
+            /[^\x00-\x7F]/,
+            /Team Name/,
+            /Name\t/,
+            /\t/
+        ];
+
+        const truncateIndex = truncatablePatterns.reduce((index, pattern) => {
+            const foundIndex = transformedText.search(pattern);
+            if (foundIndex !== -1 && (index === -1 || foundIndex < index)) {
+                return foundIndex;
+            }
+            return index;
+        }, -1);
+
+        if (truncateIndex !== -1) {
+            transformedText = transformedText.slice(0, truncateIndex);
+        }
+
+        for (let tag in tagMappings) {
+            let regex = new RegExp(tag, 'g');
+            transformedText = transformedText.replace(regex, (match) => {
+                stack.push(tag);
+                return tagMappings[tag];
+            });
+        }
+
+        while (stack.length) {
+            let tag = stack.pop();
+            transformedText += endTagMappings[tag];
+        }
+        transformedText = transformedText.trim();
+
+        return transformedText;
     }
-
-    const namePZoneIndex = text.indexOf("Name\tPZone");
-    if (namePZoneIndex !== -1) {
-        text = text.slice(0, namePZoneIndex);
-    }    
-
-    let transformedText = text;
-
-    for (let tag in tagMappings) {
-        let regex = new RegExp(tag, 'g');
-        transformedText = transformedText.replace(regex, (match) => {
-            stack.push(tag);
-            return tagMappings[tag];
-        });
-    }
-
-    // Append the end tags based on the stack
-    while (stack.length) {
-        let tag = stack.pop();
-        transformedText += endTagMappings[tag];
-    }
-    transformedText = transformedText.trim();
-
-    return transformedText;
-}
-
-
 
     onMount(async () => {
         try {
@@ -123,6 +127,7 @@ function transformText(text) {
             }
             masterServerQuery = await response.json();
             serverList = masterServerQuery.servers;
+            serverList.sort((a, b) => b.currentPlayers - a.currentPlayers);
 
             randomBg = Math.floor(Math.random() * 3) + 1;
 
@@ -180,11 +185,11 @@ function transformText(text) {
                 <span>Version</span>  <div>{serverData.game.version}</div>
                 <span>Mods</span>  <div>{serverData.game.mods}</div>
                 <span>Dedicated?</span>  <div>{serverData.game.dedicated ? 'YES' : 'NO'}</div>
-                <span>Mission</span>  <div>{serverData.server.map} ({serverData.game.game})</div>
+                <span>Mission</span>  <div>{serverData.server.map} ({serverData.game.game.trim()})</div>
                 <span>Password?</span>  <div>{serverData.game.needpass ? 'YES' : 'NO'}</div>
             </div>
 
-            
+
             <div class="desc green-border">
                 <p>{@html transformText(serverData.server.description)}</p>
                 <span class="f1 f2 jc"></span>
@@ -199,7 +204,7 @@ function transformText(text) {
                     </tr>
                     {#each serverData.teams as team}
                         <tr>
-                            
+
                             <td>{team.name}</td>
                             <td>{team.score}</td>
                             <td>{team.playercount}</td>
@@ -218,7 +223,7 @@ function transformText(text) {
                     </tr>
                     {#each serverData.players as player}
                         <tr>
-                            
+
                             <td>{player.name}</td>
                             <td>{serverData.teams.find(t => t.id === player.team).name}</td>
                             <td>{player.score}</td>
@@ -265,12 +270,12 @@ function transformText(text) {
                         <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
                     </td>
                     <td>
-                        {#if server.server.needpass} 
+                        {#if server.server.needpass}
                             <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-server-locked.gif" />
                         {/if}
-                        {#if server.server.dedicated} 
+                        {#if server.server.dedicated}
                             <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-server-dedicated.gif" />
-                        {/if}                        
+                        {/if}
                     </td>
                     <td class="name">{server.name}</td>
                     <td>{server.ping}</td>
@@ -308,7 +313,7 @@ function transformText(text) {
     .twocol {
         display:flex;
         width:100%;
-        align-items: center;        
+        align-items: center;
 
         div {
             min-width:50%;
@@ -388,12 +393,12 @@ function transformText(text) {
     }
     &.bg3 {
         background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribesbg3.gif');
-    }        
+    }
 
     th {
         background-color:#002800;
-        color:var(--light-orange);        
-        
+        color:var(--light-orange);
+
         // font-weight: bold;
         padding: 5px;
         text-transform: uppercase;
@@ -423,7 +428,7 @@ function transformText(text) {
             background-color:var(--bright-green);
         }
         &.okay {
-           background-color:#f4ca3d; 
+           background-color:#f4ca3d;
         }
         &.bad {
             background-color:red;
@@ -467,7 +472,7 @@ function transformText(text) {
             min-width:90%;
             margin-bottom:10px;
             text-align:left;
-            
+
             th {
                 color:var(--dark-orange);
                 font-weight: normal;;
@@ -493,7 +498,7 @@ function transformText(text) {
 
     .info {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); 
+        grid-template-columns: repeat(4, 1fr);
         gap: 2px;
         padding-top:10px;
         margin:0 10px;
@@ -504,7 +509,7 @@ function transformText(text) {
             text-align:right;
             padding-right:4px;
         }
-        
+
         div {
             color:var(--dark-orange);
             white-space: nowrap;
@@ -515,16 +520,16 @@ function transformText(text) {
         text-align:right;
         padding-top:10px;
         button {
-            
+
             all:unset;
             text-transform:uppercase;
             font-weight: bold;
             padding: 0 3px;
             margin-left:10px;
-            
+
             cursor: url("https://clanorb.s3.us-west-1.amazonaws.com/public/images/tribes-hand.cur"), default;
             color:#000;
-            text-shadow: 
+            text-shadow:
                 0 0 5px #fff,
                 0 0 7px #fff,
                 0 0 5px var(--bright-green),
@@ -533,7 +538,7 @@ function transformText(text) {
                 0 0 11px var(--bright-green),
                 0 0 17px var(--bright-green);
 
-            
+
             border:2px solid var(--bright-green);
             border-width:2px 0;
         }
@@ -552,7 +557,7 @@ function transformText(text) {
         z-index: 10;
         top:0;
         left:0;
-    
+
     }
 
 .green-border {
@@ -603,7 +608,7 @@ function transformText(text) {
     }
 
     .modal .info {
-         grid-template-columns: repeat(2, 1fr); 
+         grid-template-columns: repeat(2, 1fr);
     }
 }
 
