@@ -291,7 +291,7 @@
                     <td>{server.server.game}</td>
                     <td>{server.map}</td>
                     <td>{server.currentPlayers}/{server.maxPlayers}</td>
-                    <td>{server.server.mods}</td>
+                    <td>{server.server.mods.trim() || 'base'}</td>
                 </tr>
             {/each}
         </table>
