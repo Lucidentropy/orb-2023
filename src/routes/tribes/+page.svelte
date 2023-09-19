@@ -8,6 +8,9 @@
     let loading = true;
     let randomBg = 1;
 
+    let button1Sound;
+    let button4Sound;
+
     $: totalPlayers = serverList.reduce((acc, server) => acc + server.currentPlayers, 0);
     $: totalServers = serverList.length;
 
@@ -36,22 +39,20 @@
         });
     }
 
-    let lastRefreshed = null;
-
-    async function refreshData() {
-        const now = Date.now();
-        if (!lastRefreshed || now - lastRefreshed > 5000) {
-            // Fetch the master list again
-            const response = await fetch('http://new.clanorb.com/api/tribes/master');
-            serverList = await response.json();
-            lastRefreshed = now;
-        } else {
-            alert("Please wait a few seconds before refreshing again.");
-        }
-    }
-
     let showModal = false;
     let serverData = {};
+    let lastRefreshedServer = null;
+
+    async function refreshModal() {
+        const now = Date.now();
+        if (!lastRefreshedServer || now - lastRefreshedServer > 5000) {
+            const response = await fetch(`/api/tribes/${serverData.server.address}`);
+            const updatedData = await response.json();
+            serverData = updatedData;
+            lastRefreshedServer = now;
+        }
+        button1Sound.play();
+    }
 
     async function openModal(serverIP) {
         const response = await fetch(`/api/tribes/${serverIP}`);
@@ -61,6 +62,7 @@
 
     function closeModal() {
         showModal = false;
+        button1Sound.play();
         history.replaceState(null, null, ' ');
     }
 
@@ -81,6 +83,7 @@
 
         let stack = [];
         text = text.slice(1);
+        text = text.replace(/[^\x00-\x7F]/g, '');
         let transformedText = text;
 
         const truncatablePatterns = [
@@ -170,6 +173,10 @@
     </div>
     <h2>Tribes 1 Realtime Master Server List</h2>
 
+    <audio bind:this={button1Sound} src="/audio/Button1.wav" preload="auto"></audio>
+    <audio bind:this={button4Sound} src="/audio/Button4.wav" preload="auto"></audio>
+
+
 {#if showModal}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="modal-underlay" on:click={closeModal}></div>
@@ -196,6 +203,7 @@
             </div>
 
             <div class="details green-border">
+                {#if serverData.game.game !== 'RPGMOD'}
                 <table>
                     <tr>
                         <th>Team Name</th>
@@ -211,7 +219,7 @@
                         </tr>
                     {/each}
                 </table>
-
+                {/if}
                 <table>
                     <tr>
                         <th>Player Name</th>
@@ -237,7 +245,7 @@
             <p class="note">Bookmark this URL to return directly to this server.</p>
         </div>
         <div class="buttons">
-            <!-- <button on:click={closeModal}>Refresh</button> -->
+            <button on:click={refreshModal}>Refresh</button>
             <button on:click={closeModal}>Done</button>
         </div>
     </div>
@@ -265,6 +273,7 @@
                 <tr on:click={() => {
                     openModal(server.address);
                     window.location.hash = server.address;
+                    button4Sound.play();
                 }}>
                     <td>
                         <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
@@ -519,6 +528,7 @@
     .buttons {
         text-align:right;
         padding-top:10px;
+
         button {
 
             all:unset;
@@ -541,6 +551,13 @@
 
             border:2px solid var(--bright-green);
             border-width:2px 0;
+
+            &:active {
+                top:1px;
+                left:1px;
+                position:relative;
+                color:#aaa;
+            }
         }
     }
     .note {
