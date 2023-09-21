@@ -32,7 +32,7 @@
         .clock {
             background: url('/images/palia-clock.png') no-repeat 50% 50%;
             width: 216px;
-            height: 208px;
+            height: 228px;
             position: relative;
             margin:0 auto;
         }
@@ -41,7 +41,7 @@
 
             width: 114px;
             height: 46px;
-            transform-origin: 108px 104px;
+            transform-origin: 108px 114px;
             transition: 1s linear all;
 
             img {
