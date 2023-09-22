@@ -42,7 +42,7 @@
             width: 114px;
             height: 46px;
             transform-origin: 108px 114px;
-            transition: 1s linear all;
+            transition: 0s linear all;
 
             img {
                 transform:rotate(150deg);

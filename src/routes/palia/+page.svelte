@@ -29,4 +29,15 @@
         top:20px;
         right:20px;
     }
+
+@media (max-width: 700px) {
+    .palia-clock {
+        transform:scale(.75);
+        transform-origin: center top;
+        position:relative;
+        top:0;
+        right:0;
+        margin:-40px auto -20px;
+    }
+}
 </style>
