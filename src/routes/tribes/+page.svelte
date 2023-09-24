@@ -117,7 +117,7 @@
             let tag = stack.pop();
             transformedText += endTagMappings[tag];
         }
-        transformedText = transformedText.trim();
+        transformedText = transformedText?.trim();
 
         return transformedText;
     }
