@@ -1,6 +1,8 @@
 import { myDataStore, addToStore, updateStore, removeFromStore, setStore } from '$store/datastore';
 import type { DataStoreState } from '$store/datastore';
 
+import VideoDB from '$store/videoPlayerDB';
+
 export interface PogotronData {
     readonly id: number;
     category: string;
@@ -29,9 +31,9 @@ export function grouped(obj: PogotronData[] | null): PogotronDataByCategory | nu
 }
 
 export async function loadPogotronData() {
-    const response = await fetch('/api/pogotron', { method: 'GET' });
-    const data = await response.json();
-    setStore('pogotron', grouped(data.rows));
+    // const response = await fetch('/api/pogotron', { method: 'GET' });
+    // const data = await response.json();
+    setStore('pogotron', grouped(VideoDB));
 }
 
 export async function deletePogotronData(id: number | string, category: string) {
