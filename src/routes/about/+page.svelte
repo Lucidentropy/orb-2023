@@ -24,7 +24,7 @@
     <p>Before high-speed internet was broadly available, it was important that you found servers with the lowest ping. That is, unless you lived in Hawaii where every server has a high ping. I would hop between servers until I eventually found one with a community I liked playing with: a server called Oklahoma RR Tribes.</p>
     <p>I tried joining other clans at the time but was immediately disappointed at how uncool they were to each other. In the spirit of, "Yeah, well… I’m gonna go build my own clan with blackjack,” I thought it over for a few days, then with a few server regulars in tow, we created Orb. There were 4 founding members: Myself, Lucid (at the time known as Raven); Cells; Doom Train; and Vorax-1.</p>
     <p>Orb has since evolved into a multi-game community with real life meet-ups that have included road trips, weddings, and regular get-togethers with people from numerous states.</p>
-    <img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/calvinhobbesctf.jpg" alt="Calvin and Hobbes stealing the flag."/>
+    <img src="./images/calvinhobbesctf.jpg" alt="Calvin and Hobbes stealing the flag."/>
     
     <h2>The Orb philosophy is simple.</h2>
     <p>Orb is a community of people who feel that online gaming is a fun experience to be shared with friends. We're a collection of humans who aren’t perfect, but choose not to accept drama or fighting as the norm. We want others to see us as respectful, funny, mature, and fun to be around. We are people who understand how to have fun and joke without doing it at the expense of others.</p>

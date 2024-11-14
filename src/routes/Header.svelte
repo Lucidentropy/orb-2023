@@ -67,8 +67,8 @@
 </svelte:head>
 
 <header>
-	<div class="banner" style="background-image:url('https://clanorb.s3.us-west-1.amazonaws.com/public/images/header.png')" >
-		<a href="/" class="logo"><img src="https://clanorb.s3.us-west-1.amazonaws.com/public/images/neworbdemo.jpg" alt="Logo" /></a>
+	<div class="banner" style="background-image:url('./images/header.png')" >
+		<a href="/" class="logo"><img src="./images/neworbdemo.jpg" alt="Logo" /></a>
 	</div>
 	<div id="webamp-container"></div>
 
