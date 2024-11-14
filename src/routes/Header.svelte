@@ -68,7 +68,7 @@
 
 <header>
 	<div class="banner" style="background-image:url('./images/header.png')" >
-		<a href="/" class="logo"><img src="./images/neworbdemo.jpg" alt="Logo" /></a>
+		<a href="/" class="logo"><img src="/images/neworbdemo.jpg" alt="Logo" /></a>
 	</div>
 	<div id="webamp-container"></div>
 

@@ -109,8 +109,8 @@ html {
 body {
 	min-height: 100vh;
 	margin: 0;
-	background: url('./images/footer-bg.png') bottom center repeat-x fixed,
-		url('./images/star-bg.png') 50% 0 repeat-x scroll;
+	background: url('/images/footer-bg.png') bottom center repeat-x fixed,
+		url('/images/star-bg.png') 50% 0 repeat-x scroll;
 	background-size: 100% auto;
 }
 
@@ -141,7 +141,7 @@ a:hover {
 	font-size: 1.75rem;
 	line-height: 1.2;
 	font-weight: normal;
-	background: #011720 url('./images/footer-bg.png') 50% 50% no-repeat;
+	background: #011720 url('/images/footer-bg.png') 50% 50% no-repeat;
 	margin: -30px -30px 20px;
 	padding: 20px;
 	border-radius: 10px;
