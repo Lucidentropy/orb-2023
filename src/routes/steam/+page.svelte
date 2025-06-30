@@ -10,7 +10,6 @@
     
     // onMount(async () => {
     //         loading = true;
-
     //         if (myDataStore.steamData) {
     //             steamData = myDataStore.steamData;
     //             loading = false;
