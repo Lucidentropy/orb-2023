@@ -8,23 +8,23 @@
     let steamData: any = null;
     let loading: boolean = true;
     
-    onMount(async () => {
-            loading = true;
+    // onMount(async () => {
+    //         loading = true;
 
-            if (myDataStore.steamData) {
-                steamData = myDataStore.steamData;
-                loading = false;
-            } else {
-                const response = await fetch('/api/steam');
-                if (response.ok) {
-                    steamData = await response.json();
-                    myDataStore.steamData = steamData;
-                    loading = false;
-                } else {
-                    console.error('Failed to fetch steam data');
-                }
-            }
-        });
+    //         if (myDataStore.steamData) {
+    //             steamData = myDataStore.steamData;
+    //             loading = false;
+    //         } else {
+    //             const response = await fetch('/api/steam');
+    //             if (response.ok) {
+    //                 steamData = await response.json();
+    //                 myDataStore.steamData = steamData;
+    //                 loading = false;
+    //             } else {
+    //                 console.error('Failed to fetch steam data');
+    //             }
+    //         }
+    //     });
 
 </script>
 
