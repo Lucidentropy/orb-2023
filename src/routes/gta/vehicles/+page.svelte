@@ -4,7 +4,9 @@
 		faCar, faGear, faParking, faCircleDot, faBicycle,
 		faArrowUp, faPersonWalking, faWater, faMotorcycle, faPlane, faHelicopter
     } from '@fortawesome/free-solid-svg-icons';
-	import { vehicles } from '$routes/gta/gta-db.js';
+
+    import { vehicles } from '$routes/gta/gta-db.js';
+    import { removed_vehicles } from '$routes/gta/removed-vehicles.js';
 
 	type SiteColor = { site: string; color: string };
 	const SITE_COLORS: SiteColor[] = [
@@ -18,8 +20,7 @@
         { site: 'benny',        color: 'text-purple-600' },
 	];
 
-    const removed_vehicles = ['Peyote Gasser','Vamos','Furore GT','Rat Bike','Daemon','Riata','Cliffhanger','190z','Enduro','Blade','Alpha','Ruston','Verus','Carbonizzare','Hexer','Fagaloa','Tulip','Michelli GT','FMJ','Voltic','Esskey','Bullet','Avarus','Innovation','Coquette BlackFin','JB 700','Cheetah','GT500','Super Diamond','Dynasty','Entity XF','Seminole Frontier','Stafford','Massacro','Lynx','Verlierer','Stinger','Rapid GT Cabrio','Retinue','Hot Rod Blazer','Seven-70','Clique','Vacca','Jester','Rapid GT Classic','Landstalker XL','Brawler','Warrener','Coquette','Streiter','Exemplar','Kalahari','Raptor','Bifta','Surano','Roosevelt','Tornado Rat Rod','Pigalle','Bodhi','Cognoscenti Cabrio','Zombie Bobber','Wolfsbane','Hustler','Feltzer','Jester (Racecar)','Rapid GT','Contender','Thrust','Roosevelt Valor','Massacro (Racecar)','Romero Hearse','Franken Stange','Issi Sport','Lifeguard','Sovereign','Liberator','Faggio Sport','Tailgater','Faggio Mod','Peyote Gasser','Vamos','Furore GT','Rat Bike','Daemon','Riata','Cliffhanger','190z','Enduro','Blade','Alpha','Ruston','Verus','Carbonizzare','Hexer','Fagaloa','Tulip','Michelli GT','FMJ','Voltic','Esskey','Bullet','Avarus','Innovation','Coquette BlackFin','JB 700','Cheetah','GT500','Super Diamond','Dynasty','Entity XF','Seminole Frontier','Stafford','Massacro','Lynx','Verlierer','Stinger','Rapid GT Cabrio','Retinue','Hot Rod Blazer','Seven-70','Clique','Vacca','Jester','Rapid GT Classic','Landstalker XL','Brawler','Warrener','Coquette','Streiter','Exemplar','Kalahari','Raptor','Bifta','Surano','Roosevelt','Tornado Rat Rod','Pigalle','Bodhi','Cognoscenti Cabrio','Zombie Bobber','Wolfsbane','Hustler','Feltzer','Jester (Racecar)','Rapid GT','Contender','Thrust','Roosevelt Valor','Massacro (Racecar)','Romero Hearse','Franken Stange','Issi Sport','Lifeguard','Sovereign','Liberator','Faggio Sport','Tailgater','Faggio Mod'];
-
+   
 	const BENNYS_EXCEPTIONS = ['Insurgent Pick-Up Custom','Technical Custom', 'Astron Custom'];
     
     const CLASS_ICON = {
@@ -206,8 +207,14 @@
         </span>
 
         <span class="flex items-center gap-2 text-orange-400">
-            Removed from Websites
+            Removed
         </span>
+
+        <span class="flex items-center gap-2">
+            [Variant]
+        </span>
+
+                
     </div>
 
 	<div class="space-y-10">
