@@ -1,7 +1,7 @@
+import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import adapter from '@sveltejs/adapter-node';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
