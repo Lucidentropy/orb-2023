@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import {
-		faCar, faGear, faParking, faCircleDot, faBicycle,
-		faArrowUp, faPersonWalking, faWater, faMotorcycle, faPlane, faHelicopter
+		faCar, faGear, faParking, faCircleDot, faBicycle, faUnlock,
+		faArrowUp, faPersonWalking, faShip , faMotorcycle, faPlane, faHelicopter
     } from '@fortawesome/free-solid-svg-icons';
 
     import { vehicles } from '$routes/gta/gta-db.js';
@@ -20,7 +20,8 @@
         { site: 'benny',        color: 'text-purple-600' },
 	];
 
-   
+    let hoverModel: string | null = null;
+
 	const BENNYS_EXCEPTIONS = ['Insurgent Pick-Up Custom','Technical Custom', 'Astron Custom'];
     
     const CLASS_ICON = {
@@ -39,6 +40,7 @@
         lastAvailable: string;
         category: string;
         removed: boolean;
+        cost: string;
 		hsw: boolean;
 	};
 
@@ -68,12 +70,17 @@
 
 			const isHSW = /\s\(hsw\)$/i.test(v.Vehicle);
 			const baseName = v.Vehicle.replace(/\s\(hsw\)$/i,'').trim();
-			const label    = baseName;
+			let label    = baseName;
 			const radar    = v.radar_icon?.toLowerCase() || '';
             const manufacturer = v['Manufacturer']?.trim() || '';
             const upgradeLocation = v['Upgrade Location']?.toLowerCase() || '';
             const lastAvailable = v['Where/Last Available']?.toLowerCase() || '';
             const removed = removed_vehicles.includes(baseName);
+            const cost = v.Cost ? parseInt(v.Cost, 10) : 0;
+
+            if (lastAvailable.includes('arena levels')) {
+                label = `[${cost}] ${baseName}`;
+            }
 
 			let cat = v.Class || 'Unknown';
 			if      (isHSW)                                    cat = "Hao's Special Works";
@@ -86,7 +93,7 @@
 			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)'))
 				cat = "Benny's Original Motor Works";
 
-			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
+			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, cost, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
 			(baseMap.get(cat) ?? baseMap.set(cat,[]).get(cat)!).push(entry);
 		}
 
@@ -115,12 +122,11 @@
                         icon = CLASS_ICON.Motorcycles;
                     }
                     if (lastAvailable.includes('arena levels')) {
+                        icon = faUnlock;
                         color = 'text-pink-600';
                     }
                 
 					icons.push({ icon, color });
-				} else if (storage.includes('submarine')) {
-					icons.push({ icon: faWater, color: 'text-white' });
 				} else if (storage.includes('garage')) {
                     
 					if (srcLower.includes('p and m')) {
@@ -135,6 +141,9 @@
                         icons.push({ icon: faCar, color:'text-pink-500' });
                     } else if (lastAvailable.includes('benny')) {
                         icons.push({ icon: faCar, color:'text-purple-500' });
+                    } else if ( catLower.includes('motorcycles') ) {
+                        const match = SITE_COLORS.find(s=>srcLower.includes(s.site));
+                        icons.push({ icon: CLASS_ICON.Motorcycles, color: match?.color ?? 'text-white' });
                     } else {
 						const match = SITE_COLORS.find(s=>srcLower.includes(s.site));
 						icons.push({ icon: faCar, color: match?.color ?? 'text-white' });
@@ -146,75 +155,61 @@
 			}
 		}
 
-		const out: VehicleCategoryMap = {};
-		[...baseMap.entries()]
-			.sort(([a],[b])=>a.localeCompare(b))
-			.forEach(([k,v])=>{ out[k]=v.sort((a,b)=>a.label.localeCompare(b.label)); });
+        const out: VehicleCategoryMap = {};
+        [...baseMap.entries()]
+            .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+            .forEach(([k, v]) => {
+                out[k] = k === 'Arena War Vehicles'
+                    ? v.sort((a, b) => {
+                            const hasIconA = !!a.radar_icon;
+                            const hasIconB = !!b.radar_icon;
+                            if (hasIconA !== hasIconB) return hasIconB ? 1 : -1;
+                            return a.label.localeCompare(b.label, undefined, { numeric: true });
+                        })
+                    : v.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
+            });
 
-		vehiclesByCategory = out;
+
+        vehiclesByCategory = out;
+
 	}
 
 	$: jsonOut = `export const vehicles = ${JSON.stringify(vehicles,null,2)};\n`;
 </script>
 
-
-
-
-
+<style>
+	.model-preview {
+		position: absolute;
+		top: 0;
+		left: 100%;
+		margin-left: 1rem;
+		width: 200px;
+		border: 1px solid #ccc;
+		background: white;
+		z-index: 20;
+		pointer-events: none;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+</style>
 
 <main class="p-6 max-w-6xl mx-auto">
-	<h1 class="text-3xl font-bold mb-6">All GTA Vehicles by Category</h1>
+    <nav class="text-sm text-gray-600 mb-4">
+        <a href="/gta" class="hover:underline text-blue-600">← Back to GTA</a>
+    </nav>
+	<h1 class="text-3xl font-bold mb-1">All GTA Vehicles by Category</h1>
+    <p class="text-sm text-gray-500 mb-4">{Object.values(vehiclesByCategory).flat().length} total vehicles</p>
 
-    <div class="flex flex-wrap items-center gap-3 text-xs mt-4 mb-4">
-        <span class="flex items-center gap-2">
-            <Icon data={faCar} class="text-violet-600" />
-            Benny’s
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faCar} class="text-pink-500" />
-            Arena
-        </span>
-
-      <span class="flex items-center gap-2">
-            <Icon data={faParking} class="text-gray-500" />
-            Warstock
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faPlane} class="text-sky-400" />
-            Elitas
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faParking} class="text-blue-800" />
-            DockTease
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faCar} class="text-rose-500" />
-            Legendary
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faCar} class="text-yellow-500" />
-            Southern SASA
-        </span>
-
-        <span class="flex items-center gap-2">
-            <Icon data={faPersonWalking} class="text-gray-500" />
-            Traffic Spawn
-        </span>
-
-        <span class="flex items-center gap-2 text-orange-400">
-            Removed
-        </span>
-
-        <span class="flex items-center gap-2">
-            [Variant]
-        </span>
-
-                
+    <div class="flex flex-wrap items-center gap-3 text-xs mb-6">
+        <span class="flex items-center gap-2"><Icon data={faCar} class="text-pink-500" /> Arena</span>
+        <span class="flex items-center gap-2"><Icon data={faCar} class="text-violet-600" /> Benny’s</span>
+        <span class="flex items-center gap-2"><Icon data={faPlane} class="text-sky-400" /> Elitas</span>
+        <span class="flex items-center gap-2"><Icon data={faParking} class="text-blue-800" /> DockTease</span>
+        <span class="flex items-center gap-2"><Icon data={faParking} class="text-gray-500" /> Warstock</span>
+        <span class="flex items-center gap-2"><Icon data={faCar} class="text-rose-500" /> Legendary</span>
+        <span class="flex items-center gap-2"><Icon data={faCar} class="text-yellow-500" /> Southern SASA</span>
+        <span class="flex items-center gap-2"><Icon data={faPersonWalking} class="text-gray-500" /> Traffic Spawn</span>
+        <span class="flex items-center gap-2 text-orange-400"> Removed</span>
+        <span class="flex items-center gap-2"> [Variant]</span>
     </div>
 
 	<div class="space-y-10">
@@ -229,6 +224,11 @@
                     <li
                         class="break-inside-avoid mb-1 list-disc list-inside text-sm whitespace-nowrap flex items-center gap-2"
                         class:text-orange-400={vehicle.removed}
+                        on:mouseenter={() => {
+                            const modelId = vehicle.models?.split(',')[0]?.trim().toLowerCase();
+                            if (modelId) hoverModel = modelId;
+                        }}
+                        on:mouseleave={() => hoverModel = null}
                     >
                         {#if vehicle.radar_icon}
                             <img
@@ -250,6 +250,16 @@
                         {/if}
                         {vehicle.label}{vehicle.hsw ? ' (HSW)' : ''}
                         {@html vehicle.manufacturer ? `<span class="text-xs text-gray-400 float-right">${vehicle.manufacturer}</span>` : ''}
+
+                        {#if hoverModel}
+                            <div class="model-preview">
+                                <img
+                                    src={`/gta/models/${hoverModel}.webp`}
+                                    alt="Model preview"
+                                    class="w-full h-auto object-contain"
+                                />
+                            </div>
+                        {/if}
                     </li>
 					{/each}
 				</ul>
