@@ -76,7 +76,8 @@
             const upgradeLocation = v['Upgrade Location']?.toLowerCase() || '';
             const lastAvailable = v['Where/Last Available']?.toLowerCase() || '';
             const removed = removed_vehicles.includes(baseName);
-            const cost = v.Cost ? parseInt(v.Cost, 10) : 0;
+            const cost = v.Cost ? parseInt(v.Cost.replace(/,/g, ''), 10) : 0;
+            const source = v.Source?.toLowerCase() || '';
 
             if (lastAvailable.includes('arena levels')) {
                 label = `[${cost}] ${baseName}`;
@@ -89,8 +90,8 @@
 			else if (storage.includes('facility'))             cat = 'Facility Vehicles';
 			else if (storage.includes('pegasus') && (v['Where/Last Available']?.toLowerCase()??'').includes('arena'))
 				cat = 'Arena War Vehicles';
-			else if (/\(Arena\)/i.test(label))                 cat = 'Arena War Vehicles';
-			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)'))
+			else if (/\(Arena\)/i.test(label) || lastAvailable.includes('arena levels'))                 cat = 'Arena War Vehicles';
+			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)') || (lastAvailable.includes('benny') && source.includes('upgrade')))
 				cat = "Benny's Original Motor Works";
 
 			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, cost, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
@@ -107,6 +108,7 @@
                 const upgradeLocation = d.upgradeLocation.toLowerCase();
                 const catLower = d.category.toLowerCase();
                 const lastAvailable = d.lastAvailable.toLowerCase();
+                const cost = parseInt(d.cost);
 
 				if (storage.includes('pegasus')) {
 					let color = SITE_COLORS.find(s=>srcLower.includes(s.site))?.color ?? 'text-white';
@@ -135,7 +137,7 @@
 						const upLower = getUp(d.label);
 						if (upLower.includes('bennys')) icons.push({ icon: faCar, color:'text-violet-600' },{ icon: faArrowUp,color:'text-green-500' });
 						else                             icons.push({ icon: faCar, color:'text-violet-600' });
-					} else if (srcLower.includes('traffic')) {
+					} else if (srcLower.includes('traffic') || (cost < 100000 && cost > 1000 && !d.removed)) {
 						icons.push({ icon: faPersonWalking, color:'text-gray-500' });
 					} else if (lastAvailable.includes('arena workshop')) {
                         icons.push({ icon: faCar, color:'text-pink-500' });
@@ -224,11 +226,6 @@
                     <li
                         class="break-inside-avoid mb-1 list-disc list-inside text-sm whitespace-nowrap flex items-center gap-2"
                         class:text-orange-400={vehicle.removed}
-                        on:mouseenter={() => {
-                            const modelId = vehicle.models?.split(',')[0]?.trim().toLowerCase();
-                            if (modelId) hoverModel = modelId;
-                        }}
-                        on:mouseleave={() => hoverModel = null}
                     >
                         {#if vehicle.radar_icon}
                             <img
