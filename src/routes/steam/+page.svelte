@@ -24,7 +24,7 @@
     //                 console.error('Failed to fetch steam data');
     //             }
     //         }
-    //     });
+    //      });
 
 </script>
 
