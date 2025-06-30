@@ -78,6 +78,7 @@
             const removed = removed_vehicles.includes(baseName);
             const cost = v.Cost ? parseInt(v.Cost.replace(/,/g, ''), 10) : 0;
             const source = v.Source?.toLowerCase() || '';
+            const dlc = v.DLC?.toLowerCase() || '';
 
             if (lastAvailable.includes('arena levels')) {
                 label = `[${cost}] ${baseName}`;
@@ -94,7 +95,7 @@
 			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)') || (lastAvailable.includes('benny') && source.includes('upgrade')))
 				cat = "Benny's Original Motor Works";
 
-			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, cost, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
+			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, dlc, cost, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
 			(baseMap.get(cat) ?? baseMap.set(cat,[]).get(cat)!).push(entry);
 		}
 
@@ -109,8 +110,9 @@
                 const catLower = d.category.toLowerCase();
                 const lastAvailable = d.lastAvailable.toLowerCase();
                 const cost = parseInt(d.cost);
+                const dlc = d.dlc;
 
-				if (storage.includes('pegasus')) {
+				if (storage.includes('pegasus') || storage.includes('hangar')) {
 					let color = SITE_COLORS.find(s=>srcLower.includes(s.site))?.color ?? 'text-white';
 
                     let icon = faParking;
@@ -161,14 +163,33 @@
         [...baseMap.entries()]
             .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
             .forEach(([k, v]) => {
-                out[k] = k === 'Arena War Vehicles'
-                    ? v.sort((a, b) => {
-                            const hasIconA = !!a.radar_icon;
-                            const hasIconB = !!b.radar_icon;
-                            if (hasIconA !== hasIconB) return hasIconB ? 1 : -1;
-                            return a.label.localeCompare(b.label, undefined, { numeric: true });
-                        })
-                    : v.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
+                if (k === "Benny's Original Motor Works") {
+                    v.forEach(vehicle => {
+                        if (
+                            vehicle.dlc?.toLowerCase().includes('lowriders') &&
+                            vehicle.icons.length
+                        ) {
+                            vehicle.icons[0].color = 'text-green-800';
+                            vehicle._isLowrider = true; // temporary flag for sorting
+                        }
+                    });
+
+                    out[k] = v.sort((a, b) => {
+                        const aLow = !!a._isLowrider;
+                        const bLow = !!b._isLowrider;
+                        if (aLow !== bLow) return aLow ? -1 : 1;
+                        return a.label.localeCompare(b.label, undefined, { numeric: true });
+                    });
+                } else if (k === 'Arena War Vehicles') {
+                    out[k] = v.sort((a, b) => {
+                        const hasIconA = !!a.radar_icon;
+                        const hasIconB = !!b.radar_icon;
+                        if (hasIconA !== hasIconB) return hasIconB ? 1 : -1;
+                        return a.label.localeCompare(b.label, undefined, { numeric: true });
+                    });
+                } else {
+                    out[k] = v.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
+                }
             });
 
 
@@ -204,12 +225,13 @@
     <div class="flex flex-wrap items-center gap-3 text-xs mb-6">
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-pink-500" /> Arena</span>
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-violet-600" /> Benny’s</span>
+        <span class="flex items-center gap-2"><Icon data={faCar} class="text-green-800" /> Low</span>
         <span class="flex items-center gap-2"><Icon data={faPlane} class="text-sky-400" /> Elitas</span>
         <span class="flex items-center gap-2"><Icon data={faParking} class="text-blue-800" /> DockTease</span>
         <span class="flex items-center gap-2"><Icon data={faParking} class="text-gray-500" /> Warstock</span>
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-rose-500" /> Legendary</span>
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-yellow-500" /> Southern SASA</span>
-        <span class="flex items-center gap-2"><Icon data={faPersonWalking} class="text-gray-500" /> Traffic Spawn</span>
+        <span class="flex items-center gap-2"><Icon data={faPersonWalking} class="text-gray-500" /> Stealable</span>
         <span class="flex items-center gap-2 text-orange-400"> Removed</span>
         <span class="flex items-center gap-2"> [Variant]</span>
     </div>
