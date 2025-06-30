@@ -33,18 +33,12 @@
 			{ text: 'GTA 5', url: '/gta' },
 			// { text: 'Sverdle', url: '/sverdle'},
 			{ text: 'Tribes', url: '/tribes' },
+			{ text: 'Elite', url: '/elite' },
 			// { text: 'Palia' , url: '/palia' },
 			{ text: 'WoW', url: '/wow' },
+			{ text: 'Warframe', url : '/warframe'}
 		],
 	},
-	// {
-	// 	text: 'Other',
-	// 	subItems: [
-	// 		{ text: 'Panoramas', url: '/pano' },
-	// 		{ text: 'Name Generator', url: '/namegen'},
-	// 		{ text: 'Actually nothing'}
-	// 	]
-	// },
 	{
 		text: 'Login',
 		url : '/login'
@@ -135,7 +129,6 @@
 
 	nav {
 		width:100vw;
-		max-width:1020px;
 		margin: 0 auto;
 		background:#0006;
 		// border:1px solid var(--color-theme-1);

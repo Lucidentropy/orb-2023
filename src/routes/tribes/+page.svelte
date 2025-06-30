@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import { slide, fade } from 'svelte/transition';
 
     let masterServerQuery = [];
     let serverList = [];
@@ -124,22 +125,15 @@
     onMount(async () => {
         try {
             const response = await fetch('/api/tribes/master');
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
             masterServerQuery = await response.json();
-            serverList = masterServerQuery.servers;
-            serverList.sort((a, b) => b.currentPlayers - a.currentPlayers);
-
+            serverList = masterServerQuery.servers.sort((a,b) => b.currentPlayers - a.currentPlayers);
             randomBg = Math.floor(Math.random() * 3) + 1;
-
-            const serverIpFromHash = window.location.hash.substring(1);
-            if (serverIpFromHash && serverList.some(server => server.address === serverIpFromHash)) {
-                openModal(serverIpFromHash);
+            const hashIp = window.location.hash.slice(1);
+            if (hashIp && serverList.some(s=>s.address===hashIp)) {
+                openModal(hashIp);
             }
-
-        } catch (error) {
-            console.error("Failed to fetch server list:", error);
+        } catch (e) {
+            console.error("Failed to fetch server list:", e);
         } finally {
             loading = false;
         }
@@ -248,49 +242,65 @@
         {#if loading}
             <p>Establishing uplink with satellite network...</p>
         {:else}
-        <p class="counts"><strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers</p>
-        <!-- <button on:click={refreshData}>Refresh</button> -->
-            <table id="tribesMasterList" width="100%" border="0" class="green-border bg{randomBg}">
-                <thead>
-                    <tr>
-                        <th>Conn</th>
-                        <th>Status</th>
-                        <th on:click={() => sort('name')}>Server Name</th>
-                        <th on:click={() => sort('ping')}>Ping</th>
-                        <th on:click={() => sort('server.game')}>Type</th>
-                        <th on:click={() => sort('map')}>Mission</th>
-                        <th on:click={() => sort('currentPlayers')}>Players</th>
-                        <th on:click={() => sort('server?.mods')}>Server Type/Mods</th>
-                    </tr>
-                </thead>
-                {#each serverList as server}
-                    <tbody>
-                        <tr on:click={() => {
-                            openModal(server.address);
-                            window.location.hash = server.address;
-                            button4Sound.play();
-                        }}>
-                            <td>
-                                <div class="conn {server.ping < 75 ? 'good' : (server.ping < 100 ? 'okay' : 'bad')}"></div>
-                            </td>
-                            <td class="status">
-                                {#if server.server.needpass}
-                                    <img src="/images/tribes-server-locked.gif" />
-                                {/if}
-                                {#if server.server.dedicated}
-                                    <img src="/images/tribes-server-dedicated.gif" />
-                                {/if}
-                            </td>
-                            <td class="name">{server.name}</td>
-                            <td>{server.ping}</td>
-                            <td>{server.server.game}</td>
-                            <td>{server.map}</td>
-                            <td>{server.currentPlayers}/{server.maxPlayers}</td>
-                            <td>{server.server?.mods?.trim() || 'base'}</td>
-                        </tr>
-                    </tbody>
-                {/each}
-            </table>
+
+            <div in:slide={{ y: -20, duration: 400 }}>
+                <p class="counts" in:fade={{ duration: 400 }}>
+                    <strong>{totalPlayers}</strong> players online in <strong>{totalServers}</strong> servers
+                </p>
+            </div>
+
+            <div in:slide={{ y: -20, duration: 500, delay: 300 }}>
+                <div in:fade={{ duration: 500, delay: 300 }}>
+                    <table
+                    id="tribesMasterList"
+                    class="green-border bg{randomBg}"
+                    width="100%"
+                    border="0"
+                    >
+                        <thead>
+                            <tr>
+                                <th>Conn</th>
+                                <th>Status</th>
+                                <th on:click={() => sort('name')}>Server Name</th>
+                                <th on:click={() => sort('ping')}>Ping</th>
+                                <th on:click={() => sort('server.game')}>Type</th>
+                                <th on:click={() => sort('map')}>Mission</th>
+                                <th on:click={() => sort('currentPlayers')}>Players</th>
+                                <th on:click={() => sort('server?.mods')}>Server Type/Mods</th>
+                            </tr>
+                        </thead>
+                        {#each serverList as server}
+                        <tbody>
+                            <tr
+                            on:click={() => {
+                                openModal(server.address);
+                                window.location.hash = server.address;
+                                button4Sound.play();
+                            }}
+                            >
+                                <td>
+                                    <div class="conn {server.ping < 75 ? 'good' : server.ping < 100 ? 'okay' : 'bad'}"></div>
+                                </td>
+                                <td class="status">
+                                    {#if server.server.needpass}
+                                        <img src="/images/tribes-server-locked.gif" />
+                                    {/if}
+                                    {#if server.server.dedicated}
+                                        <img src="/images/tribes-server-dedicated.gif" />
+                                    {/if}
+                                </td>
+                                <td class="name">{server.name}</td>
+                                <td>{server.ping}</td>
+                                <td>{server.server.game}</td>
+                                <td>{server.map}</td>
+                                <td>{server.currentPlayers}/{server.maxPlayers}</td>
+                                <td>{server.server?.mods?.trim() || 'base'}</td>
+                            </tr>
+                        </tbody>
+                        {/each}
+                    </table>
+                </div>
+            </div>
         {/if}
     </section>
 

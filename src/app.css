@@ -92,8 +92,6 @@
 
 * {
 	box-sizing: border-box;
-	padding: 0;
-	margin: 0
 }
 
 ul {
@@ -149,13 +147,14 @@ a:hover {
 	background: #011720 url('/images/footer-bg.png') 50% 50% no-repeat;
 	margin: -30px -30px 20px;
 	padding: 20px;
-	border-radius: 10px;
+	border-radius: 10px 10px 0 0;
 	box-shadow: inset 0px 0px 10px #000;
 	font-family: "Ropa Sans", sans-serif;
 	font-weight: bold;
 	text-shadow: 1px 1px 1px #000;
 	color: #fff;
-	clear: both;	
+	clear: both;
+	border-bottom:1px solid #111;
 	
 }
 
@@ -193,9 +192,9 @@ pre {
 	color: var(--color-text);
 }
 
-.text-column {
+/* .text-column {
 	display: flex;
-	/* max-width: 48rem; */
+	
 	flex: 0.6;
 	flex-direction: column;
 	justify-content: center;
@@ -209,7 +208,7 @@ pre {
     background: linear-gradient(0deg, #000 0%, #032d50 50%, #000 100%);
     color: inherit;
     border-radius: 4.5px;
-}
+} */
 input,
 button {
 	font-size: inherit;
@@ -266,5 +265,5 @@ main {
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
-    max-width: 1020px;
+
 }

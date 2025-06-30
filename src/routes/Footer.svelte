@@ -15,7 +15,7 @@
 {/if}
 
 <footer class="flex flex-col items-center justify-center mt-24 px-4 text-xs opacity-80">
-	<p class="flex flex-wrap gap-4 items-center justify-center text-center font-bold">
+	<p class="flex flex-wrap gap-2 items-center justify-center text-center font-bold">
 		<span>Clan Orb, a gaming community founded in 2000.</span>
 
 		{#if !isWebampLoaded}
@@ -23,7 +23,8 @@
 				on:click={loadWebamp}
 				type="button"
 				title="A relic of an ancient time."
-				class="inline-flex items-center justify-center bg-transparent p-0 m-0 border-none hover:opacity-100 opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-1 rounded">
+				class="inline-flex items-center justify-center bg-transparent p-0 m-0 border-none hover:opacity-100 opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-1 rounded"
+				style="background:none;padding:0;">
 				<img src={winampIcon} alt="Winamp" class="h-5 w-5 object-contain saturate-50 hover:saturate-100" />
 			</button>
 		{/if}
