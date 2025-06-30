@@ -214,19 +214,18 @@
                                     <th>Kills</th>
                                 </tr>
                             </thead>
+                            <tbody>
                             {#each serverData.players as player}
-                                <tbody>
-                                    <tr>
-
-                                        <td>{player.name}</td>
-                                        <td>{serverData.teams.find(t => t.id === player.team).name}</td>
-                                        <td>{player.score}</td>
-                                        <td>{player.ping}</td>
-                                        <td>{player.packetLoss}</td>
-                                        <td></td>
-                                    </tr>
-                                </tbody>
+                                <tr>
+                                    <td>{player.name}</td>
+                                    <td>{serverData.teams.find(t => t.id === player.team).name}</td>
+                                    <td>{player.score}</td>
+                                    <td>{player.ping}</td>
+                                    <td>{player.packetLoss}</td>
+                                    <td></td>
+                                </tr>
                             {/each}
+                            </tbody>
                         </table>
                     </div>
                     <p class="note">Bookmark this URL to return directly to this server.</p>
@@ -269,8 +268,8 @@
                                 <th on:click={() => sort('server?.mods')}>Server Type/Mods</th>
                             </tr>
                         </thead>
-                        {#each serverList as server}
                         <tbody>
+                        {#each serverList as server}
                             <tr
                             on:click={() => {
                                 openModal(server.address);
@@ -289,15 +288,15 @@
                                         <img src="/images/tribes-server-dedicated.gif" />
                                     {/if}
                                 </td>
-                                <td class="name">{server.name}</td>
+                                <td class="name block">{server.name}</td>
                                 <td>{server.ping}</td>
                                 <td>{server.server.game}</td>
                                 <td>{server.map}</td>
                                 <td>{server.currentPlayers}/{server.maxPlayers}</td>
-                                <td>{server.server?.mods?.trim() || 'base'}</td>
+                                <td class="block">{server.server?.mods?.trim() || 'base'}</td>
                             </tr>
-                        </tbody>
                         {/each}
+                        </tbody>
                     </table>
                 </div>
             </div>
