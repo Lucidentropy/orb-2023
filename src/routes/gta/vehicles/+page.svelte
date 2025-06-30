@@ -95,7 +95,7 @@
 			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)') || (lastAvailable.includes('benny') && source.includes('upgrade')))
 				cat = "Benny's Original Motor Works";
 
-			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, dlc, cost, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
+			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, dlc, cost, source, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
 			(baseMap.get(cat) ?? baseMap.set(cat,[]).get(cat)!).push(entry);
 		}
 
@@ -166,11 +166,11 @@
                 if (k === "Benny's Original Motor Works") {
                     v.forEach(vehicle => {
                         if (
-                            vehicle.dlc?.toLowerCase().includes('lowriders') &&
-                            vehicle.icons.length
+                            (vehicle.dlc?.toLowerCase().includes('lowriders') || vehicle.dlc?.toLowerCase().includes('summer special'))
+                            && vehicle.icons.length
                         ) {
                             vehicle.icons[0].color = 'text-green-800';
-                            vehicle._isLowrider = true; // temporary flag for sorting
+                            vehicle._isLowrider = true;
                         }
                     });
 
@@ -198,6 +198,19 @@
 	}
 
 	$: jsonOut = `export const vehicles = ${JSON.stringify(vehicles,null,2)};\n`;
+    $: allVehicles = Object.values(vehiclesByCategory).flat();
+
+    $: totalCost = allVehicles
+        .filter(v => {
+            const source = (v.source || '').toLowerCase();
+            const valid = source && !source.includes('traffic') && v.cost && v.cost > 1000;
+            if (!valid) return false;
+
+            const parsedCost = parseInt(v.cost);
+            return parsedCost > 0;
+        })
+        .reduce((sum, v) => sum + parseInt(v.cost), 0)
+        .toLocaleString();
 </script>
 
 <style>
@@ -220,7 +233,18 @@
         <a href="/gta" class="hover:underline text-blue-600">← Back to GTA</a>
     </nav>
 	<h1 class="text-3xl font-bold mb-1">All GTA Vehicles by Category</h1>
-    <p class="text-sm text-gray-500 mb-4">{Object.values(vehiclesByCategory).flat().length} total vehicles</p>
+
+    <p class="text-sm text-gray-500 mb-4">
+        {Object.values(vehiclesByCategory).flat().length} total vehicles,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('garage')).length} cars,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('hangar')).length} planes,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('helicopter')).length} helicopters,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('boat')).length} boats,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('motorcycle')).length} motorcycles, 
+        {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('pegasus')).length} pegasus, 
+        ${totalCost} to purchase all
+    </p>
+    
 
     <div class="flex flex-wrap items-center gap-3 text-xs mb-6">
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-pink-500" /> Arena</span>
@@ -235,6 +259,8 @@
         <span class="flex items-center gap-2 text-orange-400"> Removed</span>
         <span class="flex items-center gap-2"> [Variant]</span>
     </div>
+
+    <p class="text-sm text-center mb-10">An all-in-one-page reference for all vehicles in GTA 5:Online for collectors.</p>
 
 	<div class="space-y-10">
 		{#each Object.entries(vehiclesByCategory) as [category, list]}

@@ -91,7 +91,7 @@
 					Vehicle Collection
 				</a>
 				<a
-					href="/gta/vehicles"
+					href="/gta/guides"
 					class="w-64 px-4 py-2 bg-blue-800/50 text-black rounded-md hover:bg-white/50 transition text-md font-semibold text-center"
 				>
 					Reference Guides
