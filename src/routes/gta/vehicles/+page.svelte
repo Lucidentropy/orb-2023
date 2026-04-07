@@ -16,11 +16,9 @@
 		{ site: 'legendary',    color: 'text-rose-500' },
 		{ site: 'ssasa',        color: 'text-yellow-500' },
 		{ site: 'pandm',        color: 'text-lime-600' },
-		{ site: 'arena',        color: 'text-pink-600' },
+		{ site: 'arena',        color: 'text-pink-500' },
         { site: 'benny',        color: 'text-purple-600' },
 	];
-
-    let hoverModel: string | null = null;
 
 	const BENNYS_EXCEPTIONS = ['Insurgent Pick-Up Custom','Technical Custom', 'Astron Custom'];
     
@@ -41,6 +39,7 @@
         category: string;
         removed: boolean;
         cost: string;
+        dlc: string;
 		hsw: boolean;
 	};
 
@@ -66,7 +65,7 @@
 			const storage = (v['storageLocation'] ?? '').toLowerCase();
 			if (!storage) continue;
 
-			if (!['garage','pegasus','submarine','hangar','warehouse','nightclub','facility'].some(s=>storage.includes(s))) continue;
+			if (!['garage','pegasus','submarine','hangar','warehouse','nightclub','facility','freakshop', 'arena', 'bail office', 'salvage yard'].some(s=>storage.includes(s))) continue;
 
 			const isHSW = /\s\(hsw\)$/i.test(v.Vehicle);
 			const baseName = v.Vehicle.replace(/\s\(hsw\)$/i,'').trim();
@@ -89,11 +88,22 @@
 			else if (storage.includes('warehouse'))            cat = 'Special Vehicle Warehouse';
 			else if (storage.includes('nightclub'))            cat = 'Nightclub Vehicles';
 			else if (storage.includes('facility'))             cat = 'Facility Vehicles';
-			else if (storage.includes('pegasus') && (v['Where/Last Available']?.toLowerCase()??'').includes('arena'))
+			else if (storage.includes('pegasus') && (lastAvailable).includes('arena'))
 				cat = 'Arena War Vehicles';
 			else if (/\(Arena\)/i.test(label) || lastAvailable.includes('arena levels'))                 cat = 'Arena War Vehicles';
 			else if (/\sCustom$/.test(label) && !BENNYS_EXCEPTIONS.includes(label) && !label.toLowerCase().includes('(hsw)') || (lastAvailable.includes('benny') && source.includes('upgrade')))
 				cat = "Benny's Original Motor Works";
+            else if ( cat == "Helicopters") {
+                const extras = ['Havok', 'Annihilator', 'Sparrow'];
+                if (extras.includes(label) || source.includes('warstock')) {
+                    cat = 'Helicopters, weaponized';
+                } 
+            } else if ( cat == "Planes") {
+                const extras = ['Ultralight', 'Seabreeze'];
+                if (extras.includes(label) || source.includes('warstock')) {
+                    cat = 'Planes, weaponized';
+                } 
+            }
 
 			const entry: VehicleDisplay = { label, radar_icon: radar, manufacturer, upgradeLocation, removed, dlc, cost, source, lastAvailable, category: cat, icons: [], storage, hsw: isHSW };
 			(baseMap.get(cat) ?? baseMap.set(cat,[]).get(cat)!).push(entry);
@@ -127,7 +137,7 @@
                     }
                     if (lastAvailable.includes('arena levels')) {
                         icon = faUnlock;
-                        color = 'text-pink-600';
+                        color = 'text-pink-500';
                     }
                 
 					icons.push({ icon, color });
@@ -211,22 +221,17 @@
         })
         .reduce((sum, v) => sum + parseInt(v.cost), 0)
         .toLocaleString();
-</script>
 
-<style>
-	.model-preview {
-		position: absolute;
-		top: 0;
-		left: 100%;
-		margin-left: 1rem;
-		width: 200px;
-		border: 1px solid #ccc;
-		background: white;
-		z-index: 20;
-		pointer-events: none;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-</style>
+
+    function uniqueCSV(field) {
+        const set = new Set(
+            vehicles
+                .map(v => v[field])
+                .filter(Boolean)
+        );
+        return [...set].join(', ');
+    }
+</script>
 
 <main class="p-6 max-w-6xl mx-auto">
     <nav class="text-sm text-gray-600 mb-4">
@@ -236,15 +241,39 @@
 
     <p class="text-sm text-gray-500 mb-4">
         {Object.values(vehiclesByCategory).flat().length} total vehicles,
-        {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('garage')).length} cars,
+        {Object.values(vehiclesByCategory).flat().filter(
+            v =>
+                v.storage?.includes('garage') &&
+                !v.category.toLowerCase().includes('motorcycle') &&
+                !v.category.toLowerCase().includes('cycle')
+        ).length} cars, 
         {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('hangar')).length} planes,
         {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('helicopter')).length} helicopters,
         {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('boat')).length} boats,
+        {Object.values(vehiclesByCategory).flat().filter(v => v.source.toLowerCase().includes('p and m')).length} bikes,
         {Object.values(vehiclesByCategory).flat().filter(v => v.category.toLowerCase().includes('motorcycle')).length} motorcycles, 
+        {Object.values(vehiclesByCategory).flat().filter(
+            v =>
+            !v.storage?.includes('garage') &&
+            !v.category.toLowerCase().includes('motorcycle') &&
+            !v.category.toLowerCase().includes('cycle') &&
+            !v.category.toLowerCase().includes('helicopter') &&
+            !v.category.toLowerCase().includes('plane') &&
+            !v.storage?.includes('pegasus')
+        ).length} special, 
         {Object.values(vehiclesByCategory).flat().filter(v => v.storage?.includes('pegasus')).length} pegasus, 
-        ${totalCost} to purchase all
+        ${totalCost}.
     </p>
-    
+
+
+    <!-- <ul class="text-xs list-disc list-inside space-y-1">
+        <li><strong>Drivetrain:</strong> {uniqueCSV('Drivetrain')}</li>
+        <li><strong>Manufacturer:</strong> {uniqueCSV('Manufacturer')}</li>
+        <li><strong>Source:</strong> {uniqueCSV('Source')}</li>
+        <li><strong>Where/Last Available:</strong> {uniqueCSV('Where/Last Available')}</li>
+        <li><strong>Storage Location:</strong> {uniqueCSV('storageLocation')}</li>
+        <li><strong>Upgrade Location:</strong> {uniqueCSV('Upgrade Location')}</li>
+    </ul> -->
 
     <div class="flex flex-wrap items-center gap-3 text-xs mb-6">
         <span class="flex items-center gap-2"><Icon data={faCar} class="text-pink-500" /> Arena</span>
@@ -260,7 +289,7 @@
         <span class="flex items-center gap-2"> [Variant]</span>
     </div>
 
-    <p class="text-sm text-center mb-10">An all-in-one-page reference for all vehicles in GTA 5:Online for collectors.</p>
+    <p class="text-sm text-center mb-10">An all-in-one-page reference for all vehicles that can be stored in GTA 5:Online for collectors.</p>
 
 	<div class="space-y-10">
 		{#each Object.entries(vehiclesByCategory) as [category, list]}
@@ -293,18 +322,8 @@
                                 {/each}
                             </span>
                         {/if}
-                        {vehicle.label}{vehicle.hsw ? ' (HSW)' : ''}
+                        <span class:text-xs={vehicle.label.length > 30}>{vehicle.label}{vehicle.hsw ? ' (HSW)' : ''}</span>
                         {@html vehicle.manufacturer ? `<span class="text-xs text-gray-400 float-right">${vehicle.manufacturer}</span>` : ''}
-
-                        {#if hoverModel}
-                            <div class="model-preview">
-                                <img
-                                    src={`/gta/models/${hoverModel}.webp`}
-                                    alt="Model preview"
-                                    class="w-full h-auto object-contain"
-                                />
-                            </div>
-                        {/if}
                     </li>
 					{/each}
 				</ul>
