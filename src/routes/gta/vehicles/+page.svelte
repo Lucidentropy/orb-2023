@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Icon from 'svelte-awesome/components/Icon.svelte';
+	import Container from '$lib/ThemeHandler.svelte';
+
 	import {
 		faCar, faGear, faParking, faCircleDot, faBicycle, faUnlock,
 		faArrowUp, faPersonWalking, faShip , faMotorcycle, faPlane, faHelicopter
@@ -233,7 +235,7 @@
     }
 </script>
 
-<main class="p-6 max-w-6xl mx-auto">
+<Container>
     <nav class="text-sm text-gray-600 mb-4">
         <a href="/gta" class="hover:underline text-blue-600">← Back to GTA</a>
     </nav>
@@ -330,7 +332,7 @@
 			</section>
 		{/each}
 	</div>
-</main>
+</Container>
 
 <textarea
 	class="w-full h-[60vh] p-4 mt-8 font-mono text-xs border rounded focus:outline-none focus:ring hidden"

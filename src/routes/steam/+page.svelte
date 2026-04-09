@@ -4,6 +4,7 @@
     import { steam } from 'svelte-awesome/icons';
     import trouble from '$lib/images/troubleshooting.jpg';
 	import { myDataStore } from '$store/datastore';
+	import Container from '$lib/ThemeHandler.svelte';
 
     let steamData: any = null;
     let loading: boolean = true;
@@ -32,7 +33,7 @@
 	<meta name="description" content="The Orb Steam community." />
 </svelte:head>
 
-<div class="text-column">
+<Container>
     <h1>
         <span class="steam-icon">
             <Icon data={steam} scale={3} />
@@ -93,7 +94,7 @@
             <img src={trouble} alt="Various dudes trying to figure this computer out." />
         {/if}
     {/if}
-</div>
+</Container>
 
 <style lang="scss">
 

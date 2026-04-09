@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { slide, fade } from 'svelte/transition';
+	import Container from '$lib/ThemeHandler.svelte';
 
     let masterServerQuery = [];
     let serverList = [];
@@ -145,7 +146,7 @@
 	<meta name="description" content="Orb in Starseige:Tribes, the original game we were founded in." />
 </svelte:head>
 
-<section class="text-column">
+<Container>
     <h1>Tribes <p>the original</p></h1>
 
     <p>Orb was founded in Tribes as well as contributed to several of the game's several widely used mods such as Annhilation, Tribes RPG, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
@@ -335,7 +336,7 @@
             <li><a href="https://www.pcrpg.org/" target="_blank">Particle's Custom RPG</a></li>
         </ul>
     </section>
-</section>
+</Container>
 
 <style lang="scss">
 

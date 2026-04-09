@@ -3,7 +3,11 @@
 	<meta name="description" content="Links and Resources" />
 </svelte:head>
 
-<div class="text-column">
+<script type="ts">
+	import Container from '$lib/ThemeHandler.svelte';
+</script>
+
+<Container>
 	<h1>Links</h1>
 	<h2>Orb on Other Platforms</h2>
 	<ul>
@@ -36,4 +40,4 @@
 	<ul>
 		<li><a target="_blank" href="https://discord.gg/playpalia">Palia</a></li>
 	</ul>
-</div>
+</Container>

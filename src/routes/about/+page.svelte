@@ -3,8 +3,10 @@
 	<meta name="description" content="Learn about the Orb community and our origins." />
 </svelte:head>
 
-<script>
+<script type="ts">
 	const orbTag = "{-o-}";
+	import Container from '$lib/ThemeHandler.svelte';
+
 </script>
 
 <style>
@@ -13,7 +15,7 @@
     }
 </style>
 
-<div class="text-column">
+<Container>
     <h1>About the Orb Community
         <p>{(new Date().getFullYear() - 2000).toString()} years of good times</p>
     </h1>
@@ -31,7 +33,7 @@
     
     <h2>The Orb Ethos</h2>
     <ul>
-        <li>Being a nice person should not require a rule list-disc</li>
+        <li>Being a nice person should not require a rule list</li>
         <li>You should never have to expect ill intent within your own community</li>
         <li>Share your resources, not flex your wealth - Lift others up, not your ego</li>
         <li>If you're as good as you say you are, you wouldn't need to say it</li>
@@ -47,4 +49,4 @@
     
     <h2>Mental health matters.</h2>
         <p>Difficulties with mental health affect us all. Many gamers find respite from the challenges of mental illness in online gaming and their communities, often even serving as a support group. Orb is a welcoming and accepting community for those who are looking for online friends they can trust to be reliably friendly and welcoming. Whether you're anxious, stressed, depressed, lonely, going through a lot, or just hoping to get a few hours in your chosen game after taking care of the kids, Orb is the group for you.</p>
-</div>
+</Container>

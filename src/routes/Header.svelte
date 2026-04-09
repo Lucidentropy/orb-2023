@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	// import DiscordStatus from './DiscordStatus.svelte';
 	import Icon from 'svelte-awesome/components/Icon.svelte';
-	import { arrowCircleOLeft, steam } from 'svelte-awesome/icons';
+	import { arrowCircleOLeft, bars, times } from 'svelte-awesome/icons';
 	import { fade } from 'svelte/transition';
 
 	interface NavItem {
@@ -10,7 +10,10 @@
 		url?: string;
 		icon?: string;
 		subItems?: NavItem[];
+		devOnly?: boolean;
 	}
+
+	const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
 	let navItems: NavItem[] = [
 	{
@@ -42,15 +45,32 @@
 	{
 		text: 'Login',
 		url : '/login'
+	},
+	{
+		text: 'Admin',
+		devOnly: true,
+		subItems: [
+			{ text: 'Style Guide', url: '/styleguide' },
+		],
 	}
 	];
-	
-	let activeItem: NavItem | null = navItems.find(item =>
-	item.subItems?.find(subItem => $page.url.pathname.startsWith(subItem.url))) || null;
 
-	function toggleSubMenu(item: NavItem) {
+	let activeItem: NavItem | null = navItems.find(item =>
+		item.subItems?.find(subItem => $page.url.pathname.startsWith(subItem.url ?? ''))) || null;
+
+	let mobileOpen = false;
+
+	function toggleSubMenu(item: NavItem | null) {
 		activeItem = activeItem === item ? null : item;
+		mobileOpen = true;
 	}
+
+	function closeMobile() {
+		mobileOpen = false;
+		activeItem = null;
+	}
+
+	const visibleItems = navItems.filter(item => !item.devOnly || isDev);
 </script>
 
 <svelte:head>
@@ -60,166 +80,143 @@
 </svelte:head>
 
 <header>
-	<div class="banner" style="background-image:url('/images/header.png')" >
-		<a href="/" class="logo"><img src="/images/neworbdemo.jpg" alt="Logo" /></a>
+	<div
+		class="w-screen h-[130px] flex justify-center items-center text-center bg-center bg-[length:auto_100%]"
+		style="background-image:url('/images/header.png')"
+	>
+		<a href="/"><img src="/images/neworbdemo.jpg" alt="Logo" class="max-h-[125px] mx-[30px] rounded-full shadow-[0_0_30px_10px_#000]" /></a>
 	</div>
-	<div id="webamp-container"></div>
 
-	<nav>
+	<nav class="w-screen bg-black/40 border-t border-t-transparent border-b border-b-black shadow-[0_0_40px_#000] flex justify-center relative">
+
+		<!-- Mobile hamburger -->
+		<button
+			class="md:hidden absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-2 text-[var(--color-text)] hover:text-white"
+			on:click={() => mobileOpen = !mobileOpen}
+			aria-label="Toggle menu"
+		>
+			<Icon data={mobileOpen ? times : bars} scale={1.2} />
+		</button>
+
+		<!-- Desktop nav -->
 		{#if activeItem !== null}
-			<ul out:fade={{ duration:0 }} in:fade={{ duration:300 }} class="sub-menu">
-				<li class="back">
-					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}>
-						<Icon data={arrowCircleOLeft} /> Back
+			<ul out:fade={{ duration:0 }} in:fade={{ duration:300 }}
+				class="nav-ul hidden md:flex relative p-0 m-0 h-12 items-center">
+				<li class="relative h-full opacity-50 hover:opacity-100">
+					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}
+						class="nav-link flex h-full items-center px-2 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white pl-1">
+						<Icon data={arrowCircleOLeft} class="mr-2.5" /> Back
 					</a>
 				</li>
 				{#each activeItem.subItems as subItem (subItem.url)}
-					<li aria-current={$page.url.pathname.startsWith(subItem.url) ? 'page' : undefined}>
-						<a href={subItem.url}>
+					<li class="relative h-full {$page.url.pathname.startsWith(subItem.url ?? '') ? 'active-indicator' : ''}"
+						aria-current={$page.url.pathname.startsWith(subItem.url ?? '') ? 'page' : undefined}>
+						<a href={subItem.url}
+							class="nav-link flex h-full items-center px-2 font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 hover:text-white
+							{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-[var(--color-text)]'}">
 							{subItem.text}
 						</a>
-					</li>	
+					</li>
 				{/each}
 			</ul>
 		{:else}
-			<ul>
-			{#each navItems as item}
-				<li>
-					{#if item.subItems}
-						<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}>{item.text}</a>
-					{:else}
-						{#if item.url}
-							<a href={item.url}>{item.text}</a>
-						{:else}
-							<p>{item.text}</p>
+			<ul class="nav-ul hidden md:flex relative p-0 m-0 h-12 items-center">
+				{#each visibleItems as item}
+					<li class="relative h-full">
+						{#if item.subItems}
+							<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}
+								class="nav-link flex h-full items-center px-2 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white">
+								{item.text}
+							</a>
+						{:else if item.url}
+							<a href={item.url}
+								class="nav-link flex h-full items-center px-2 font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 hover:text-white
+								{item.devOnly ? 'dev-item' : 'text-[var(--color-text)]'}
+								{$page.url.pathname === item.url ? 'text-white' : ''}">
+								{item.text}
+							</a>
 						{/if}
-					{/if}
-				</li>
-			{/each}
+					</li>
+				{/each}
 			</ul>
 		{/if}
 
 		<!-- <DiscordStatus /> -->
 	</nav>
+
+	<!-- Mobile drawer -->
+	{#if mobileOpen}
+		<div transition:fade={{ duration: 200 }}
+			class="md:hidden w-screen bg-black/90 border-b border-[var(--color-theme-2)] z-40">
+
+			{#if activeItem !== null}
+				<ul class="nav-ul flex flex-col p-0 m-0">
+					<li class="border-b border-white/10 opacity-50 hover:opacity-100">
+						<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}
+							class="nav-link flex items-center gap-2 px-4 py-3 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
+							<Icon data={arrowCircleOLeft} /> Back
+						</a>
+					</li>
+					{#each activeItem.subItems as subItem (subItem.url)}
+						<li class="border-b border-white/10">
+							<a href={subItem.url} on:click={closeMobile}
+								class="nav-link flex items-center px-4 py-3 font-bold text-xs uppercase tracking-widest no-underline hover:text-white
+								{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-[var(--color-text)]'}">
+								{subItem.text}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<ul class="nav-ul flex flex-col p-0 m-0">
+					{#each visibleItems as item}
+						<li class="border-b border-white/10">
+							{#if item.subItems}
+								<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}
+									class="nav-link flex items-center justify-between px-4 py-3 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
+									{item.text}
+									<span class="opacity-50 text-lg">›</span>
+								</a>
+							{:else if item.url}
+								<a href={item.url} on:click={closeMobile}
+									class="nav-link flex items-center px-4 py-3 font-bold text-xs uppercase tracking-widest no-underline hover:text-white
+									{item.devOnly ? 'dev-item' : 'text-[var(--color-text)]'}">
+									{item.text}
+								</a>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	{/if}
 </header>
 
-<style lang="scss">
-	header {
-
-		.banner {
-			align-self: stretch;
-			background-position:50% 50%;
-			background-size:auto 100%;
-			width:100vw;
-			height:130px;
-			text-align:center;
-
-			display:flex;
-			justify-content:center;
-			align-items:center;;
-
-			img {
-				max-height:125px;
-				margin:0 30px; 
-				border-radius:50%;
-				box-shadow:0 0 30px 10px #000;
-			}
-		}
+<style>
+	.nav-link {
+		font-family: 'Ropa Sans', sans-serif;
 	}
 
-	nav {
-		width:100vw;
-		margin: 0 auto;
-		background:#0006;
-		// border:1px solid var(--color-theme-1);
-		border-width:1px 0;
-		box-shadow:0 0 40px #000;
-		display:flex;
-		justify-content:center;
-		position:relative;
-		// transition:1s ease-out all;
-
-		svg {
-			margin-right:10px;
-		}
-
-		.back {
-			text-indent:4px;
-			opacity:.5;
-
-			&:hover {
-				opacity:1;
-			}
-		}
-	}
-
-	svg {
-		width: 2em;
-		height: 3em;
-		display: block;
-	}
-
-	path {
-		fill: var(--background);
-	}
-
-	ul {
-		position: relative;
-		padding: 0;
-		margin: 0;
-		height: 3em;
-		display: flex;
-		justify-content: left;
-		align-items: left;
+	.nav-ul {
 		list-style: none;
-		background: var(--background);
-		background-size: contain;
+		padding-left: 0;
 	}
 
-	li {
-		position: relative;
-		height: 100%;
+	.dev-item {
+		color: rgba(250, 204, 21, 0.7);
+	}
+	.dev-item:hover {
+		color: rgb(253, 224, 71);
 	}
 
-	li[aria-current='page'] {
-		a {
-			color:#fff;
-		}
-	}
-
-	li[aria-current='page']::before {
-		--size: 6px;
+	.active-indicator::before {
 		content: '';
 		width: 0;
 		height: 0;
 		position: absolute;
 		top: 0;
-		left: calc(50% - var(--size));
-		border: var(--size) solid transparent;
-		border-top: var(--size) solid #fff;
-	}
-
-	nav a, nav p {
-		display: flex;
-		height: 100%;
-		align-items: center;
-		padding: 0 0.5rem;
-		color: var(--color-text);
-		font-weight: 700;
-		font-size: 0.8rem;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		text-decoration: none;
-		transition: color 0.2s linear;
-		font-family:'Ropa Sans', sans-serif;
-		cursor:pointer;
-
-		&:hover {
-			color:#fff;
-		}
-	}
-
-	a:hover {
-		color: var(--color-theme-1);
+		left: calc(50% - 6px);
+		border: 6px solid transparent;
+		border-top: 6px solid #fff;
 	}
 </style>

@@ -1,4 +1,7 @@
-<div class="text-column">
-    <h1>World of Warcraft</h1>
+<script type="ts">
+	import Container from '$lib/ThemeHandler.svelte';
+</script>
 
-</div>
+<Container>
+	<h1>World of Warcraft</h1>
+</Container>

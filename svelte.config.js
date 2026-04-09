@@ -18,7 +18,8 @@ const config = {
 			$routes: resolve(__dirname, 'src/routes/'),
 			$store: resolve(__dirname, 'src/store/'),
 			$styles: resolve(__dirname, 'src/styles/'),
-			$static: resolve(__dirname, 'static')
+			$static: resolve(__dirname, 'static'),
+			$themes: resolve(__dirname, 'src/themes/')
 		}
 	}
 };

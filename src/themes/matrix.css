@@ -1,0 +1,39 @@
+main[data-theme="matrix"] {
+    --orb-highlight: #7CFF41;
+    --orb-accent: #43ff64;
+    --orb-link: #c9ffb0;
+
+    --orb-bg-base: #000000;
+    --orb-bg-deep: #000000;
+    --orb-bg-mid: #010401;
+    --orb-bg-800: #050905;
+    --orb-bg-750: #081008;
+    --orb-bg-700: #0d160d;
+
+    --orb-border: rgba(124, 255, 65, 0.22);
+    --orb-border-strong: rgba(124, 255, 65, 0.5);
+    --orb-border-faint: rgba(124, 255, 65, 0.08);
+
+    --orb-gradient-panel: linear-gradient(0deg, #000000 0%, #000000 70%, #010401 100%);
+
+    --orb-glow-highlight: 0 0 16px rgba(124, 255, 65, 0.18);
+    --orb-glow-panel: 0 0 30px rgba(124, 255, 65, 0.1);
+
+    --color-orb-highlight: var(--orb-highlight);
+    --color-orb-accent: var(--orb-accent);
+    --color-orb-link: var(--orb-link);
+
+    --color-bg-base: var(--orb-bg-base);
+    --color-bg-deep: var(--orb-bg-deep);
+    --color-bg-mid: var(--orb-bg-mid);
+    --color-bg-800: var(--orb-bg-800);
+    --color-bg-750: var(--orb-bg-750);
+    --color-bg-700: var(--orb-bg-700);
+
+    --color-border-default: var(--orb-border);
+    --color-border-strong: var(--orb-border-strong);
+    --color-border-faint: var(--orb-border-faint);
+
+    --shadow-glow-highlight: var(--orb-glow-highlight);
+    --shadow-panel: var(--orb-glow-panel);
+}

@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
 	import { CSSPlugin } from 'gsap/CSSPlugin';
+	import Container from '$lib/ThemeHandler.svelte';
+
 	gsap.registerPlugin(CSSPlugin);
 
 	const triSize = 20;
@@ -148,48 +150,49 @@
 			);
 	});
 </script>
+<Container>
+	<div bind:this={container} class="relative w-full aspect-video overflow-hidden">
+		<canvas bind:this={canvas} class="absolute inset-0 w-full h-full"></canvas>
+		<div class="overlay absolute inset-0 bg-black/50 pointer-events-none"></div>
 
-<div bind:this={container} class="relative w-full aspect-video overflow-hidden">
-	<canvas bind:this={canvas} class="absolute inset-0 w-full h-full"></canvas>
-	<div class="overlay absolute inset-0 bg-black/50 pointer-events-none"></div>
+		<div class="station-content absolute inset-0 flex items-center justify-center pointer-events-none opacity-0">
+			<div class="station-inner relative mx-auto flex items-center w-1/2 text-left">
+				<img
+					src="./images/elite/Coriolis.svg"
+					alt="Coriolis Station"
+					class="max-h-[50px] w-auto mr-4 flex-shrink-0"
+				/>
+				<div class="flex-1 flex flex-col justify-between h-full">
+					<div class="text-orange-500 uppercase tracking-wide text-3xl font-bold">WELCOME TO</div>
+					<div class="loader-bar w-3/4 h-[2px] bg-white self-start"></div>
+					<div class="text-white uppercase tracking-wide text-3xl font-bold">ELITE ORBITAL</div>
+				</div>
+			</div>
+		</div>
 
-	<div class="station-content absolute inset-0 flex items-center justify-center pointer-events-none opacity-0">
-		<div class="station-inner relative mx-auto flex items-center w-1/2 text-left">
-			<img
-				src="./images/elite/Coriolis.svg"
-				alt="Coriolis Station"
-				class="max-h-[50px] w-auto mr-4 flex-shrink-0"
-			/>
-			<div class="flex-1 flex flex-col justify-between h-full">
-				<div class="text-orange-500 uppercase tracking-wide text-3xl font-bold">WELCOME TO</div>
-				<div class="loader-bar w-3/4 h-[2px] bg-white self-start"></div>
-				<div class="text-white uppercase tracking-wide text-3xl font-bold">ELITE ORBITAL</div>
+		<div class="grid-placeholder absolute inset-x-4 bottom-4 top grid grid-cols-3 grid-rows-[auto,1fr,auto] gap-4 opacity-0">
+			<div class="mission-board row-start-1 col-start-1 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Mission Board
+			</div>
+			<div class="shipyard row-start-1 row-span-2 col-start-2 bg-orange-500/20 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Shipyard
+			</div>
+			<div class="contacts row-start-1 col-start-3 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Contacts
+			</div>
+
+			<div class="commodities row-start-2 col-start-1 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Commodities Market
+			</div>
+			<div class="universal row-start-2 col-start-3 bg-white/20 border border-white/20 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Universal Cartographics
+			</div>
+			<div class="crew row-start-2 col-start-3 row-start-3 col-start-3 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
+				Crew Lounge
+			</div>
+			<div class="local-news row-start-3 col-start-1 col-span-2 bg-white/10 border border-white/20 rounded flex items-center px-6 text-white uppercase text-sm font-medium">
+				Local News Ticker
 			</div>
 		</div>
 	</div>
-
-	<div class="grid-placeholder absolute inset-x-4 bottom-4 top grid grid-cols-3 grid-rows-[auto,1fr,auto] gap-4 opacity-0">
-		<div class="mission-board row-start-1 col-start-1 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Mission Board
-		</div>
-		<div class="shipyard row-start-1 row-span-2 col-start-2 bg-orange-500/20 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Shipyard
-		</div>
-		<div class="contacts row-start-1 col-start-3 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Contacts
-		</div>
-
-		<div class="commodities row-start-2 col-start-1 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Commodities Market
-		</div>
-		<div class="universal row-start-2 col-start-3 bg-white/20 border border-white/20 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Universal Cartographics
-		</div>
-		<div class="crew row-start-2 col-start-3 row-start-3 col-start-3 bg-orange-500/10 border border-orange-500 rounded flex items-center justify-center text-white uppercase font-semibold p-4">
-			Crew Lounge
-		</div>
-		<div class="local-news row-start-3 col-start-1 col-span-2 bg-white/10 border border-white/20 rounded flex items-center px-6 text-white uppercase text-sm font-medium">
-			Local News Ticker
-		</div>
-	</div>
-</div>
+</Container>

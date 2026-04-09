@@ -1,0 +1,330 @@
+:root {
+    --orb-highlight: #66CCFF;
+    --orb-accent: #4075a6;
+    --orb-link: #C1E6FF;
+    --orb-success: #63d363;
+    --orb-success-muted: #a6e6a6;
+    --orb-danger: #cb4848;
+    --orb-danger-muted: #e8afaf;
+    --orb-warning: #dddd00;
+    --orb-warning-muted: #fefe00;
+    --orb-bg-base: #000000;
+    --orb-bg-deep: #041428;
+    --orb-bg-mid: #032d50;
+    --orb-bg-800: #252630;
+    --orb-bg-750: #393e4c;
+    --orb-bg-700: #44495a;
+    --orb-border: rgba(102, 204, 255, 0.40);
+    --orb-border-strong: rgba(102, 204, 255, 0.80);
+    --orb-border-faint: rgba(102, 204, 255, 0.15);
+    --orb-gradient-panel: linear-gradient(0deg, #000 0%, #032d50 50%, #000 100%);
+    --orb-glow-highlight: 0 0 16px rgba(102, 204, 255, 0.30);
+    --orb-glow-success: 0 0 12px rgba(99, 211, 99, 0.40);
+    --orb-glow-danger: 0 0 12px rgba(203, 72, 72, 0.40);
+    --orb-glow-panel: 0 0 40px rgba(102, 204, 255, 0.20);
+}
+
+@theme {
+    --font-sans: 'Noto Sans', Arial, -apple-system, sans-serif;
+    --font-mono: 'Fira Mono', monospace;
+    --font-display: 'Ropa Sans', sans-serif;
+
+    --color-orb-highlight: var(--orb-highlight);
+    --color-orb-accent: var(--orb-accent);
+    --color-orb-link: var(--orb-link);
+
+    --color-success: var(--orb-success);
+    --color-success-muted: var(--orb-success-muted);
+    --color-danger: var(--orb-danger);
+    --color-danger-muted: var(--orb-danger-muted);
+    --color-warning: var(--orb-warning);
+    --color-warning-muted: var(--orb-warning-muted);
+
+    --color-bg-base: var(--orb-bg-base);
+    --color-bg-deep: var(--orb-bg-deep);
+    --color-bg-mid: var(--orb-bg-mid);
+    --color-bg-800: var(--orb-bg-800);
+    --color-bg-750: var(--orb-bg-750);
+    --color-bg-700: var(--orb-bg-700);
+
+    --color-border-default: var(--orb-border);
+    --color-border-strong: var(--orb-border-strong);
+    --color-border-faint: var(--orb-border-faint);
+
+    --shadow-glow-highlight: var(--orb-glow-highlight);
+    --shadow-glow-success: var(--orb-glow-success);
+    --shadow-glow-danger: var(--orb-glow-danger);
+    --shadow-panel: var(--orb-glow-panel);
+}
+
+@utility panel {
+    background-image: var(--orb-gradient-panel);
+    border: 1px solid var(--orb-border);
+    border-radius: 0.25rem;
+    box-shadow: var(--orb-glow-panel);
+}
+
+@utility badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border-width: 1px;
+    padding: 0.1rem 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+@utility alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-radius: 0.25rem;
+    border-width: 1px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+}
+
+@layer base {
+    body {
+            @apply font-sans;
+            min-height: 100vh;
+            margin: 0;
+
+            background-color: #000;
+            background-image: url('/images/footer-bg.png'), url('/images/star-bg.png');
+            background-position: bottom, 50% 0;
+            background-repeat: repeat-x, repeat-x;
+            background-size: 100%, 100%;
+            background-attachment: fixed, scroll;
+            background-origin: padding-box, padding-box;
+            background-clip: border-box, border-box;
+        }
+
+    main {
+        @apply text-orb-highlight;
+    }
+
+    main a {
+        @apply text-orb-link no-underline transition-colors duration-200 hover:text-white hover:underline;
+    }
+
+    main button {
+        @apply panel text-orb-highlight px-3 py-2 text-base font-sans cursor-pointer transition-colors hover:border-white;
+        text-shadow: 1px 1px 1px #000;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+        @apply font-display font-bold text-white tracking-wide;
+    }
+
+    p {
+        @apply leading-relaxed mb-4;
+    }
+
+    ul {
+        list-style: square;
+        @apply pl-4;
+    }
+
+    input,
+    button {
+        @apply font-sans text-base;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-orb-highlight hover:text-white;
+        border: 1px solid var(--orb-border);
+        box-shadow: var(--orb-glow-highlight);
+    }
+
+    .btn-primary:hover {
+        border-color: var(--orb-border-strong);
+    }
+
+    .orb-card {
+        @apply p-5 transition-all;
+        background-image: var(--orb-gradient-panel);
+        border: 1px solid var(--orb-border);
+        border-radius: 0.25rem;
+        box-shadow: var(--orb-glow-panel);
+    }
+
+    .panel-danger {
+        border-color: color-mix(in srgb, var(--orb-danger) 60%, transparent);
+        box-shadow: var(--orb-glow-danger);
+    }
+
+    .btn-secondary {
+        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-gray-500;
+        border: 1px solid var(--orb-border-faint);
+        background-color: color-mix(in srgb, var(--orb-bg-700) 55%, transparent);
+    }
+
+    .btn-secondary:hover {
+        @apply text-white;
+        border-color: var(--orb-border);
+        background-color: color-mix(in srgb, var(--orb-bg-700) 75%, transparent);
+    }
+
+    .btn-danger {
+        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-danger-muted hover:text-white;
+        border: 1px solid color-mix(in srgb, var(--orb-danger) 55%, transparent);
+        box-shadow: var(--orb-glow-danger);
+    }
+
+    .btn-danger:hover {
+        border-color: var(--orb-danger);
+    }
+
+    .btn-ghost {
+        @apply border text-orb-highlight px-3 py-2;
+        border-color: var(--color-border-faint);
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .btn-ghost:hover {
+        border-color: var(--color-border-strong);
+        background: rgba(255, 255, 255, 0.05);
+        @apply text-white;
+    }
+
+    .btn-icon {
+        @apply flex items-center justify-center p-0 w-10 h-10;
+    }
+
+    
+
+    .panel-danger {
+        @apply border-danger/60 shadow-glow-danger;
+    }
+
+    .orb-card {
+        @apply panel p-5 transition-all;
+    }
+
+    .overlay {
+        @apply absolute inset-0 bg-black/70 backdrop-blur-sm;
+    }
+
+    .badge-primary {
+        @apply badge border-border-default text-orb-highlight bg-orb-highlight/5;
+    }
+
+    .badge-success {
+        @apply badge border-success/40 text-success bg-success/5;
+    }
+
+    .badge-warning {
+        @apply badge border-warning/40 text-warning bg-warning/5;
+    }
+
+    .badge-danger {
+        @apply badge border-danger/40 text-danger-muted bg-danger/5;
+    }
+
+    .badge-neutral {
+        @apply badge border-border-faint text-orb-highlight/35 bg-orb-highlight/[0.03];
+    }
+
+    .badge-solid-primary {
+        @apply badge border-orb-highlight text-white bg-orb-highlight/20;
+    }
+
+    .badge-solid-danger {
+        @apply badge border-danger text-white bg-danger/20;
+    }
+
+    .alert-info {
+        @apply alert border-border-default bg-orb-highlight/5 text-orb-highlight;
+    }
+
+    .alert-success {
+        @apply alert border-success/40 bg-success/5 text-success;
+    }
+
+    .alert-warning {
+        @apply alert border-warning/40 bg-warning/5 text-warning;
+    }
+
+    .alert-danger {
+        @apply alert border-danger/40 bg-danger/5 text-danger-muted;
+    }
+
+    .toast {
+        @apply panel fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 text-sm;
+    }
+
+    .toast-info {
+        @apply border-orb-highlight text-orb-highlight shadow-glow-highlight;
+    }
+
+    .toast-success {
+        @apply border-success text-success-muted shadow-glow-success;
+    }
+
+    .toast-error {
+        @apply border-danger text-danger-muted shadow-glow-danger;
+    }
+
+    .toast-warning {
+        @apply border-warning text-warning;
+    }
+
+    .field-label {
+        @apply block font-mono text-[0.7rem] font-semibold uppercase tracking-widest text-orb-highlight/55 mb-1;
+    }
+
+    .field-hint {
+        @apply text-xs text-orb-highlight/30 mt-1;
+    }
+
+    .field-input {
+        @apply w-full rounded border border-border-faint bg-black/50 text-orb-highlight px-3 py-2 text-sm font-sans placeholder:text-orb-highlight/20 transition-all focus:outline-none focus:border-orb-highlight/70 focus:ring-1 focus:ring-orb-highlight/20;
+    }
+
+    .field-input-error {
+        @apply border-danger/50 focus:border-danger focus:ring-danger/20;
+    }
+
+    .section-label {
+        text-shadow:1px 1px 1px #000;
+        @apply block font-mono text-[0.85rem] uppercase tracking-[0.2em] text-white mb-5 pt-4;
+    }
+
+    .subsection-label {
+        text-shadow: 1px 1px 1px #000;
+        @apply block font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white mb-2;
+    }
+
+    .body-secondary {
+        @apply text-sm text-orb-highlight/50;
+    }
+
+    .icon-well {
+        @apply flex h-10 w-10 shrink-0 items-center justify-center rounded border text-lg;
+    }
+
+    .icon-well-danger {
+        @apply border-danger/40 bg-danger/10 text-danger;
+    }
+
+    .code-block {
+        @apply font-mono text-[0.78rem] leading-relaxed bg-black/60 border border-border-faint rounded px-6 py-5 overflow-x-auto text-orb-highlight/75 whitespace-pre;
+    }
+
+
+    .orb-theme-panel {
+        background-image: var(--orb-gradient-panel);
+        border: 1px solid var(--orb-border-strong);
+    }
+}

@@ -1,11 +1,13 @@
-<script lant="ts">
+<script lang="ts">
+	import Container from '$lib/ThemeHandler.svelte';
+
     const bombBayVehicles = ['Streamer216','RO-86 Alkonost','B-11 Strikeforce','Avenger','Volatol','Seabreeze','Mogul','RM-10 Bombushka','Tula','Rogue','LF-22 Starling'];
     const boostVehicles = ['Scramjet', 'Oppressor Mk II', 'Vigilante', 'Rocket Voltic', 'Toreador'];
 
     const stashCodes = ['73-27-38','24-10-81','01-23-45','72-68-83','77-79-73','28-03-98','02-12-87','28-11-97','44-23-37','05-02-91'];
 </script>
 
-<section class="text-column">
+<Container>
     <a href="/gta" class="hover:underline text-blue-600 absolute top-3 right-5">← Back to GTA</a>
     <h1>Grand Theft Auto 5: Online Info and References</h1>
 
@@ -279,4 +281,4 @@
 
 
 
-</section>
+</Container>

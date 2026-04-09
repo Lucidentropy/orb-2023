@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Container from '$lib/ThemeHandler.svelte';
 
 	const images = [
 		'images/gta/EntryScreen-GTAO-TextureFiles-BeachBum.webp',
@@ -49,7 +50,7 @@
   });
 </script>
 
-<section class="text-column" style="margin:-30px;">
+<Container>
 	<h1 class="text-4xl font-bold rounded-b-none" style="margin:0;">Grand Theft Auto 5: Online</h1>
 
 	<div class="relative w-full max-w-full overflow-hidden aspect-video">
@@ -117,7 +118,7 @@
 			</div>
 		</div>
 	</div>
-</section>
+</Container>
 
 <style>
 	@keyframes zoom-pan {
