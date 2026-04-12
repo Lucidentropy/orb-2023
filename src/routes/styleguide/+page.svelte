@@ -36,18 +36,21 @@
 
 	import { activeTheme, activeLayout } from '$lib/stores/themeStore';
 
-	const themes = [
-		{ value: '', label: 'Default' },
-		{ value: 'matrix', label: 'Matrix' }
-	];
+    const themes = [
+        { value: '', label: 'Default' },
+        { value: 'matrix', label: 'Matrix' },
+        { value: 'halflife', label: 'Half-Life' },
+        { value: 'crimson', label: 'Crimson' },
+        { value: 'vapor', label: 'Vapor' }
+    ];
 
     const layouts = [
         { value: '', label: 'Page Default' },
         { value: 'classic', label: 'Classic' },
-        { value: 'wide', label: 'Wide' },
-        { value: 'centeredNarrow', label: 'Centered Narrow' },
-        { value: 'centeredWide', label: 'Centered Wide' },
-        { value: 'fullWidth', label: 'Full Width' }
+        { value: 'wide', label: 'Default' },
+        { value: 'centeredNarrow', label: 'No-Panel Classic' },
+        { value: 'centeredWide', label: 'No-Panel Default' },
+        { value: 'fullWidth', label: 'No-Panel Full Width' }
     ];
 </script>
 
@@ -96,8 +99,8 @@
     
 	<div class="flex items-start justify-between gap-4">
 		<div>
-			<h1 class="font-display text-4xl font-bold tracking-widest text-white uppercase">Style Guide</h1>
-			<p class="mt-1 text-sm tracking-wide text-orb-highlight/60">UI component reference — Clan Orb design system</p>
+			<p class="font-display text-4xl font-bold tracking-widest text-white uppercase">Style Guide</p>
+			<p class="text-sm tracking-wide text-orb-highlight/60">UI component reference — Clan Orb design system</p>
 		</div>
 
         <div class="absolute top-6 right-6 z-20 flex w-full max-w-[460px] gap-4">
@@ -121,150 +124,202 @@
         </div>
 	</div>
 
-	<section>
-		<p class="section-label">Typography</p>
-		<div class="space-y-3">
-			<p class="font-display text-5xl font-bold tracking-widest text-white uppercase">Ropa Sans Display</p>
-			<p class="font-display text-3xl font-bold tracking-wide text-white">Heading / Page Title</p>
-			<p class="font-display text-xl tracking-wide text-white">Sub-heading</p>
-			<p class="text-lg text-orb-highlight">Large body — lead paragraph or intro copy.</p>
-			<p class="text-base text-orb-highlight/80">Base body — default for most content areas.</p>
-			<p class="text-sm text-orb-highlight/60">Small — captions, helper text, metadata.</p>
-			<p class="section-label !mb-0">Overline / Section Label</p>
-			<code class="code-block inline-block px-3 py-1 text-xs">Monospace — ids, values, code</code>
-			<a href="#typography" class="block text-sm">Hyperlink → hover for white</a>
-		</div>
-	</section>
+    <section>
+        <p class="section-label">Typography</p>
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <h1>Heading 1 / Noto Sans @ text-[1.75rem]</h1>
+                <h1>Heading 1 / Noto Sans @ text-[1.75rem]<p>P tag within</p></h1>
+
+                <h2>Heading 2 / Noto Sans @ text-[1.2rem]</h2>
+                <h3>Heading 3 / Noto Sans @ text-2xl</h3>
+                <h4>Heading 4 / Noto Sans @ text-xl</h4>
+                <h5>Heading 5 / Noto Sans @ text-lg</h5>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-lg text-orb-highlight">Large body — lead paragraph or intro copy.</p>
+                <p class="text-base text-orb-highlight/80">Base body — default for most content areas.</p>
+                <p class="text-sm text-orb-highlight/60">Small — captions, helper text, metadata.</p>
+                <p class="section-label !mb-0 !pt-0">Overline / Section Label</p>
+                <code class="code-block inline-block px-3 py-1 text-xs">Monospace — ids, values, code</code>
+            </div>
+
+            <div class="space-y-2">
+                <p class="subsection-label">Link States</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-sm">
+                    <a href="#default-link">Default link</a>
+                    <a href="#visited-link" class="visited:text-orb-accent">Visited link example</a>
+                    <a href="#hover-link" class="hover:text-orb-highlight/80 hover:underline">Hover link example</a>
+                    <a href="#active-link" class="active:text-orb-accent/80">Active link example</a>
+                    <a href="#subtle-link" class="text-orb-highlight/70 hover:text-orb-link underline underline-offset-2">Subtle inline link example</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <p class="section-label">Theme Tokens</p>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {#each [
+                { label: 'orb-highlight', bg: 'bg-orb-highlight' },
+                { label: 'orb-accent', bg: 'bg-orb-accent' },
+                { label: 'orb-link', bg: 'bg-orb-link' },
+                { label: 'bg-base', bg: 'bg-bg-base border border-border-faint' },
+                { label: 'bg-deep', bg: 'bg-bg-deep' },
+                { label: 'bg-mid', bg: 'bg-bg-mid' },
+                { label: 'border-default', bg: 'bg-bg-base border border-border-default' },
+                { label: 'border-strong', bg: 'bg-bg-base border border-border-strong' }
+            ] as swatch (swatch.label)}
+                <div class="overflow-hidden rounded border border-border-faint">
+                    <div class="h-12 {swatch.bg}"></div>
+                    <div class="bg-black/40 px-3 py-2">
+                        <p class="font-mono text-xs text-orb-highlight/60">{swatch.label}</p>
+                    </div>
+                </div>
+            {/each}
+        </div>
+    </section>
 
 	<section>
-		<p class="section-label">Colour Tokens</p>
-		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			{#each [
-				{ label: 'orb-highlight', hex: 'theme-driven', bg: 'bg-orb-highlight' },
-				{ label: 'orb-accent', hex: 'theme-driven', bg: 'bg-orb-accent' },
-				{ label: 'success', hex: 'theme-driven', bg: 'bg-success' },
-				{ label: 'danger', hex: 'theme-driven', bg: 'bg-danger' },
-				{ label: 'warning', hex: 'theme-driven', bg: 'bg-warning' },
-				{ label: 'bg-deep', hex: 'theme-driven', bg: 'bg-bg-deep' },
-				{ label: 'bg-mid', hex: 'theme-driven', bg: 'bg-bg-mid' },
-				{ label: 'bg-base', hex: 'theme-driven', bg: 'bg-bg-base border border-border-faint' }
-			] as swatch (swatch.label)}
-				<div class="overflow-hidden rounded border border-border-faint">
-					<div class="h-12 {swatch.bg}"></div>
-					<div class="bg-black/40 px-3 py-2">
-						<p class="font-mono text-xs text-orb-highlight/60">{swatch.label}</p>
-					</div>
-				</div>
-			{/each}
-		</div>
-	</section>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="space-y-6 rounded border border-border-faint p-4 bg-bg-deep/30">
+                <p class="section-label">Buttons</p>
+                <div>
+                    <p class="subsection-label">Variants</p>
+                    <div class="flex flex-wrap gap-3">
+                        <button>Default</button>
+                        <button class="btn-primary">Primary</button>
+                        <button class="btn-success">Success</button>
+                        <button class="btn-danger">Danger</button>
+                        <button class="btn-warning">Warning</button>
+                        <button class="btn-ghost">Ghost</button>
+                    </div>
+                </div>
 
-	<section>
-		<p class="section-label">Buttons</p>
-		<div class="space-y-6">
-			<div>
-				<p class="subsection-label">Variants</p>
-				<div class="flex flex-wrap gap-3">
-					<button>Default</button>
-					<button class="btn-primary">Primary</button>
-					<button class="btn-success">Success</button>
-					<button class="btn-danger">Danger</button>
-					<button class="btn-warning">Warning</button>
-					<button class="btn-ghost">Ghost</button>
-				</div>
-			</div>
+                <div>
+                    <p class="subsection-label">Sizes</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button class="btn-primary px-2 py-1 text-xs">XS</button>
+                        <button class="btn-primary px-3 py-1.5 text-sm">SM</button>
+                        <button class="btn-primary">MD</button>
+                        <button class="btn-primary px-5 py-2.5 text-base">LG</button>
+                        <button class="btn-primary px-6 py-3 text-lg">XL</button>
+                    </div>
+                </div>
 
-			<div>
-				<p class="subsection-label">Sizes</p>
-				<div class="flex flex-wrap items-center gap-3">
-					<button class="btn-primary px-2 py-1 text-xs">XS</button>
-					<button class="btn-primary px-3 py-1.5 text-sm">SM</button>
-					<button class="btn-primary">MD</button>
-					<button class="btn-primary px-5 py-2.5 text-base">LG</button>
-					<button class="btn-primary px-6 py-3 text-lg">XL</button>
-				</div>
-			</div>
+                <div>
+                    <p class="subsection-label">States</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button class="btn-primary">Default</button>
+                        <button class="btn-primary ring-2 ring-orb-highlight ring-offset-2 ring-offset-black">Focused</button>
+                        <button class="btn-primary brightness-75">Active</button>
+                        <button class="btn-primary cursor-not-allowed opacity-40" disabled>Disabled</button>
+                        <button class="btn-primary flex items-center gap-2">
+                            <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                            </svg>
+                            Loading
+                        </button>
+                    </div>
+                </div>
 
-			<div>
-				<p class="subsection-label">States</p>
-				<div class="flex flex-wrap items-center gap-3">
-					<button class="btn-primary">Default</button>
-					<button class="btn-primary ring-2 ring-orb-highlight ring-offset-2 ring-offset-black">Focused</button>
-					<button class="btn-primary brightness-75">Active</button>
-					<button class="btn-primary cursor-not-allowed opacity-40" disabled>Disabled</button>
-					<button class="btn-primary flex items-center gap-2">
-						<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-						</svg>
-						Loading
-					</button>
-				</div>
-			</div>
+                <div>
+                    <p class="subsection-label">With Icons</p>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="btn-primary flex items-center gap-2">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Item
+                        </button>
+                        <button class="flex items-center gap-2">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Export
+                        </button>
+                        <button class="btn-secondary flex items-center justify-center p-2 leading-none">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-6 rounded border border-border-faint p-4 bg-bg-deep/30">
+                <p class="section-label">Modals & Dialogs</p>
+                <div class="flex flex-wrap gap-3">
+                    <button class="btn-primary" onclick={() => (modalOpen = true)}>Open Modal</button>
+                    <button class="btn-danger" onclick={() => (confirmOpen = true)}>Confirm / Destructive</button>
+                </div>
 
-			<div>
-				<p class="subsection-label">With Icons</p>
-				<div class="flex flex-wrap gap-3">
-					<button class="btn-primary flex items-center gap-2">
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						</svg>
-						Add Item
-					</button>
-					<button class="flex items-center gap-2">
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-						</svg>
-						Export
-					</button>
-					<button class="btn-secondary flex items-center justify-center p-2 leading-none">
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-						</svg>
-					</button>
-				</div>
-			</div>
-		</div>
-	</section>
+                <div class="mt-4">
+                    <p class="subsection-label">Toast Notifications</p>
+                    <div class="flex flex-wrap gap-3">
+                        {#each (['success', 'error', 'info', 'warning'] as const) as type}
+                            <button onclick={() => showToast(`This is a ${type} notification`, type)} class="uppercase">{type}</button>
+                        {/each}
+                    </div>
+                </div>
 
-	<section>
-		<p class="section-label">Modals & Dialogs</p>
-		<div class="flex flex-wrap gap-3">
-			<button class="btn-primary" onclick={() => (modalOpen = true)}>Open Modal</button>
-			<button class="btn-danger" onclick={() => (confirmOpen = true)}>Confirm / Destructive</button>
-		</div>
-	</section>
+                <p class="section-label">Alerts & Notifications</p>
+                <div class="space-y-3">
+                    <div class="alert-info"><span class="font-mono">ℹ</span><div><p class="font-semibold">Info — Something you should know</p><p class="opacity-70">Additional context or guidance to help the user.</p></div></div>
+                    <div class="alert-success"><span class="font-mono">✓</span><div><p class="font-semibold text-success-muted">Success — Action completed</p><p class="opacity-70">Your changes have been saved successfully.</p></div></div>
+                    <div class="alert-warning"><span class="font-mono">⚠</span><div><p class="font-semibold text-warning-muted">Warning — Proceed with caution</p><p class="opacity-70">This action may have unintended side effects.</p></div></div>
+                    <div class="alert-danger"><span class="font-mono">✕</span><div><p class="font-semibold">Error — Something went wrong</p><p class="opacity-70">Please try again or contact support.</p></div></div>
+                </div>
+            </div>
+            <div class="space-y-6 rounded border border-border-faint p-4 bg-bg-deep/30">
+                <p class="section-label">Loading States</p>
+                <div class="flex flex-wrap items-start gap-10">
+                    <div class="flex flex-col items-center gap-2">
+                        <svg class="h-8 w-8 animate-spin text-orb-highlight" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                        </svg>
+                        <span class="font-mono text-xs text-orb-highlight">Spinner</span>
+                    </div>
+                    <div class="flex w-48 flex-col gap-2">
+                        <div class="h-2.5 animate-pulse rounded bg-orb-highlight/10"></div>
+                        <div class="h-2.5 w-3/4 animate-pulse rounded bg-orb-highlight/10"></div>
+                        <div class="h-2.5 w-1/2 animate-pulse rounded bg-orb-highlight/10"></div>
+                        <span class="mt-1 font-mono text-xs text-orb-highlight">Skeleton</span>
+                    </div>
+                    <div class="flex w-48 flex-col gap-2">
+                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-orb-highlight/10">
+                            <div class="h-full w-2/3 animate-pulse rounded-full bg-orb-highlight/50"></div>
+                        </div>
+                        <span class="font-mono text-xs text-orb-highlight">Progress bar</span>
+                    </div>
+                </div>
 
-	<section>
-		<p class="section-label">Alerts & Notifications</p>
-		<div class="space-y-3">
-			<div class="alert-info"><span class="font-mono">ℹ</span><div><p class="font-semibold">Info — Something you should know</p><p class="opacity-70">Additional context or guidance to help the user.</p></div></div>
-			<div class="alert-success"><span class="font-mono">✓</span><div><p class="font-semibold text-success-muted">Success — Action completed</p><p class="opacity-70">Your changes have been saved successfully.</p></div></div>
-			<div class="alert-warning"><span class="font-mono">⚠</span><div><p class="font-semibold text-warning-muted">Warning — Proceed with caution</p><p class="opacity-70">This action may have unintended side effects.</p></div></div>
-			<div class="alert-danger"><span class="font-mono">✕</span><div><p class="font-semibold">Error — Something went wrong</p><p class="opacity-70">Please try again or contact support.</p></div></div>
-		</div>
-		<div class="mt-4">
-			<p class="subsection-label">Toast Notifications</p>
-			<div class="flex flex-wrap gap-3">
-				{#each (['success', 'error', 'info', 'warning'] as const) as type}
-					<button onclick={() => showToast(`This is a ${type} notification`, type)} class="capitalize">{type}</button>
-				{/each}
-			</div>
-		</div>
-	</section>
+                <p class="section-label">Badges & Pills</p>
+                <div class="flex flex-wrap gap-3">
+                    <span class="badge-primary">Default</span>
+                    <span class="badge-success">Success</span>
+                    <span class="badge-warning">Warning</span>
+                    <span class="badge-danger">Danger</span>
+                    <span class="badge-neutral">Neutral</span>
+                    <span class="badge-success"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-success"></span>Online</span>
+                    <span class="badge-neutral"><span class="h-1.5 w-1.5 rounded-full bg-orb-highlight/30"></span>Offline</span>
+                    <span class="badge-solid-primary">ADMIN</span>
+                    <span class="badge-solid-danger">BANNED</span>
+                </div>
 
-	<section>
-		<p class="section-label">Badges & Pills</p>
-		<div class="flex flex-wrap gap-3">
-			<span class="badge-primary">Default</span>
-			<span class="badge-success">Success</span>
-			<span class="badge-warning">Warning</span>
-			<span class="badge-danger">Danger</span>
-			<span class="badge-neutral">Neutral</span>
-			<span class="badge-success"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-success"></span>Online</span>
-			<span class="badge-neutral"><span class="h-1.5 w-1.5 rounded-full bg-orb-highlight/30"></span>Offline</span>
-			<span class="badge-solid-primary">ADMIN</span>
-			<span class="badge-solid-danger">BANNED</span>
+                <p class="section-label">Dividers</p>
+                <div class="space-y-6">
+                    <hr class="border-border-faint" />
+                    <div class="flex items-center gap-4">
+                        <hr class="flex-1 border-border-faint" />
+                        <span class="font-mono text-xs uppercase tracking-widest text-orb-highlight/30">or</span>
+                        <hr class="flex-1 border-border-faint" />
+                    </div>
+                    <hr class="border-dashed border-border-faint" />
+                </div>
+            </div>
 		</div>
 	</section>
 
@@ -424,44 +479,6 @@
 					{/each}
 				</tbody>
 			</table>
-		</div>
-	</section>
-
-	<section>
-		<p class="section-label">Loading States</p>
-		<div class="flex flex-wrap items-start gap-10">
-			<div class="flex flex-col items-center gap-2">
-				<svg class="h-8 w-8 animate-spin text-orb-highlight" fill="none" viewBox="0 0 24 24">
-					<circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-					<path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-				</svg>
-				<span class="font-mono text-xs text-orb-highlight/50">Spinner</span>
-			</div>
-			<div class="flex w-48 flex-col gap-2">
-				<div class="h-2.5 animate-pulse rounded bg-orb-highlight/10"></div>
-				<div class="h-2.5 w-3/4 animate-pulse rounded bg-orb-highlight/10"></div>
-				<div class="h-2.5 w-1/2 animate-pulse rounded bg-orb-highlight/10"></div>
-				<span class="mt-1 font-mono text-xs text-orb-highlight/50">Skeleton</span>
-			</div>
-			<div class="flex w-48 flex-col gap-2">
-				<div class="h-1.5 w-full overflow-hidden rounded-full bg-orb-highlight/10">
-					<div class="h-full w-2/3 animate-pulse rounded-full bg-orb-highlight/50"></div>
-				</div>
-				<span class="font-mono text-xs text-orb-highlight/50">Progress bar</span>
-			</div>
-		</div>
-	</section>
-
-	<section>
-		<p class="section-label">Dividers</p>
-		<div class="space-y-6">
-			<hr class="border-border-faint" />
-			<div class="flex items-center gap-4">
-				<hr class="flex-1 border-border-faint" />
-				<span class="font-mono text-xs uppercase tracking-widest text-orb-highlight/30">or</span>
-				<hr class="flex-1 border-border-faint" />
-			</div>
-			<hr class="border-dashed border-border-faint" />
 		</div>
 	</section>
 

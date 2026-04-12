@@ -1,115 +1,149 @@
-// import axios from 'axios';
-// import xml2js from 'xml2js';
-// import type { SteamData } from '$models/steam';
-// import type { StoreCache } from '$models/storeCache'; 
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { STEAM } from '$env/static/private';
+import { getCachedJson, setCachedJson } from '$lib/server/cacheHandler';
 
-// import dotenv from 'dotenv';
-// dotenv.config();
-// import { getConnection } from '$db/db';
+type SteamMember = {
+    steamid: string;
+    personaname: string;
+    profileurl: string;
+    avatarfull: string;
+    communityvisibilitystate?: number;
+    profilestate?: number;
+    personastate?: number;
+    realname?: string;
+    loccountrycode?: string;
+    gameextrainfo?: string;
+};
 
-// export async function GET() {
-//     const { cache, updated } = await fetchStoreCache();
-//     let steamData = JSON.parse(cache);
+type SteamData = {
+    groupID: number;
+    groupName: string;
+    groupURL: string;
+    headline: string;
+    summary: string;
+    avatarIcon: string;
+    avatarMedium: string;
+    avatarFull: string;
+    memberCount: number;
+    status: {
+        membersInChat: number;
+        membersInGame: number;
+        membersOnline: number;
+    };
+    members: SteamMember[];
+};
 
-//     if (isDataOld(updated)) {
-//         steamData = await fetchSteamXML();
-//         updateStoreCache(steamData);
-//     }
+const GROUP_SLUG = 'orb';
+const STEAM_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // one day
 
-//     return new Response(JSON.stringify(steamData), { status: 200 });
-// }
+export const GET: RequestHandler = async () => {
+    try {
+        const cached = await getCachedJson<SteamData>(
+            'steam',
+            ['guild', GROUP_SLUG],
+            STEAM_CACHE_TTL_MS
+        );
 
-// const isDataOld = (updated: Date): boolean => {
-//     const oneDayAgo = new Date();
-//     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-//     return updated < oneDayAgo;
-// }
+        if (cached) {
+            return json(cached);
+        }
 
-// async function fetchStoreCache(): Promise<StoreCache> {
-//     try {
-//         const query = `SELECT cache, updated FROM storecache WHERE store = 'steam'`;
-//         const conn = await getConnection();
-//         const [result] = await conn.execute(query) as any[];
-//         conn.end();
+        const fresh = await fetchSteamData();
+        await setCachedJson('steam', ['guild', GROUP_SLUG], fresh, STEAM_CACHE_TTL_MS);
 
-//         if (result.length > 0) {
-//             return {
-//                 cache: result[0].cache,
-//                 updated: new Date(result[0].updated),
-//             };
-//         } else {
-//             const steamData = await fetchSteamXML();
-//             return {
-//                 cache: JSON.stringify(steamData),
-//                 updated: new Date()
-//             };
-//         }
-//     } catch (error) {
-//         throw new Error(error.message);
-//     }
-// }
+        return json(fresh);
+    } catch (error: unknown) {
+        return json(
+            {
+                error: true,
+                message: error instanceof Error ? error.message : 'Unknown Steam API error'
+            },
+            { status: 500 }
+        );
+    }
+};
 
+async function fetchSteamData(): Promise<SteamData> {
+    if (!STEAM) {
+        throw new Error('Missing STEAM environment variable');
+    }
 
-// async function updateStoreCache(steamData: SteamData) {
-//     try {
-//         const query = `UPDATE storecache SET cache = ?, updated = NOW() WHERE store = 'steam'`;
-//         const conn = await getConnection();
-//         await conn.execute(query, [JSON.stringify(steamData)]);
-//         conn.end();
-//     } catch (error) {
-//         throw new Error(error.message);
-//     }
-// }
+    const xmlUrl = `https://steamcommunity.com/groups/${GROUP_SLUG}/memberslistxml/?xml=1`;
+    const xmlResponse = await fetch(xmlUrl);
 
+    if (!xmlResponse.ok) {
+        throw new Error(`Failed to fetch Steam XML: ${xmlResponse.status}`);
+    }
 
-// async function fetchSteamXML(): Promise<SteamData> {
-//     const url = 'https://steamcommunity.com/groups/orb/memberslistxml/';
-//     const response = await axios.get(url);
-//     const parser = new xml2js.Parser();
-//     const json = await parser.parseStringPromise(response.data);
+    const xml = await xmlResponse.text();
 
-//     const steamK = process.env.STEAM;
-//     const steamIDs = json.memberList.members[0].steamID64;
-//     const playerSummaryUrl = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamK}&steamids=${steamIDs.join(',')}&format=json`;
-//     const subQuery = await axios.get(playerSummaryUrl);
-    
-//     json.memberList.players = subQuery.data.response.players;
-//     let members = json.memberList.players;
-//     members = members.sort((a, b) => {
-//         const nameA = a.personaname.toUpperCase().replace('} ', '}');
-//         const nameB = b.personaname.toUpperCase().replace('} ', '}');
-//         // Sort orb tags higher
-//         if (nameA.startsWith('{') !== nameB.startsWith('{')) {
-//             return nameA.startsWith('{') ? -1 : 1;
-//         }
-//         return nameA > nameB ? 1 : (nameA < nameB ? -1 : 0);
-//     });
-    
-//     const group = json.memberList.groupDetails[0];
-//     group.summary[0] = group.summary[0].replace(/<br\s*\/?>/gi, '\n');
-//     group.summary[0] = group.summary[0].replace(/<[^>]+>/g, '');
-//     group.summary[0] = group.summary[0].replace(/\[.*?\]/g, '');
-//     group.summary[0] = group.summary[0].replace(/Clan Orb/g, '');
-//     group.summary[0] = group.summary[0].trim();
-    
-//     const result = {
-//         groupID: parseInt(json.memberList.groupID64[0]),
-//         groupName: group.groupName[0],
-//         groupURL: group.groupURL[0],
-//         headline: group.headline[0],
-//         summary: group.summary[0],
-//         avatarIcon: group.avatarIcon[0],
-//         avatarMedium: group.avatarMedium[0],
-//         avatarFull: group.avatarFull[0],
-//         memberCount: parseInt(group.memberCount[0]),
-//         status: {
-//             membersInChat: parseInt(group.membersInChat[0]),
-//             membersInGame: parseInt(group.membersInGame[0]),
-//             membersOnline: parseInt(group.membersOnline[0])
-//         },
-//         members
-//     }
+    const get = (tag: string) => {
+        const match = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i'));
+        return match?.[1]?.trim() ?? '';
+    };
 
-//     updateStoreCache(result);
-//     return result;
-// }
+    const clean = (value: string) =>
+        value
+            .replace(/^<!\[CDATA\[/, '')
+            .replace(/\]\]>$/, '')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]+>/g, '')
+            .replace(/\[.*?\]/g, '')
+            .replace(/Clan Orb/g, '')
+            .trim();
+
+    const ids: string[] = [];
+    const regex = /<steamID64>(.*?)<\/steamID64>/g;
+    let match: RegExpExecArray | null = null;
+
+    while ((match = regex.exec(xml)) !== null) {
+        ids.push(match[1].trim());
+    }
+
+    if (!ids.length) {
+        throw new Error('No Steam IDs found');
+    }
+
+    const playerSummaryUrl =
+        `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/` +
+        `?key=${STEAM}&steamids=${ids.join(',')}&format=json`;
+
+    const summaryResponse = await fetch(playerSummaryUrl);
+
+    if (!summaryResponse.ok) {
+        throw new Error(`Failed to fetch Steam summaries: ${summaryResponse.status}`);
+    }
+
+    const summaryJson = await summaryResponse.json();
+    const players = summaryJson?.response?.players ?? [];
+
+    const members = [...players].sort((a, b) => {
+        const nameA = (a.personaname || '').toUpperCase().replace('} ', '}');
+        const nameB = (b.personaname || '').toUpperCase().replace('} ', '}');
+
+        if (nameA.startsWith('{') !== nameB.startsWith('{')) {
+            return nameA.startsWith('{') ? -1 : 1;
+        }
+
+        return nameA.localeCompare(nameB);
+    });
+
+    return {
+        groupID: Number(get('groupID64') || 0),
+        groupName: clean(get('groupName')),
+        groupURL: clean(get('groupURL')),
+        headline: clean(get('headline')),
+        summary: clean(get('summary')),
+        avatarIcon: clean(get('avatarIcon')),
+        avatarMedium: clean(get('avatarMedium')),
+        avatarFull: clean(get('avatarFull')),
+        memberCount: Number(get('memberCount') || 0),
+        status: {
+            membersInChat: Number(get('membersInChat') || 0),
+            membersInGame: Number(get('membersInGame') || 0),
+            membersOnline: Number(get('membersOnline') || 0)
+        },
+        members
+    };
+}

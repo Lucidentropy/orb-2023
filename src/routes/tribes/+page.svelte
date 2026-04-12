@@ -2,6 +2,8 @@
     import { onMount } from 'svelte';
     import { slide, fade } from 'svelte/transition';
 	import Container from '$lib/ThemeHandler.svelte';
+    import VgsMenu from './vgsMenu.svelte';
+    export const ssr = false;
 
     let masterServerQuery = [];
     let serverList = [];
@@ -147,10 +149,33 @@
 </svelte:head>
 
 <Container>
-    <h1>Tribes <p>the original</p></h1>
+    <div class="tribes-header">
+        <h1>Tribes <p>the original</p></h1>
+        <div class="vgs-anchor">
+            <VgsMenu />
+        </div>
+    </div>
+
+    <style>
+    .tribes-header {
+        position: relative;
+        /* text-align: center; */
+    }
+
+    .vgs-anchor {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    .vgs-anchor :global(*) {
+        pointer-events: auto;
+    }
+    </style>
 
     <p>Orb was founded in Tribes as well as contributed to several of the game's several widely used mods such as Annhilation, Tribes RPG, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
-
     <section>
         <h2>Tribes 1 Realtime Master Server List</h2>
 
@@ -238,9 +263,22 @@
             </div>
         {/if}
 
-
         {#if loading}
-            <p>Establishing uplink with satellite network...</p>
+            <div class="space-y-3 py-6 text-center">
+                <div
+                    class="mx-auto h-8 w-full max-w-md overflow-hidden"
+                    style="background: #000; border: 1px solid var(--bright-green);"
+                >
+                    <div
+                        class="h-full w-full animate-[loadingBar_3.2s_cubic-bezier(0.2,0.8,0.2,1)_forwards]"
+                        style="background: var(--dark-green); transform-origin: left;"
+                    ></div>
+                </div>
+
+                <p class="text-xs font-bold uppercase tracking-wide text-shadow-2xs" style="color: var(--dark-orange);">
+                    Establishing uplink with satellite network...
+                </p>
+            </div>
         {:else}
 
             <div in:slide={{ y: -20, duration: 400 }}>
@@ -270,33 +308,33 @@
                             </tr>
                         </thead>
                         <tbody>
-                        {#each serverList as server}
-                            <tr
-                            on:click={() => {
-                                openModal(server.address);
-                                window.location.hash = server.address;
-                                button4Sound.play();
-                            }}
-                            >
-                                <td>
-                                    <div class="conn {server.ping < 75 ? 'good' : server.ping < 100 ? 'okay' : 'bad'}"></div>
-                                </td>
-                                <td class="status">
-                                    {#if server.server.needpass}
-                                        <img src="/images/tribes-server-locked.gif" />
-                                    {/if}
-                                    {#if server.server.dedicated}
-                                        <img src="/images/tribes-server-dedicated.gif" />
-                                    {/if}
-                                </td>
-                                <td class="name block">{server.name}</td>
-                                <td>{server.ping}</td>
-                                <td>{server.server.game}</td>
-                                <td>{server.map}</td>
-                                <td>{server.currentPlayers}/{server.maxPlayers}</td>
-                                <td class="block">{server.server?.mods?.trim() || 'base'}</td>
-                            </tr>
-                        {/each}
+                            {#each serverList as server (server.address)}
+                                <tr
+                                    on:click={() => {
+                                        openModal(server.address);
+                                        window.location.hash = server.address;
+                                        button4Sound.play();
+                                    }}
+                                >
+                                    <td>
+                                        <div class="conn {server.ping < 75 ? 'good' : server.ping < 100 ? 'okay' : 'bad'}"></div>
+                                    </td>
+                                    <td class="status">
+                                        {#if server.server.needpass}
+                                            <img src="/images/tribes-server-locked.gif" alt="Server Locked" />
+                                        {/if}
+                                        {#if server.server.dedicated}
+                                            <img src="/images/tribes-server-dedicated.gif" alt="Dedicated Server" />
+                                        {/if}
+                                    </td>
+                                    <td class="name block">{server.name}</td>
+                                    <td>{server.ping}</td>
+                                    <td>{server.server.game}</td>
+                                    <td>{server.map}</td>
+                                    <td>{server.currentPlayers}/{server.maxPlayers}</td>
+                                    <td class="block">{server.server?.mods?.trim() || 'base'}</td>
+                                </tr>
+                            {/each}
                         </tbody>
                     </table>
                 </div>
@@ -304,37 +342,157 @@
         {/if}
     </section>
 
-    <section>
+    <section class="space-y-4">
         <h2>Download</h2>
-        <p>Note: Since tribes0.com has gone down, I am searching for updated archives of these files.</p>
-        <div class="twocol">
-            <div class="downloads">
-                <a href="https://www.tribes0.com/FullTribes_1.41.zip" target="_blank">Download Original Tribes<i class="fa fa-download"></i></a>
-                <p>114 MB -  Bugs fixed and 1.41 patch by The Community <br />Game set 1.40v by GarageGames</p>
-                <a href="https://www.tribes0.com/Tribes_2015.zip" target="_blank">Download Tribes 2015 Version<i class="fa fa-download"></i></a>
-                <p>349 MB - High Quality Textures and Interface.<br />Game set released by FSB-SPY</p>
-                <a href="https://www.pcrpg.org/main.php?action=viewpage&page=downloads&startdl=33" target="_blank">Download Tribes RPG<i class="fa fa-download"></i></a>
-                <p>134 MB - Tribes RPG Starter pack <br /> For Particle's Custom RPG. <a href="https://www.pcrpg.org/main.php?action=viewpage&page=downloads&viewfile=33">more info<i class="fa fa-external-link"></i></a></p>
+        <p class="text-orb-highlight/75">
+            Note: Since tribes0.com has gone down, I am searching for updated archives of these files.
+        </p>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_480px] xl:grid-cols-[minmax(0,1fr)_560px]">
+            <div class="space-y-4">
+                <div class="rounded border border-border-faint/60 bg-bg-deep/20 p-4">
+                    <a
+                        href="https://www.tribes0.com/FullTribes_1.41.zip"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-orb-link hover:text-white"
+                    >
+                        Download Original Tribes ↗
+                    </a>
+                    <p class="mt-2 mb-0 text-sm text-orb-highlight/70">
+                        114 MB — Bugs fixed and 1.41 patch by The Community<br />
+                        Game set 1.40v by GarageGames
+                    </p>
+                </div>
+
+                <div class="rounded border border-border-faint/60 bg-bg-deep/20 p-4">
+                    <a
+                        href="https://www.tribes0.com/Tribes_2015.zip"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-orb-link hover:text-white"
+                    >
+                        Download Tribes 2015 Version ↗
+                    </a>
+                    <p class="mt-2 mb-0 text-sm text-orb-highlight/70">
+                        349 MB — High Quality Textures and Interface.<br />
+                        Game set released by FSB-SPY
+                    </p>
+                </div>
+
+                <div class="rounded border border-border-faint/60 bg-bg-deep/20 p-4">
+                    <a
+                        href="https://www.pcrpg.org/main.php?action=viewpage&page=downloads&startdl=33"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-semibold text-orb-link hover:text-white"
+                    >
+                        Download Tribes RPG ↗
+                    </a>
+                    <p class="mt-2 mb-0 text-sm text-orb-highlight/70">
+                        134 MB — Tribes RPG Starter pack<br />
+                        For Particle's Custom RPG.
+                        <a
+                            href="https://www.pcrpg.org/main.php?action=viewpage&page=downloads&viewfile=33"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="ml-1 text-orb-link hover:text-white"
+                        >
+                            more info ↗
+                        </a>
+                    </p>
+                </div>
             </div>
-            <div class="orbskin">
-                <img src="/images/titanshot6.jpg" />
+
+            <div class="self-start rounded border border-border-faint/60 bg-bg-deep/20 p-2 shadow-panel">
+                <img
+                    src="/images/titanshot6.jpg"
+                    alt="Clan Orb Heavy Skin for Tribes"
+                    class="w-full rounded object-cover"
+                />
             </div>
         </div>
     </section>
 
-    <section>
+    <section class="space-y-4">
         <h2>Links</h2>
-        <p>Please note - Tribes is a game from 1998, many of these sites will fade away over time. I've attempted to keep as many links to old resources here as possible.</p>
-        <ul>
-            <li><a href="https://library.theexiled.pwnageservers.com/category.php?id=167" target="_blank">Starsiege: Tribes - TheExiled Library</a></li>
-            <li><a href="https://www.tribalwar.com/forums/showthread.php?t=607313" target="_blank">Tribes 1 Resource Thread - TribalWar</a></li>
-            <li><a href="https://www.tribalwar.com/forums/showthread.php?t=225377" target="_blank">Tribes 1 Links Thread - TribalWar</a></li>
-            <li><a href="https://www.annihilation.info/" target="_blank">Annihilation Mod</a></li>
-            <li><a href="https://www.tribesmasterserver.com/" target="_blank">https://www.tribesmasterserver.com/</a></li>
-            <li><a href="https://www.maxogc.net/tribes/master/index.php" target="_blank">Tribes 1 Master Server Query</a></li>
-            <li><a href="https://t1m1.pu.net/" target="_blank">https://t1m1.pu.net/</a></li>
-            <li><a href="https://www.pcrpg.org/" target="_blank">Particle's Custom RPG</a></li>
-        </ul>
+        <p class="text-orb-highlight/75">
+            Please note - Tribes is a game from 1998, many of these sites will fade away over time. I've attempted to keep as many links to old resources here as possible.
+        </p>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <a
+                href="https://library.theexiled.pwnageservers.com/category.php?id=167"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Starsiege: Tribes - TheExiled Library
+            </a>
+
+            <a
+                href="https://www.tribalwar.com/forums/showthread.php?t=607313"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Tribes 1 Resource Thread - TribalWar
+            </a>
+
+            <a
+                href="https://www.tribalwar.com/forums/showthread.php?t=225377"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Tribes 1 Links Thread - TribalWar
+            </a>
+
+            <a
+                href="https://www.annihilation.info/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Annihilation Mod
+            </a>
+
+            <a
+                href="https://www.tribesmasterserver.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                tribesmasterserver.com
+            </a>
+
+            <a
+                href="https://www.maxogc.net/tribes/master/index.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Tribes 1 Master Server Query
+            </a>
+
+            <a
+                href="https://t1m1.pu.net/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                t1m1.pu.net
+            </a>
+
+            <a
+                href="https://www.pcrpg.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+            >
+                Particle's Custom RPG
+            </a>
+        </div>
     </section>
 </Container>
 
@@ -345,19 +503,6 @@
         --dark-green:#336600;
         --light-orange:#FFD07B;
         --dark-orange:#D88E00;
-    }
-
-    .twocol {
-        display:flex;
-        width:100%;
-        align-items: center;
-
-        div {
-            min-width:50%;
-            img {
-                max-width: 100%;
-            }
-        }
     }
 
     @media (max-width: 768px) {
@@ -384,25 +529,6 @@
     text-align:center;
     strong {
         color:#fff;
-    }
-}
-
-.downloads {
-    text-align: center;
-    padding:0 20px;
-    // width:65%;
-    & > a {
-        font-weight: bold;
-        display: inline-block;
-        background-color: #00a5e2;
-        color: #000;
-        border-radius: 5px;
-        padding: 5px 9px;
-        margin: 15px 0 4px;
-        text-shadow: 1px 1px 1px #ccc;
-    }
-    p {
-        margin: 0 20px 10px 0;
     }
 }
 
@@ -568,6 +694,7 @@
             font-weight: bold;
             padding: 0 3px;
             margin-left:10px;
+            padding-left:0;
 
             cursor: url("/images/tribes-hand.cur"), default;
             color:#000;
@@ -589,6 +716,9 @@
                 left:1px;
                 position:relative;
                 color:#aaa;
+            }
+            &:before {
+                content: "";
             }
         }
     }

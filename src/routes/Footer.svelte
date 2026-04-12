@@ -15,7 +15,7 @@
 {/if}
 
 <footer class="flex flex-col items-center justify-center mt-24 px-4 text-xs opacity-80">
-	<p class="flex flex-wrap gap-2 items-center justify-center text-center font-bold">
+	<p class="flex flex-wrap gap-2 items-center justify-center text-center font-bold text-orb-highlight">
 		<span>Clan Orb, a gaming community founded in 2000.</span>
 
 		{#if !isWebampLoaded}

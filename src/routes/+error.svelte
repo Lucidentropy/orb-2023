@@ -8,6 +8,9 @@
 <svelte:head>
   <title>{error_no} - {error_msg}</title>
   <meta name="description" content="{error_no}" />
+  <style>
+  footer { display:none !important; }
+  </style>
 </svelte:head>
 
 <main style="max-width:auto !important;">
@@ -21,7 +24,10 @@
     <span>ERROR {error_no}</span>
   </h1>
   <h2>Broken in style!</h2>
-  <p class="error_msg">{error_msg}</p>
+  <p class="error_msg">{$page.error?.message}</p>
+  {#if $page.error?.stack}
+      <pre style="font-size:0.7rem; opacity:0.5; white-space:pre-wrap; text-align:left; max-width:900px; margin-top:1rem;">{$page.error.stack}</pre>
+  {/if}
   <p><a href="/">back</a></p>
 </main>
 
@@ -109,8 +115,8 @@ main {
   box-shadow: 0 0 1em rgba($color, 0.4);
   transform: translateY(-2.5em);
   left: 0;
-  top:calc(43% - 40px);
-  height:80px;
+  top:calc(43% - 15px);
+  height:40px;
 }
 
 h1 {
@@ -121,6 +127,16 @@ h1 {
   transform: skew(-15deg);
   letter-spacing: 0.03em;
   white-space:nowrap;
+  border: none;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  color: white;
+  text-shadow: none;
+  font-weight: normal;
+  margin: 0;
+  border-radius: 0;
+  line-height: inherit;
   
   &::after {
     content: '';
@@ -167,9 +183,11 @@ h2 {
   margin: 0;
   font-size: 4.5em;
   margin-top: -0.6em;
-  color: white;
+  color: white !important;
   text-shadow: 0 0 0.05em #fff, 0 0 0.2em #fe05e1, 0 0 0.3em #fe05e1;
   transform: rotate(-7deg);
+  box-shadow:none !important;
+  background:none !important;
 }
 
 .grid {

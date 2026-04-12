@@ -49,6 +49,7 @@
 		"@fortawesome/fontawesome-svg-core": "^6.7.2",
 		"@fortawesome/free-solid-svg-icons": "^6.7.2",
 		"gsap": "^3.13.0",
+		"postgres": "^3.4.9",
 		"svelte-awesome": "^3.3.5",
 		"webamp": "^2.1.2"
 	}

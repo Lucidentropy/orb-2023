@@ -89,32 +89,38 @@
 }
 
 @layer base {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+        
     body {
-            @apply font-sans;
-            min-height: 100vh;
-            margin: 0;
+        @apply font-sans;
+        min-height: 100vh;
+        margin: 0;
 
-            background-color: #000;
-            background-image: url('/images/footer-bg.png'), url('/images/star-bg.png');
-            background-position: bottom, 50% 0;
-            background-repeat: repeat-x, repeat-x;
-            background-size: 100%, 100%;
-            background-attachment: fixed, scroll;
-            background-origin: padding-box, padding-box;
-            background-clip: border-box, border-box;
-        }
+        background-color: #000;
+        background-image: url('/images/footer-bg.png'), url('/images/star-bg.png');
+        background-position: bottom, 50% 0;
+        background-repeat: repeat-x, repeat-x;
+        background-size: 100%, 100%;
+        background-attachment: fixed, scroll;
+        background-origin: padding-box, padding-box;
+        background-clip: border-box, border-box;
+        overflow-x: hidden;
+    }
 
     main {
         @apply text-orb-highlight;
     }
 
     main a {
-        @apply text-orb-link no-underline transition-colors duration-200 hover:text-white hover:underline;
+        @apply text-orb-link underline-offset-2 transition-colors duration-200 hover:text-orb-highlight hover:underline active:text-orb-accent;
     }
 
-    main button {
-        @apply panel text-orb-highlight px-3 py-2 text-base font-sans cursor-pointer transition-colors hover:border-white;
-        text-shadow: 1px 1px 1px #000;
+    main a:visited {
+        color: color-mix(in srgb, var(--orb-link) 70%, var(--orb-accent) 30%);
     }
 
     h1,
@@ -122,33 +128,235 @@
     h3,
     h4,
     h5 {
-        @apply font-display font-bold text-white tracking-wide;
+        @apply font-display text-white;
+        font-weight: 400;
     }
 
     p {
-        @apply leading-relaxed mb-4;
+        @apply mb-4;
+        line-height: 1.5;
+    }
+
+    a {
+        @apply text-orb-link no-underline transition-colors duration-200;
+    }
+
+    a:hover {
+        @apply text-white underline;
+    }
+
+    h1 {
+        @apply font-display text-[1.75rem] leading-tight font-bold text-white p-5 rounded-t-[10px] shadow-[inset_0_0_10px_#000] border-b;
+        margin: -40px -40px 20px;
+        text-shadow: 1px 1px 1px #000;
+        border-bottom-color: #111;
+        clear: both;
+        overflow: hidden;
+
+        background:
+            linear-gradient(0deg, var(--orb-highlight), var(--orb-highlight)),
+            url('/images/footer-bg.png') 50% 50% / 100% auto no-repeat,
+            var(--orb-bg-deep);
+
+        background-blend-mode: color, luminosity, normal;
+    }
+
+
+    h1 p {
+        @apply text-[13px] uppercase font-normal;
+        margin: 0;
+        color: #ddd;
+    }
+
+    h2 {
+        @apply text-white text-[1.2rem] font-normal rounded px-[10px] py-[10px] m-0 mb-2;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+        background-color: color-mix(in srgb, var(--orb-bg-mid) 30%, transparent);
+        /* border-color: color-mix(in srgb, var(--orb-bg-mid) 60%, transparent); */
+        clear: both;
+    }
+
+    h3 {
+        @apply text-white text-2xl font-bold tracking-wide;
+    }
+
+    h4 {
+        @apply text-white text-xl font-bold tracking-wide;
+    }
+
+    h5 {
+        @apply text-white text-lg font-bold tracking-wide;
     }
 
     ul {
         list-style: square;
         @apply pl-4;
     }
+    
+    section {
+        @apply space-y-6 rounded border border-border-faint/50 p-4 bg-bg-deep/30 my-2;
+    }
 
-    input,
+    input {
+        @apply font-sans;
+    }
+
     button {
-        @apply font-sans text-base;
+        @apply inline-flex text-xs py-2.5 px-3 cursor-pointer rounded text-shadow-2xs;
+        position: relative;
+
+        border: 1px solid var(--orb-border-faint);
+
+        background:
+                linear-gradient(to bottom,
+                    color-mix(in srgb, var(--orb-bg-700) 90%, white 6%) 0%,
+                    color-mix(in srgb, var(--orb-bg-mid) 92%, black 5%) 40%,
+                    color-mix(in srgb, var(--orb-bg-base) 98%, black 2%) 100%);
+
+        box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 10%, transparent),
+            inset 0 -1px 0 color-mix(in srgb, black 45%, transparent);
+
+        color: var(--orb-highlight);
+
+        transition:
+            color 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease,
+            background 0.18s ease,
+            transform 0.08s ease;
+    }
+
+    button:not(.btn-icon):not(:has(svg)):not(:has(img))::before {
+        content: '::';
+        margin-right: 0.5rem;
+        text-shadow:1px 1px 1px #000;
+        opacity: 0.6;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    button:hover {
+        color: #fff;
+        border-color: var(--orb-border);
+
+        box-shadow:
+            inset 0 1px 0 color-mix(in srgb, white 14%, transparent),
+            inset 0 -1px 0 color-mix(in srgb, black 55%, transparent),
+            0 0 8px color-mix(in srgb, var(--orb-highlight) 10%, transparent);
+    }
+
+    button:active {
+        transform: translateY(1px);
+        box-shadow:
+            inset 0 2px 3px color-mix(in srgb, black 45%, transparent);
+    }
+
+    button:focus-visible {
+        outline: 1px solid var(--orb-border-strong);
+        outline-offset: 1px;
+    }
+
+    @keyframes loadingBar {
+        from {
+            transform: scaleX(0);
+        }
+
+        to {
+            transform: scaleX(1);
+        }
     }
 }
 
 @layer components {
     .btn-primary {
-        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-orb-highlight hover:text-white;
-        border: 1px solid var(--orb-border);
-        box-shadow: var(--orb-glow-highlight);
+        border-color: var(--orb-border);
+        color: var(--orb-highlight);
     }
 
     .btn-primary:hover {
         border-color: var(--orb-border-strong);
+    }
+
+    .btn-secondary {
+        color: color-mix(in srgb, var(--orb-highlight) 10%, #aaa);
+        border-color: var(--orb-border-faint);
+    }
+
+    .btn-success {
+        color: var(--orb-success);
+        border-color: color-mix(in srgb, var(--orb-success) 45%, transparent);
+    }
+
+    .btn-success:hover {
+        border-color: color-mix(in srgb, var(--orb-success) 70%, transparent);
+    }
+
+    .btn-warning {
+        color: var(--orb-warning);
+        border-color: color-mix(in srgb, var(--orb-warning) 45%, transparent);
+    }
+
+    .btn-warning:hover {
+        border-color: color-mix(in srgb, var(--orb-warning) 70%, transparent);
+    }
+
+    .btn-danger {
+        color: var(--orb-danger-muted);
+        border-color: color-mix(in srgb, var(--orb-danger) 45%, transparent);
+    }
+
+    .btn-danger:hover {
+        border-color: color-mix(in srgb, var(--orb-danger) 75%, transparent);
+    }
+
+    .btn-ghost {
+        background:
+            linear-gradient(to bottom,
+                color-mix(in srgb, white 2%, transparent) 0%,
+                color-mix(in srgb, var(--orb-bg-700) 10%, transparent) 100%);
+        border-color: color-mix(in srgb, var(--orb-border-faint) 70%, transparent);
+        color: color-mix(in srgb, var(--orb-highlight) 35%, #9ca3af);
+    }
+
+    .btn-ghost:hover {
+        border-color: var(--orb-border-faint);
+    }
+
+    .btn-row {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        text-shadow: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        display: contents;
+    }
+
+    .btn-row::before {
+        display: none;
+    }
+
+    .btn-row:hover {
+        background: none;
+        border: none;
+        box-shadow: none;
+        color: inherit;
+    }
+
+    .btn-row:active {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-row:focus-visible {
+        outline: 1px solid var(--orb-border-strong);
+        outline-offset: 2px;
+        border-radius: 2px;
     }
 
     .orb-card {
@@ -158,58 +366,9 @@
         border-radius: 0.25rem;
         box-shadow: var(--orb-glow-panel);
     }
-
-    .panel-danger {
-        border-color: color-mix(in srgb, var(--orb-danger) 60%, transparent);
-        box-shadow: var(--orb-glow-danger);
-    }
-
-    .btn-secondary {
-        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-gray-500;
-        border: 1px solid var(--orb-border-faint);
-        background-color: color-mix(in srgb, var(--orb-bg-700) 55%, transparent);
-    }
-
-    .btn-secondary:hover {
-        @apply text-white;
-        border-color: var(--orb-border);
-        background-color: color-mix(in srgb, var(--orb-bg-700) 75%, transparent);
-    }
-
-    .btn-danger {
-        @apply px-4 py-2 text-sm font-semibold cursor-pointer text-danger-muted hover:text-white;
-        border: 1px solid color-mix(in srgb, var(--orb-danger) 55%, transparent);
-        box-shadow: var(--orb-glow-danger);
-    }
-
-    .btn-danger:hover {
-        border-color: var(--orb-danger);
-    }
-
-    .btn-ghost {
-        @apply border text-orb-highlight px-3 py-2;
-        border-color: var(--color-border-faint);
-        background: rgba(255, 255, 255, 0.02);
-    }
-
-    .btn-ghost:hover {
-        border-color: var(--color-border-strong);
-        background: rgba(255, 255, 255, 0.05);
-        @apply text-white;
-    }
-
-    .btn-icon {
-        @apply flex items-center justify-center p-0 w-10 h-10;
-    }
-
     
-
     .panel-danger {
         @apply border-danger/60 shadow-glow-danger;
-    }
-
-    .orb-card {
-        @apply panel p-5 transition-all;
     }
 
     .overlay {
@@ -297,13 +456,31 @@
     }
 
     .section-label {
-        text-shadow:1px 1px 1px #000;
-        @apply block font-mono text-[0.85rem] uppercase tracking-[0.2em] text-white mb-5 pt-4;
+        @apply flex items-center gap-4 font-mono text-[0.85rem] uppercase tracking-[0.2em] text-white mb-5 pl-2;
+        text-shadow: 1px 1px 1px #000;
+    }
+
+    .section-label::after {
+        content: '';
+        @apply flex-1 h-px;
+        background: linear-gradient(to right,
+                var(--orb-border-strong),
+                transparent);
     }
 
     .subsection-label {
+        @apply flex items-center justify-center gap-3 text-center font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white my-2;
         text-shadow: 1px 1px 1px #000;
-        @apply block font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white mb-2;
+    }
+
+    .subsection-label::before,
+    .subsection-label::after {
+        content: '';
+        @apply flex-1 h-px;
+        background: linear-gradient(to right,
+                transparent,
+                var(--orb-border),
+                transparent);
     }
 
     .body-secondary {
@@ -326,5 +503,9 @@
     .orb-theme-panel {
         background-image: var(--orb-gradient-panel);
         border: 1px solid var(--orb-border-strong);
+    }
+
+    .orb-theme-panel > section {
+        margin:auto -20px 10px;
     }
 }

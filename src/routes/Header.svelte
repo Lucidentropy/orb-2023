@@ -91,7 +91,7 @@
 
 		<!-- Mobile hamburger -->
 		<button
-			class="md:hidden absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-2 text-[var(--color-text)] hover:text-white"
+			class="md:hidden absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent p-2 text-orb-highlight hover:text-white"
 			on:click={() => mobileOpen = !mobileOpen}
 			aria-label="Toggle menu"
 		>
@@ -104,7 +104,7 @@
 				class="nav-ul hidden md:flex relative p-0 m-0 h-12 items-center">
 				<li class="relative h-full opacity-50 hover:opacity-100">
 					<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}
-						class="nav-link flex h-full items-center px-2 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white pl-1">
+						class="nav-link flex h-full items-center px-2 text-orb-highlight font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white pl-1">
 						<Icon data={arrowCircleOLeft} class="mr-2.5" /> Back
 					</a>
 				</li>
@@ -113,7 +113,7 @@
 						aria-current={$page.url.pathname.startsWith(subItem.url ?? '') ? 'page' : undefined}>
 						<a href={subItem.url}
 							class="nav-link flex h-full items-center px-2 font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 hover:text-white
-							{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-[var(--color-text)]'}">
+							{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-orb-highlight'}">
 							{subItem.text}
 						</a>
 					</li>
@@ -125,13 +125,13 @@
 					<li class="relative h-full">
 						{#if item.subItems}
 							<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}
-								class="nav-link flex h-full items-center px-2 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white">
+								class="nav-link flex h-full items-center px-2 text-orb-highlight font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 cursor-pointer hover:text-white">
 								{item.text}
 							</a>
 						{:else if item.url}
 							<a href={item.url}
 								class="nav-link flex h-full items-center px-2 font-bold text-xs uppercase tracking-widest no-underline transition-colors duration-200 hover:text-white
-								{item.devOnly ? 'dev-item' : 'text-[var(--color-text)]'}
+								{item.devOnly ? 'dev-item' : 'text-orb-highlight'}
 								{$page.url.pathname === item.url ? 'text-white' : ''}">
 								{item.text}
 							</a>
@@ -153,7 +153,7 @@
 				<ul class="nav-ul flex flex-col p-0 m-0">
 					<li class="border-b border-white/10 opacity-50 hover:opacity-100">
 						<a href={activeItem.url} on:click|preventDefault={() => toggleSubMenu(null)}
-							class="nav-link flex items-center gap-2 px-4 py-3 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
+							class="nav-link flex items-center gap-2 px-4 py-3 text-orb-highlight font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
 							<Icon data={arrowCircleOLeft} /> Back
 						</a>
 					</li>
@@ -161,7 +161,7 @@
 						<li class="border-b border-white/10">
 							<a href={subItem.url} on:click={closeMobile}
 								class="nav-link flex items-center px-4 py-3 font-bold text-xs uppercase tracking-widest no-underline hover:text-white
-								{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-[var(--color-text)]'}">
+								{$page.url.pathname.startsWith(subItem.url ?? '') ? 'text-white' : 'text-orb-highlight'}">
 								{subItem.text}
 							</a>
 						</li>
@@ -173,14 +173,14 @@
 						<li class="border-b border-white/10">
 							{#if item.subItems}
 								<a href={item.url} on:click|preventDefault={() => toggleSubMenu(item)}
-									class="nav-link flex items-center justify-between px-4 py-3 text-[var(--color-text)] font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
+									class="nav-link flex items-center justify-between px-4 py-3 text-orb-highlight font-bold text-xs uppercase tracking-widest no-underline hover:text-white">
 									{item.text}
 									<span class="opacity-50 text-lg">›</span>
 								</a>
 							{:else if item.url}
 								<a href={item.url} on:click={closeMobile}
 									class="nav-link flex items-center px-4 py-3 font-bold text-xs uppercase tracking-widest no-underline hover:text-white
-									{item.devOnly ? 'dev-item' : 'text-[var(--color-text)]'}">
+									{item.devOnly ? 'dev-item' : 'text-orb-highlight'}">
 									{item.text}
 								</a>
 							{/if}

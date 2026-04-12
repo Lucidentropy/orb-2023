@@ -1,0 +1,3 @@
+staging.clanorb.com {
+    reverse_proxy localhost:3000
+}
