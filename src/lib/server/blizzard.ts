@@ -1,13 +1,13 @@
 import {
     BLIZZARD_CLIENT_ID,
     BLIZZARD_CLIENT_SECRET,
-    WOW_REGION,
-    WOW_LOCALE
 } from '$env/static/private';
 import { getCachedJson, setCachedJson } from '$lib/server/cacheHandler';
 
-export const region = WOW_REGION || 'us';
-export const locale = WOW_LOCALE || 'en_US';
+export const region = 'us';
+export const locale = 'en_US';
+export const realmSlug = 'stormreaver';
+export const guildSlug = 'orb';
 
 export const INACTIVE_RANKS = new Set([4, 6]);
 export const MIN_LEVEL_ACTIVE = 40;
