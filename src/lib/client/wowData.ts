@@ -104,6 +104,7 @@ export const WOW_CLASSES: Record<number, {
         specs: [
             { name: 'Havoc', abbrev: 'Havoc', role: 'DPS' },
             { name: 'Vengeance', abbrev: 'Veng', role: 'Tank' },
+            { name: 'Devourer', abbrev: 'Devour', role: 'DPS' },
         ],
     },
     13: {
