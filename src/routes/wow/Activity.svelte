@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {wowClassColor} from './data';
+	import {wowClassColor} from "$lib/client/wowData";
 	let activityPage = 1;
 	const activityPageSize = 8;
     

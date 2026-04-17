@@ -2,24 +2,25 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { region, locale } from '$lib/server/blizzard';
-import { WOW_REALM_SLUG, WOW_GUILD_SLUG } from '$routes/wow/data';
+import { WOW_REALM_SLUG, WOW_GUILD_SLUG } from '$lib/client/wowData';
 import { fetchGuildBase, enrichRosterMembers } from '$lib/server/wowRoster';
 
 const realmSlug = WOW_REALM_SLUG || 'stormreaver';
 const guildSlug = WOW_GUILD_SLUG || 'orb';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url }) => {
     try {
-        const { accessToken, guild, roster, activity } = await fetchGuildBase();
+        const bust = url.searchParams.get('bust') === 'true';
+        const { accessToken, guild, roster, activity } = await fetchGuildBase(bust);
         const allMembers: any[] = roster?.members ?? [];
-        const { enriched, allMembersWithDetails } = await enrichRosterMembers(allMembers, accessToken);
+        const { members, allMembersWithDetails } = await enrichRosterMembers(allMembers, accessToken, bust);
 
         return json({
             guild,
             activity,
             roster: {
                 total: allMembers.length,
-                eligible: enriched.length,
+                eligible: members.length,
                 members: allMembersWithDetails
             },
             meta: {

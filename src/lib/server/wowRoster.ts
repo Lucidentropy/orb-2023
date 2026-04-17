@@ -1,5 +1,5 @@
 // wow roster helpers
-import { WOW_REALM_SLUG, WOW_GUILD_SLUG } from '$routes/wow/data';
+import { WOW_REALM_SLUG, WOW_GUILD_SLUG } from '$lib/client/wowData';
 import {
     region,
     locale,
@@ -19,7 +19,7 @@ import {
 const realmSlug = WOW_REALM_SLUG || 'stormreaver';
 const guildSlug = WOW_GUILD_SLUG || 'orb';
 
-export async function fetchGuildBase() {
+export async function fetchGuildBase(bust = false) {
     const accessToken = await getAccessToken();
 
     const [guild, roster, activity] = await Promise.all([
@@ -27,26 +27,26 @@ export async function fetchGuildBase() {
             ['guild', region, realmSlug, guildSlug],
             TTL.guild,
             `https://${region}.api.blizzard.com/data/wow/guild/${realmSlug}/${guildSlug}?namespace=profile-${region}&locale=${locale}`,
-            accessToken
+            accessToken, 1, bust
         ),
         cachedFetch(
             ['roster', region, realmSlug, guildSlug],
             TTL.roster,
             `https://${region}.api.blizzard.com/data/wow/guild/${realmSlug}/${guildSlug}/roster?namespace=profile-${region}&locale=${locale}`,
-            accessToken
+            accessToken, 1, bust
         ),
         cachedFetch(
             ['activity', region, realmSlug, guildSlug],
             TTL.activity,
             `https://${region}.api.blizzard.com/data/wow/guild/${realmSlug}/${guildSlug}/activity?namespace=profile-${region}&locale=${locale}`,
-            accessToken
+            accessToken, 1, bust
         )
     ]);
 
     return { accessToken, guild, roster, activity };
 }
 
-export async function enrichRosterMembers(allMembers: any[], accessToken: string) {
+export async function enrichRosterMembers(allMembers: any[], accessToken: string, bust = false) {
     const ns = profileNs();
 
     const activeMembers = allMembers.filter(
@@ -68,7 +68,9 @@ export async function enrichRosterMembers(allMembers: any[], accessToken: string
         insetUrl: null,
         mounts: null,
         pets: null,
-        toys: null
+        toys: null,
+        decor: null,
+        houses: null,
     }));
 
     const tier2Map = new Map<number, any>();
@@ -80,21 +82,25 @@ export async function enrichRosterMembers(allMembers: any[], accessToken: string
             const charRealm = member.character.realm?.slug ?? realmSlug;
             const base = charBaseUrl(charRealm, charName);
 
-            const [pets, toys, profile, media] = await Promise.all([
-                cachedFetch(['char', region, charRealm, charName, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken).catch(() => null),
-                cachedFetch(['char', region, charRealm, charName, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null),
-                cachedFetch(['char', region, charRealm, charName, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch(() => null),
-                cachedFetch(['char', region, charRealm, charName, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null)
+            const [pets, toys, profile, media, decor, houses] = await Promise.all([
+                cachedFetch(['char', region, charRealm, charName, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken, 1, bust).catch(() => null),
+                cachedFetch(['char', region, charRealm, charName, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken, 1, bust).catch(() => null),
+                cachedFetch(['char', region, charRealm, charName, 'profile'], TTL.character, `${base}?${ns}`, accessToken, 1, bust).catch(() => null),
+                cachedFetch(['char', region, charRealm, charName, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken, 1, bust).catch(() => null),
+                cachedFetch(['char', region, charRealm, charName, 'decor'], TTL.collections, `${base}/collections/decor?${ns}`, accessToken, 1, bust).catch(() => null),
+                cachedFetch(['char', region, charRealm, charName, 'houses'], TTL.collections, `${base}/house/house-1?${ns}`, accessToken, 1, bust).catch(() => null),
             ]);
 
             tier2Map.set(member.character?.id, {
                 pets: pets?.pets?.length ?? null,
                 toys: toys?.toys?.length ?? null,
+                decor: decor?.decor_collected?.length ?? null,
+                houses: houses?.houses ?? null,
                 details: profile,
                 achievementPoints: profile?.achievement_points ?? null,
                 _ilvl: profile?.equipped_item_level ?? -1,
                 avatarUrl: media?.assets?.find((a: any) => a.key === 'avatar')?.value ?? null,
-                insetUrl: media?.assets?.find((a: any) => a.key === 'inset')?.value ?? null
+                insetUrl: media?.assets?.find((a: any) => a.key === 'inset')?.value ?? null,
             });
         },
         CHARACTER_BATCH_SIZE
@@ -120,7 +126,7 @@ export async function enrichRosterMembers(allMembers: any[], accessToken: string
                 ['char', region, charRealm, charName, 'mounts'],
                 TTL.collections,
                 `${base}/collections/mounts?${ns}`,
-                accessToken
+                accessToken, 1, bust
             ).catch(() => null);
 
             const existing = tier2Map.get(member.character?.id) ?? {};
@@ -132,20 +138,20 @@ export async function enrichRosterMembers(allMembers: any[], accessToken: string
         CHARACTER_BATCH_SIZE
     );
 
-    const enriched = tier1.map((m: any) => {
+    const processed = tier1.map((m: any) => {
         const t2 = tier2Map.get(m.character?.id);
         return t2 ? { ...m, ...t2 } : m;
     });
 
-    const enrichedById = new Map(enriched.map((m: any) => [m.character?.id, m]));
+    const processedById = new Map(processed.map((m: any) => [m.character?.id, m]));
     const allMembersWithDetails = allMembers.map((m: any) =>
-        enrichedById.get(m.character?.id) ??
+        processedById.get(m.character?.id) ??
         inactiveById.get(m.character?.id) ??
         { ...m, active: false }
     );
 
     return {
-        enriched,
+        members: processed,
         allMembersWithDetails
     };
 }

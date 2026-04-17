@@ -60,3 +60,21 @@ export async function setCachedJson<T>(
 export function cacheKeyFilename(keyParts: string[]): string {
     return `${keyParts.map(v => v.toLowerCase().replace(/[^a-z0-9-_]/g, '-')).join('-')}.json`;
 }
+export async function deleteCachedByPrefix(service: string, prefix: string[]): Promise<void> {
+    try {
+        const safe = (v: string) => v.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+        const keyPrefix = `${safe(service)}:${prefix.map(safe).join('-')}`;
+        await sql`DELETE FROM wow_cache WHERE key LIKE ${keyPrefix + '%'}`;
+    } catch (err) {
+        console.error('[cache] deleteCachedByPrefix failed:', err);
+    }
+}
+
+export async function deleteCached(service: string, keyParts: string[]): Promise<void> {
+    try {
+        const key = buildKey(service, keyParts);
+        await sql`DELETE FROM wow_cache WHERE key = ${key}`;
+    } catch (err) {
+        console.error('[cache] deleteCached failed:', err);
+    }
+}

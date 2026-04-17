@@ -1,50 +1,138 @@
 <script>
-	import github from '$lib/images/github.svg';
-	import svelteLogo from '$lib/images/svelte-logo.svg';
-	import winampIcon from '$lib/images/winamp-icon.svg';
+    import github from '$lib/images/github.svg';
+    import svelteLogo from '$lib/images/svelte-logo.svg';
+    import winampIcon from '$lib/images/winamp-icon.svg';
+    import Webamp from './Webamp.svelte';
+    import { activeTheme } from '$lib/stores/themeStore';
 
 	let isWebampLoaded = false;
-	import Webamp from './Webamp.svelte';
-	const loadWebamp = () => (isWebampLoaded = !isWebampLoaded);
+	let drawerOpen = false;
+
+    const loadWebamp = () => (isWebampLoaded = !isWebampLoaded);
+
+    const themes = [
+        { value: '', label: 'Default' },
+        { value: 'matrix', label: 'Matrix' },
+        { value: 'halflife', label: 'Half-Life' },
+        { value: 'crimson', label: 'Crimson' },
+        { value: 'vapor', label: 'Vapor' }
+    ];
 </script>
 
 {#if isWebampLoaded}
-<div class="fixed top-0 left-0 w-screen h-screen z-50 pointer-events-none">
-    <Webamp />
-</div>
+    <div class="fixed top-0 left-0 w-screen h-screen z-50 pointer-events-none">
+        <Webamp />
+    </div>
 {/if}
 
-<footer class="flex flex-col items-center justify-center mt-24 px-4 text-xs opacity-80">
-	<p class="flex flex-wrap gap-2 items-center justify-center text-center font-bold text-orb-highlight">
+<footer class="mt-24 px-4 text-xs">
+	<p class="tagline">
 		<span>Clan Orb, a gaming community founded in 2000.</span>
+	</p>
+	<div class="drawer-row pb-4">
+		<a href="https://svelte.dev/" target="_blank" rel="noopener noreferrer">
+			<img src={svelteLogo} alt="" class="h-4 w-4 object-contain saturate-0" />
+			Powered by Svelte
+		</a>
+
+		<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" rel="noopener noreferrer">
+			<img src={github} alt="" class="h-4 w-4 object-contain invert" />
+			GitHub
+		</a>
 
 		{#if !isWebampLoaded}
-			<button
-				on:click={loadWebamp}
-				type="button"
-				title="A relic of an ancient time."
-				class="inline-flex items-center justify-center bg-transparent p-0 m-0 border-none hover:opacity-100 opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-1 rounded"
-				style="background:none;padding:0;">
-				<img src={winampIcon} alt="Winamp" class="h-5 w-5 object-contain saturate-50 hover:saturate-100" />
+			<button class="btn-row" onclick={loadWebamp} title="A relic of an ancient time." style="gap:7px; display:inline-flex;">
+				<img src={winampIcon} alt="" class="h-4 w-4 object-contain saturate-50" />
+				Llama Time
 			</button>
 		{/if}
 
-		<a
-			href="https://github.com/Lucidentropy/orb-2023"
-			target="_blank"
-			rel="noopener noreferrer"
-			title="View on GitHub"
-			class="inline-flex items-center justify-center opacity-60 hover:opacity-100">
-			<img src={github} alt="GitHub" class="h-5 w-5 object-contain invert" />
-		</a>
-
-		<a
-			href="https://svelte.dev/"
-			target="_blank"
-			rel="noopener noreferrer"
-			title="Built with Svelte"
-			class="inline-flex items-center justify-center opacity-60 hover:opacity-100">
-			<img src={svelteLogo} alt="Svelte" class="h-5 w-5 object-contain saturate-0 hover:saturate-100" />
-		</a>
-	</p>
+		<div class="theme-select">
+			<label for="theme-select" class="field-label">Theme</label>
+			<select id="theme-select" class="field-input" bind:value={$activeTheme}>
+				{#each themes as option}
+					<option value={option.value}>{option.label}</option>
+				{/each}
+			</select>
+		</div>
+	</div>
 </footer>
+
+<style lang="scss">
+    footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tagline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-weight: bold;
+        color: var(--orb-highlight);
+        opacity: 0.7;
+    }
+
+    .more-btn {
+        font-size: 0.7rem;
+        opacity: 0.6;
+
+        &:hover { opacity: 1; }
+    }
+
+    .drawer {
+        width: 100%;
+        max-width: 600px;
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.3s ease;
+
+        &.open {
+            grid-template-rows: 1fr;
+        }
+    }
+
+    .drawer-inner {
+        overflow: hidden;
+    }
+
+	.drawer-row {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1.25rem;
+		font-size: 0.75rem;
+		color: var(--orb-highlight);
+		opacity: 0.6;
+
+		a, .winamp-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			color: inherit;
+			font-size: 0.75rem;
+			transition: opacity 0.2s;
+
+			&:hover { opacity: 1; color: inherit; }
+		}
+	}
+
+	.theme-select {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+		.field-label {
+			margin: 0;
+			white-space: nowrap;
+		}
+
+		.field-input {
+			font-size: 0.65rem;
+			padding: 0.25rem 0.5rem;
+			min-width: 100px;
+		}
+	}
+</style>

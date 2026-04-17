@@ -1,22 +1,53 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { replaceState } from '$app/navigation';
+	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { blur } from 'svelte/transition';
 	import Container from '$lib/ThemeHandler.svelte';
 	import Roster from './Roster.svelte';
 	import Character from './Character.svelte';
 	import Cache from './Cache.svelte';
 	import Activity from './Activity.svelte';
+	import Neighborhood from './Neighborhood.svelte';
+
+	import { factionName, realmName } from "$lib/client/wowData";
 
 	let wowData: any = $state(null);
 	let loading = $state(true);
 	let error = $state('');
+	let currentCharTab = $state<'gear' | 'alts'>('gear');
 
-	type PanelView = 'roster' | 'character' | 'cache';
+	type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood';
 	let panelView = $state<PanelView>('roster');
 	let selectedMember = $state<any>(null);
 
+	let neighborhoodData: any = $state(null);
+	let neighborhoodLoading = $state(false);
+	let neighborhoodError = $state('');
+
 	onMount(() => {
+		restorePanelFromPath();
+
+		const panelParam = $page.url.searchParams.get('panel');
+
+		if (panelParam === 'neighborhood') {
+			openPanel('neighborhood');
+			return;
+		}
+
+		if (panelParam === 'cache') {
+			openPanel('cache');
+			return;
+		}
+
+		if (panelParam === 'roster') {
+			openPanel('roster');
+			return;
+		}
+
+		if (panelView !== 'roster') {
+			openPanel(panelView);
+		}
 		const handler = (e: PromiseRejectionEvent) => {
 			e.preventDefault();
 		};
@@ -49,10 +80,7 @@
 
 			wowData = data;
 
-			const charParam = $page.url.searchParams.get('char');
-			if (charParam) {
-				restoreCharFromUrl(data);
-			}
+			restoreCharFromUrl(data);
 		} catch (err: unknown) {
 			error = err instanceof Error ? err.message : 'Unknown error';
 		} finally {
@@ -60,11 +88,95 @@
 		}
 	});
 
-	function restoreCharFromUrl(data: any) {
-		const charParam = $page.url.searchParams.get('char');
-		if (!charParam) return;
+	async function openPanel(view: PanelView) {
+		panelView = view;
 
-		const [realm, name] = charParam.split('/');
+		if (view === 'roster') {
+			selectedMember = null;
+			updateUrl('/wow');
+			return;
+		}
+
+		if (view === 'cache') {
+			updateUrl('/wow/cache');
+			return;
+		}
+
+		if (view === 'neighborhood') {
+			updateUrl('/wow/neighborhood');
+
+			if (neighborhoodData || neighborhoodLoading) return;
+
+			neighborhoodLoading = true;
+
+			try {
+				const response = await fetch('/api/wow/neighborhood');
+				const data = await response.json();
+
+				if (!response.ok || data?.error) {
+					throw new Error(data?.message || 'Failed to load neighborhood data');
+				}
+
+				neighborhoodData = data;
+			} catch (err: unknown) {
+				neighborhoodError = err instanceof Error ? err.message : 'Unknown error';
+			} finally {
+				neighborhoodLoading = false;
+			}
+
+			return;
+		}
+	}
+
+	function updateUrl(path: string) {
+		if (window.location.pathname !== path) {
+			window.history.replaceState({}, '', path);
+		}
+	}
+
+	function restorePanelFromPath() {
+		const path = window.location.pathname;
+
+		if (path === '/wow/neighborhood') {
+			openPanel('neighborhood');
+			return;
+		}
+
+		if (path === '/wow/cache') {
+			openPanel('cache');
+			return;
+		}
+
+		openPanel('roster');
+	}
+
+	type CharacterTab = 'gear' | 'alts';
+
+	function charPath(realm: string, name: string, tab: CharacterTab = 'gear') {
+		return `/wow/char/${encodeURIComponent(realm)}/${encodeURIComponent(name)}/${tab}`;
+	}
+
+	function restoreCharFromUrl(data: any) {
+		let realm = '';
+		let name = '';
+		let tab: CharacterTab = 'gear';
+
+		const pathMatch = window.location.pathname.match(/^\/wow\/char\/([^/]+)\/([^/]+)\/(gear|alts)$/i);
+
+		if (pathMatch) {
+			realm = decodeURIComponent(pathMatch[1]);
+			name = decodeURIComponent(pathMatch[2]);
+			tab = pathMatch[3].toLowerCase() as CharacterTab;
+		} else {
+			const charParam = $page.url.searchParams.get('char');
+			if (!charParam) return;
+
+			const parts = charParam.split('/');
+			realm = parts[0] ?? '';
+			name = parts[1] ?? '';
+			tab = ((parts[2] ?? 'gear').toLowerCase() as CharacterTab);
+		}
+
 		if (!realm || !name) return;
 
 		const found = (data?.roster?.members ?? []).find(
@@ -76,17 +188,31 @@
 		if (found) {
 			selectedMember = found;
 			panelView = 'character';
+			currentCharTab = tab;
+
+			const nextPath = charPath(
+				found.character?.realm?.slug ?? realm,
+				found.character?.name ?? name,
+				tab
+			);
+
+			if (window.location.pathname !== nextPath) {
+				window.history.replaceState({}, '', nextPath);
+			}
 		}
 	}
 
-	function factionName(faction: any) {
-		if (!faction) return 'Unknown';
-		return faction.name || faction.type || 'Unknown';
-	}
+	function selectMember(member: any, tab: 'gear' | 'alts' = 'gear') {
+		selectedMember = member;
+		panelView = 'character';
+		currentCharTab = tab;
 
-	function realmName(realm: any) {
-		if (!realm) return 'Unknown';
-		return realm.name || wowData?.meta?.realm || 'Unknown';
+		const realm = member?.character?.realm?.slug;
+		const name = member?.character?.name;
+
+		if (realm && name) {
+			window.history.pushState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+		}
 	}
 
 	function memberRows() {
@@ -104,20 +230,11 @@
 		)
 	);
 
-	function selectMember(member: any) {
-		selectedMember = member;
-		panelView = 'character';
-		const realm = member?.character?.realm?.slug;
-		const name = member?.character?.name;
-		if (realm && name) {
-			replaceState(`?char=${realm}/${name}`, {});
-		}
-	}
-
-	function backToRoster() {
-		panelView = 'roster';
-		selectedMember = null;
-		replaceState('?', {});
+	async function refreshRoster() {
+		const response = await fetch('/api/wow?bust=true');
+		const data = await response.json();
+		if (!response.ok || data?.error) throw new Error(data?.message || 'Refresh failed');
+		wowData = data;
 	}
 </script>
 
@@ -174,13 +291,25 @@
 
 	{:else if wowData}
 		<div class="space-y-8">
-			<header class="relative overflow-hidden rounded border border-border-faint/60 bg-bg-deep/30 shadow-panel">
+			<header class="relative overflow-hidden rounded border border-border-faint/60 bg-bg-deep/30 shadow-panel mb-2">
 				<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,208,123,0.14),transparent_45%)]"></div>
 
 				<div class="relative grid grid-cols-1 gap-6 px-6 py-8 lg:grid-cols-[140px_minmax(0,1fr)]">
 					<div class="flex items-start justify-center lg:justify-start">
-						<div class="flex h-28 w-28 items-center justify-center rounded text-center text-sm text-orb-highlight">
-							<img src="https://assets-bwa.worldofwarcraft.blizzard.com/3edbc547ab318bd385b2.png" alt="Guild Crest" />
+						<div class="relative h-[118px] w-[118px]">
+							<div class="h-full w-full overflow-hidden rounded-full">
+								<img
+									src="/images/wow/orb-emblem.jpg"
+									alt="Guild Crest"
+									class="h-full w-full scale-100 object-cover"
+								/>
+							</div>
+
+							<img
+								src="/images/wow/border_circle_118.png"
+								alt=""
+								class="pointer-events-none absolute inset-0 h-full w-full scale-120"
+							/>
 						</div>
 					</div>
 
@@ -223,22 +352,88 @@
 				</div>
 			</header>
 
+			<div class="flex flex-wrap gap-2 mb-0">
+				{#each ['roster', 'neighborhood', 'cache'] as panel (panel)}
+					<button
+						type="button"
+						class={`btn-ghost rounded border px-3 py-2 text-xs font-semibold uppercase tracking-wider transition
+							${panelView === panel
+								? 'border-white/70 bg-bg-deep/70 text-white'
+								: 'border-border-faint/60 bg-bg-deep/40 text-orb-highlight hover:border-orb-highlight/60 hover:bg-bg-deep/70'}`}
+						on:click={() => openPanel(panel)}
+					>
+						{panel.charAt(0).toUpperCase() + panel.slice(1)}
+					</button>
+				{/each}
+			</div>
+
 			<div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] items-stretch">
 				<div class="h-full">
-					{#if panelView === 'roster'}
-						<Roster
-							members={wowData?.roster?.members || []}
-							realm={wowData?.meta?.realm || ''}
-							onSelectMember={selectMember}
-						/>
-					{:else if panelView === 'character'}
-						<Character
-							member={selectedMember}
-							allMembers={(wowData?.roster?.members || []).filter((m: any) => m.active !== false)}
-							onBack={backToRoster}
-							onSelectMember={selectMember}
-						/>
-					{/if}
+					{#key panelView}
+						<div
+							in:blur={{ duration: 180, amount: 6, opacity: 0.2 }}
+						>
+							{#if panelView === 'roster'}
+								<Roster
+									members={wowData?.roster?.members || []}
+									realm={wowData?.meta?.realm || ''}
+									onSelectMember={selectMember}
+								/>
+
+							{:else if panelView === 'character'}
+							<Character
+								member={selectedMember}
+								allMembers={(wowData?.roster?.members || []).filter((m: any) => m.active !== false)}
+								onBack={() => openPanel('roster')}
+								onSelectMember={selectMember}
+								onSelectTab={(tab: 'gear' | 'alts') => {
+									currentCharTab = tab;
+
+									const realm = selectedMember?.character?.realm?.slug;
+									const name = selectedMember?.character?.name;
+
+									if (realm && name) {
+										window.history.pushState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+									}
+								}}
+								initialTab={currentCharTab}
+							/>
+
+							{:else if panelView === 'cache'}
+								<Cache
+									fetchedAt={wowData?.meta?.fetchedAt ?? null}
+									memberCount={(wowData?.roster?.members || []).filter((m: any) => m.active !== false).length}
+									onBack={() => openPanel('roster')}
+									onRefresh={refreshRoster}
+								/>
+
+							{:else if panelView === 'neighborhood'}
+								{#if neighborhoodLoading}
+									<div class="rounded border border-border-faint/60 bg-bg-deep/20 p-6">
+										<p class="mb-0 text-sm uppercase tracking-wider text-orb-highlight/65">
+											Loading neighborhood data...
+										</p>
+									</div>
+
+								{:else if neighborhoodError}
+									<div class="alert-danger">
+										<span class="font-mono">⛔</span>
+										<div>
+											<p class="font-semibold">Failed to load neighborhood data.</p>
+											<p class="opacity-80">{neighborhoodError}</p>
+										</div>
+									</div>
+
+								{:else}
+									<Neighborhood
+										plots={neighborhoodData?.plots || []}
+										mapSrc={neighborhoodData?.meta?.mapSrc || '/images/wow/neighborhood-map.jpg'}
+										onBack={() => openPanel('roster')}
+									/>
+								{/if}
+							{/if}
+						</div>
+					{/key}
 				</div>
 
 				<div class="h-full">

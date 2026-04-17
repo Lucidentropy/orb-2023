@@ -26,7 +26,7 @@
   <h2>Broken in style!</h2>
   <p class="error_msg">{$page.error?.message}</p>
   {#if $page.error?.stack}
-      <pre style="font-size:0.7rem; opacity:0.5; white-space:pre-wrap; text-align:left; max-width:900px; margin-top:1rem;">{$page.error.stack}</pre>
+      <pre style="font-size:0.75rem; white-space:pre-wrap; text-align:left; max-width:900px; margin-top:1rem; background:#000; color:#00ff41; border:1px solid #00ff41; border-radius:4px; padding:1rem; box-shadow:0 0 10px #00ff4166; text-shadow:0 0 5px #00ff4166; font-family:monospace; opacity:0.85;">{$page.error.stack}</pre>
   {/if}
   <p><a href="/">back</a></p>
 </main>

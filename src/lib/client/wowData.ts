@@ -3,6 +3,8 @@ export const WOW_REALM_SLUG = 'stormreaver';
 export const WOW_GUILD_SLUG = 'orb';
 export const WOW_LOCALE = 'en_US';
 
+export const max_level = 90;
+
 export const wowClassNames: Record<number, string> = {
     1: 'Warrior',
     2: 'Paladin',
@@ -131,6 +133,93 @@ export const wowSpecAbbrev: Record<string, string> = {
     'Blood': 'Blood',
 };
 
+export const wowNeighborhoodMap = {
+    src: '/images/wow/neighborhood-map.jpg',
+    referenceWidth: 1024,
+    referenceHeight: 768,
+    houseIconSize: 32,
+    flightIconSize: 22,
+    vendorIconSize: 22,
+    portalIconSize: 22
+};
+
+export const wowNeighborhoodHouses = [
+    { id: 16, x: 508, y: 461 },
+    { id: 10, x: 535, y: 507 },
+    { id: 34, x: 515, y: 491 },
+    { id: 48, x: 498, y: 510 },
+    { id: 27, x: 418, y: 516 },
+    { id: 47, x: 483, y: 481 },
+    { id: 29, x: 479, y: 525 },
+    { id: 25, x: 387, y: 399 },
+    { id: 2, x: 335, y: 391 },
+    { id: 33, x: 367, y: 522 },
+    { id: 0, x: 313, y: 500 },
+    { id: 41, x: 403, y: 489 },
+    { id: 36, x: 395, y: 418 },
+    { id: 9, x: 318, y: 435 },
+    { id: 18, x: 332, y: 452 },
+    { id: 28, x: 341, y: 433 },
+    { id: 44, x: 579, y: 389 },
+    { id: 45, x: 553, y: 399 },
+    { id: 31, x: 552, y: 359 },
+    { id: 4, x: 546, y: 451 },
+    { id: 46, x: 597, y: 329 },
+    { id: 15, x: 629, y: 360 },
+    { id: 39, x: 655, y: 335 },
+    { id: 52, x: 619, y: 441 },
+    { id: 8, x: 617, y: 490 },
+    { id: 14, x: 617, y: 516 },
+    { id: 20, x: 588, y: 407 },
+    { id: 23, x: 622, y: 385 },
+    { id: 35, x: 671, y: 414 },
+    { id: 38, x: 652, y: 397 },
+    { id: 53, x: 599, y: 446 },
+    { id: 42, x: 650, y: 425 },
+    { id: 11, x: 355, y: 537 },
+    { id: 43, x: 379, y: 615 },
+    { id: 49, x: 475, y: 649 },
+    { id: 22, x: 453, y: 630 },
+    { id: 51, x: 525, y: 616 },
+    { id: 7, x: 550, y: 622 },
+    { id: 50, x: 390, y: 542 },
+    { id: 17, x: 357, y: 563 },
+    { id: 12, x: 393, y: 632 },
+    { id: 32, x: 435, y: 605 },
+    { id: 19, x: 516, y: 658 },
+    { id: 54, x: 362, y: 598 },
+    { id: 40, x: 474, y: 551 },
+    { id: 6, x: 500, y: 612 },
+    { id: 13, x: 600, y: 567 },
+    { id: 5, x: 569, y: 596 },
+    { id: 3, x: 542, y: 588 },
+    { id: 24, x: 389, y: 685 },
+    { id: 1, x: 590, y: 588 },
+    { id: 26, x: 329, y: 543 },
+    { id: 37, x: 485, y: 672 },
+    { id: 30, x: 416, y: 559 },
+    { id: 21, x: 537, y: 431 }
+];
+
+export const wowNeighborhoodFlightPoints = [
+    { id: 0, x: 480, y: 376 },
+    { id: 1, x: 634, y: 565 },
+    { id: 2, x: 339, y: 412 },
+    { id: 3, x: 398, y: 522 },
+    { id: 4, x: 455, y: 613 },
+    { id: 5, x: 613, y: 417 },
+    { id: 6, x: 467, y: 442 },
+    { id: 7, x: 531, y: 536 }
+];
+
+export const wowNeighborhoodPortals = [{ id: 0, x: 470, y: 363 }];
+
+export const wowNeighborhoodVendors = [
+    { id: 0, x: 469, y: 426 },
+    { id: 1, x: 312, y: 546 }
+];
+
+
 export const wowRankIcons: Record<number, string> = {
     0: `<polygon points="0,30 10,10 20,22 30,2 40,22 50,10 60,30" fill="none" stroke="#FFD700" stroke-width="2" stroke-linejoin="round"/><rect x="0" y="30" width="60" height="8" rx="2" fill="#FFD700" opacity="0.8"/><circle cx="30" cy="4" r="3" fill="#FFD700"/><circle cx="10" cy="11" r="2.5" fill="#FFD700"/><circle cx="50" cy="11" r="2.5" fill="#FFD700"/>`,
     1: `<polygon points="0,30 10,10 20,22 30,2 40,22 50,10 60,30" fill="none" stroke="#FF69B4" stroke-width="2" stroke-linejoin="round"/><rect x="0" y="30" width="60" height="8" rx="2" fill="#FF69B4" opacity="0.8"/><circle cx="30" cy="4" r="4" fill="#FF69B4"/><circle cx="30" cy="4" r="2" fill="white" opacity="0.6"/><circle cx="10" cy="11" r="2.5" fill="#FF69B4"/><circle cx="50" cy="11" r="2.5" fill="#FF69B4"/>`,
@@ -142,7 +231,7 @@ export const wowRankIcons: Record<number, string> = {
     7: `<line x1="30" y1="42" x2="30" y2="20" stroke="#63d363" stroke-width="2.5" stroke-linecap="round"/><line x1="30" y1="32" x2="22" y2="24" stroke="#63d363" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="28" x2="38" y2="20" stroke="#63d363" stroke-width="2" stroke-linecap="round"/><ellipse cx="18" cy="21" rx="8" ry="5" fill="#63d363" opacity="0.8" transform="rotate(-30,18,21)"/><ellipse cx="42" cy="17" rx="8" ry="5" fill="#63d363" opacity="0.8" transform="rotate(30,42,17)"/><ellipse cx="30" cy="11" rx="7" ry="5" fill="#63d363"/>`,
 };
 
-export function wowRankIcon(rank?: number, size = 20): string {
+export function wowRankIcon(rank?: number, size = 30): string {
     const paths = rank != null ? wowRankIcons[rank] : null;
     if (!paths) return '';
     return `<svg viewBox="0 0 60 48" width="${size}" height="${size}" style="display:inline-block;vertical-align:-0.2em;" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
@@ -169,6 +258,16 @@ export function wowRaceName(id?: number) {
 export function wowSpecName(name?: string | null, abbreviated = false): string | null {
     if (!name) return null;
     return abbreviated ? (wowSpecAbbrev[name] ?? name) : name;
+}
+
+export function factionName(faction: any) {
+    if (!faction) return 'Unknown';
+    return faction.name || faction.type || 'Unknown';
+}
+
+export function realmName(realm: any, wowData?: any) {
+    if (!realm) return wowData?.meta?.realm || 'Unknown';
+    return realm.name || wowData?.meta?.realm || 'Unknown';
 }
 
 export function sortRosterMembers(members: any[]) {

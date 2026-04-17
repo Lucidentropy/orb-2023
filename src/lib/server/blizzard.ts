@@ -85,12 +85,15 @@ export async function cachedFetch(
     ttlMs: number,
     url: string,
     accessToken: string,
-    attempt = 1
+    attempt = 1,
+    bust = false
 ): Promise<any> {
-    const cached = await getCachedJson<any>('wow', keyParts, ttlMs);
-    if (cached) {
-        if (cached?._negative) throw new Error(cached.reason ?? 'Cached failure');
-        return cached;
+    if (!bust) {
+        const cached = await getCachedJson<any>('wow', keyParts, ttlMs);
+        if (cached) {
+            if (cached?._negative) throw new Error(cached.reason ?? 'Cached failure');
+            return cached;
+        }
     }
 
     let response: Response;
@@ -99,7 +102,7 @@ export async function cachedFetch(
     } catch (networkErr: unknown) {
         if (attempt < 3) {
             await sleep(500 * attempt);
-            return cachedFetch(keyParts, ttlMs, url, accessToken, attempt + 1);
+            return cachedFetch(keyParts, ttlMs, url, accessToken, attempt + 1, bust);
         }
         throw networkErr;
     }
@@ -107,7 +110,7 @@ export async function cachedFetch(
     if (response.status === 429 || response.status >= 500) {
         if (attempt < 3) {
             await sleep(1000 * attempt);
-            return cachedFetch(keyParts, ttlMs, url, accessToken, attempt + 1);
+            return cachedFetch(keyParts, ttlMs, url, accessToken, attempt + 1, bust);
         }
     }
 

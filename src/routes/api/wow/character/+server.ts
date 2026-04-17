@@ -1,4 +1,4 @@
-// wow character api
+// routes/api/wow/character/+server.ts
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import {
@@ -17,7 +17,6 @@ export const GET: RequestHandler = async ({ url }) => {
     try {
         const realm = url.searchParams.get('realm')?.toLowerCase();
         const name = url.searchParams.get('name')?.toLowerCase();
-
         if (!realm || !name) {
             return json({ error: true, message: 'Missing realm or name' }, { status: 400 });
         }
@@ -27,14 +26,16 @@ export const GET: RequestHandler = async ({ url }) => {
         const ns = profileNs();
         const staticNs = `namespace=static-${region}&locale=${locale}`;
 
-        const [profile, media, equipment, achievements, mounts, pets, toys] = await Promise.all([
+
+        const [profile, media, equipment, achievements, mounts, pets, toys, decor] = await Promise.all([
             cachedFetch(['char', region, realm, name, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch((e: Error) => ({ _error: e.message })),
             cachedFetch(['char', region, realm, name, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'equipment'], TTL.character, `${base}/equipment?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'achievements'], TTL.achievements, `${base}/achievements?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'mounts'], TTL.collections, `${base}/collections/mounts?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null)
+            cachedFetch(['char', region, realm, name, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null),
+            cachedFetch(['char', region, realm, name, 'decor'], TTL.collections, `${base}/collections/decor?${ns}`, accessToken).catch(() => null),
         ]);
 
         if (profile && '_error' in profile) {
@@ -78,7 +79,7 @@ export const GET: RequestHandler = async ({ url }) => {
                 slotMap,
                 slotOrder: SLOT_ORDER
             },
-            collections: { mounts, pets, toys },
+            collections: { mounts, pets, toys, decor },
             meta: { realm, name, region, fetchedAt: new Date().toISOString() }
         });
     } catch (error: unknown) {

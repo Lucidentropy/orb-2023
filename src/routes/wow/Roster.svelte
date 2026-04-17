@@ -9,29 +9,32 @@
 		wowClassColor,
 		wowSpecName,
 		wowRankIcon,
-	} from './data';
+	} from "$lib/client/wowData";
 
 	let {
 		members = [],
 		realm = '',
-		onSelectMember
+		onSelectMember,
+		onOpenCache
 	}: {
 		members: any[];
 		realm: string;
 		onSelectMember?: (member: any) => void;
+		onOpenCache?: () => void;
 	} = $props();
 
-	type SortKey = 'name' | 'rank' | 'achievementPoints' | 'mounts' | 'toys' | 'pets' | 'ilvl';
+	type SortKey = 'name' | 'rank' | 'achievementPoints' | 'mounts' | 'toys' | 'pets' | 'decor' | 'ilvl';
 
 	const MIN_COLLECTION_COUNT = 5;
 
 	let rosterPage   = $state(rosterPageMemory);
-	const rosterPageSize = 13;
+	const rosterPageSize = 10;
 	let showInactive = $state(false);
 	let groupAlts    = $state(true);
 	let sortKey      = $state<SortKey>('ilvl');
 	let sortAsc      = $state(false);
 	let expandedIds  = $state<Set<number>>(new Set());
+	let hoveredId    = $state<number | null>(null);
 	let searchQuery  = $state('');
 
 	const isSearching     = $derived(searchQuery.trim().length > 0);
@@ -128,6 +131,7 @@
 				case 'mounts':            av = a.mounts ?? -1;                       bv = b.mounts ?? -1;                       break;
 				case 'toys':              av = a.toys ?? -1;                         bv = b.toys ?? -1;                       break;
 				case 'pets':              av = a.pets ?? -1;                         bv = b.pets ?? -1;                         break;
+				case 'decor':             av = a.decor ?? -1;                        bv = b.decor ?? -1;                        break;
 				default:                  av = 0; bv = 0;
 			}
 			if (av < bv) return sortAsc ? -1 : 1;
@@ -214,12 +218,14 @@
 		return slug.toLowerCase().split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
 	}
 
-	const grid     = 'grid-cols-[32px_minmax(0,1.6fr)_52px_64px_52px_48px_48px_48px]';
+	const grid     = 'grid-cols-[32px_minmax(0,1.6fr)_52px_64px_52px_48px_48px_48px_48px]';
 	const thClass  = 'cursor-pointer select-none hover:text-orb-highlight/80 transition-colors';
 </script>
 
 <section class="space-y-4 h-full flex flex-col">
-	<p class="section-label">Roster</p>
+	<div class="flex items-center justify-between">
+		<p class="section-label mb-0 flex-1">Roster</p>
+	</div>
 
 	<div class="overflow-hidden rounded border border-border-faint/60 bg-bg-deep/20 flex-1 flex flex-col" onwheel={onWheel}>
 
@@ -259,6 +265,7 @@
 			<div onclick={() => toggleSort('mounts')}            class="{thClass} whitespace-nowrap" title="Mounts collected">Mounts{sortIndicator('mounts')}</div>
 			<div onclick={() => toggleSort('toys')}              class="{thClass} whitespace-nowrap" title="Toys collected">Toys{sortIndicator('toys')}</div>
 			<div onclick={() => toggleSort('pets')}              class="{thClass} whitespace-nowrap" title="Battle pets collected">Pets{sortIndicator('pets')}</div>
+			<div onclick={() => toggleSort('decor')}             class="{thClass} whitespace-nowrap" title="Housing decor collected">Decor{sortIndicator('decor')}</div>
 			<div class="whitespace-nowrap" title="Detected alts">Alts</div>
 		</div>
 
@@ -275,8 +282,10 @@
 
 				<button
 					type="button"
-					class="btn-row grid w-full {grid} gap-2 text-left text-sm transition-colors hover:bg-bg-mid/60 focus-visible:outline-none"
+					class="btn-row grid w-full {grid} gap-2 text-left text-sm transition-colors focus-visible:outline-none {hoveredId === id ? 'bg-bg-mid/60' : 'hover:bg-bg-mid/40'}"
 					onclick={() => onSelectMember?.(member)}
+					onmouseenter={() => hoveredId = id ?? null}
+					onmouseleave={() => hoveredId = null}
 				>
 					<div class="flex items-center h-12">
 						{#if member.avatarUrl}
@@ -292,7 +301,7 @@
 
 					<div class="flex flex-col justify-center min-w-0 h-12">
 						<p class="mb-0 font-semibold truncate flex items-center gap-1" style="color: {wowClassColor(member.character?.playable_class?.id)}">
-							{member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}{#if mainName}&nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>{/if}&nbsp;{@html wowRankIcon(member.rank, 12)}
+							{member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}{#if mainName}&nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>{/if}&nbsp;{@html wowRankIcon(member.rank, 16)}
 						</p>
 						<p class="mb-0 text-xs text-orb-highlight/50 truncate flex items-center gap-1">
 							<span class="text-white">{member.character?.level ?? '-'}</span> ·
@@ -307,12 +316,13 @@
 					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.mounts ?? '—'}</div>
 					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.toys ?? '—'}</div>
 					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.pets ?? '—'}</div>
+					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.decor ?? '—'}</div>
 
 					<div class="flex items-center h-12">
 						{#if alts.length > 0}
 							<button
 								type="button"
-								class="btn-row flex items-center justify-center gap-1 text-xs text-orb-highlight/60 hover:text-white w-full h-full"
+								class="btn-row flex items-center gap-1 text-xs text-orb-highlight/60 hover:text-white w-full h-full"
 								onclick={(e) => toggleExpand(id, e)}
 							>
 								<span>{alts.length}</span>
@@ -353,6 +363,40 @@
 				{/if}
 			{/if}
 		{/each}
+
+		<!-- hero strip: one image per visible member -->
+		{#if pagedMembers.some((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl))}
+			<div class="grid border-t border-border-faint/30 overflow-hidden" style="grid-template-columns: repeat({pagedMembers.filter((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)).length}, minmax(0, 1fr)); max-height: 260px;">
+				{#each pagedMembers.filter((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)) as m (m.character?.id)}
+					{@const classId = m.character?.playable_class?.id}
+					{@const inset = m.insetUrl ?? m.avatarUrl}
+					<div
+						class="relative overflow-hidden cursor-pointer transition-all duration-150"
+						style="height: 170px; background: {classId ? `url('/images/wow/character_bg_${classId}.webp') center/cover no-repeat` : '#000'}; {hoveredId === m.character?.id ? 'box-shadow: inset 0 0 0 2px rgba(102,204,255,0.5), 0 0 20px rgba(102,204,255,0.15); z-index: 20; position: relative;' : ''}"
+						title={m.character?.name}
+						onclick={() => onSelectMember?.(m)}
+						onmouseenter={() => hoveredId = m.character?.id ?? null}
+						onmouseleave={() => hoveredId = null}
+					>
+						<!-- character inset image -->
+						{#if inset}
+							<img
+								src={inset}
+								alt={m.character?.name}
+								class="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-200" style={hoveredId === m.character?.id ? "opacity: 1;" : "opacity: 0.8;"}
+								onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }}
+							/>
+						{/if}
+						<!-- bottom gradient + name -->
+						<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-1 pb-1 pt-4">
+							<p class="mb-0 text-center text-[9px] font-semibold leading-tight truncate" style="color: {wowClassColor(classId)}; text-shadow: 0 1px 3px #000;">
+								{m.character?.name}
+							</p>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
 
 		<div class="flex flex-wrap items-center justify-between gap-3 border-t border-border-faint px-4 py-3">
 			<p class="mb-0 text-xs uppercase tracking-wide text-orb-highlight/50 w-30 tabular-nums shrink-0">
