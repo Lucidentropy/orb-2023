@@ -180,8 +180,8 @@ export const wowRankNames: Record<number, string> = {
 };
 
 export const ROLE_COLOR: Record<string, string> = {
-    Tank: '#dddd00',
-    Healer: '#63d363',
+    Tank: '#0070DE',
+    Healer: '#00FF96',
     DPS: '#cb4848',
 };
 

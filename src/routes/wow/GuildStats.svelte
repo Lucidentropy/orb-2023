@@ -227,20 +227,37 @@
         selectedClass = null;
         selectedRole  = null;
     }
+
+    const totalMembers = $derived(members.length);
+    const activeMembers = $derived(members.filter(m => {
+        if (m.active === false) return false;
+        const ts = m.details?.last_login_timestamp;
+        if (ts == null) return false;
+        return (Date.now() - ts) <= SIX_MONTHS_MS;
+    }).length);
 </script>
 
 <section class="space-y-4 h-full flex flex-col">
-<div class="flex items-center justify-between gap-4 flex-wrap">
-    <p class="section-label mb-0">Guild Stats</p>
-    <div class="text-right">
-        <p class="mb-0 font-mono text-xs" style="color: var(--orb-highlight)">{total} members</p>
+<div class="space-y-2">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <p class="section-label mb-0">Guild Stats</p>
+    </div>
+    <h3 class='text-center'>Guild Orb in World of Warcraft</h3>
+    <div class="flex flex-wrap gap-4 rounded border border-border-faint/20 bg-black/20 px-4 py-3 text-sm justify-center">
+        <span>Total members: <span style="color: var(--orb-highlight)">{totalMembers}</span></span>
+        <span style="color: var(--background-600)">·</span>
+        <span>Active characters: <span style="color: var(--orb-highlight)">{activeMembers}</span></span>
+        <span style="color: var(--background-600)">·</span>
+        <span>Active mains: <span style="color: var(--orb-highlight)">{total}</span></span>
         {#if guildAge}
-            <p class="mb-0 font-mono text-[10px]" style="color: var(--background-400)">
+            <p class="mb-0">
                 Founded {guildAge.years} years, {guildAge.months} months, {guildAge.days} days, {guildAge.hours} hours, {guildAge.minutes} minutes, {guildAge.seconds} seconds ago
             </p>
-        {/if}
+        {/if}        
     </div>
 </div>
+
+
 
 <!-- Filters -->
     <div class="flex flex-wrap gap-4 rounded border border-border-faint/20 bg-black/20 px-4 py-3">
@@ -312,19 +329,19 @@
                 >
                     <div class="flex items-center gap-2 mb-0.5">
                         <img src="/images/wow/icon_class_{c.id}.jpg" alt="" class="h-5 w-5 rounded-sm shrink-0"
-                            style="opacity: {selectedClass === c.id || selectedClass === null ? 1 : 0.25};" />
+                            style="opacity: {selectedClass === c.id || selectedClass === null ? 1 : 0.2};" />
                         <span class="text-sm w-28 text-left truncate transition-all"
-                            style="color: {selectedClass === c.id ? c.color : selectedClass === null ? 'var(--orb-highlight)' : 'var(--background-600)'}">
+                            style="color: {selectedClass === c.id ? c.color : selectedClass === null ? 'var(--orb-highlight)' : 'rgba(255,255,255,0.15)'}">
                             {c.name}
                         </span>
                         <div class="flex-1 mx-2 h-2 rounded-full overflow-hidden" style="background: var(--orb-bg-800)">
                             <div
                                 class="h-full rounded-full transition-all duration-500"
-                                style="width: {c.count / maxClassCount * 100}%; background: {c.color}; opacity: {selectedClass === c.id || selectedClass === null ? 1 : 0.15};"
+                                style="width: {c.count / maxClassCount * 100}%; background: {c.color}; opacity: {selectedClass === c.id || selectedClass === null ? 1 : 0.1};"
                             ></div>
                         </div>
                         <span class="font-mono text-sm tabular-nums transition-all"
-                            style="color: {selectedClass === c.id ? c.color : selectedClass === null ? c.color : 'var(--background-600)'}">
+                            style="color: {selectedClass === c.id ? c.color : selectedClass === null ? c.color : 'rgba(255,255,255,0.15)'}">
                             {c.count}
                         </span>
                     </div>
@@ -344,20 +361,21 @@
                         </div>
                         {#each group.specs as s (s.spec)}
                             <button type="button" class="btn-row w-full flex items-center gap-2" onclick={() => toggleSpec(s.spec)}>
-                                <span class="text-[10px] w-3 shrink-0 text-right font-mono tabular-nums" style="color: {ROLE_COLOR[s.role] ?? 'var(--background-500)'}">
-                                    {s.count}
-                                </span>
-                                <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: var(--orb-bg-800)">
-                                    <div
-                                        class="h-full rounded-full transition-all duration-500"
-                                        style="width: {s.count / maxSpecCount * 100}%; background: {s.color}; opacity: {selectedSpec === s.spec || selectedSpec === null ? 1 : 0.15};"
-                                    ></div>
-                                </div>
-                                <span class="text-xs w-24 truncate transition-colors text-right"
-                                    style="color: {selectedSpec === s.spec ? s.color : selectedSpec === null ? 'var(--orb-highlight)' : 'var(--background-600)'}">
-                                    {s.spec}
-                                </span>
-                            </button>
+                            <span class="text-[10px] w-3 shrink-0 text-right font-mono tabular-nums transition-all"
+                                style="color: {selectedSpec === s.spec ? s.color : selectedSpec === null ? 'var(--orb-highlight)' : 'rgba(255,255,255,0.15)'}">
+                                {s.count}
+                            </span>
+                            <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: var(--orb-bg-800)">
+                                <div
+                                    class="h-full rounded-full transition-all duration-500"
+                                    style="width: {s.count / maxSpecCount * 100}%; background: {s.color}; opacity: {selectedSpec === s.spec || selectedSpec === null ? 1 : 0.15};"
+                                ></div>
+                            </div>
+                            <span class="text-xs w-24 truncate transition-colors text-left"
+                                style="color: {selectedSpec === s.spec ? s.color : selectedSpec === null ? 'var(--orb-highlight)' : 'rgba(255,255,255,0.15)'}">
+                                {s.spec}
+                            </span>
+                        </button>
                         {/each}
                     </div>
                 {/each}
@@ -380,7 +398,7 @@
                 >Clear</button>
             </div>
 
-            <div class="grid grid-cols-2 gap-px sm:grid-cols-3 xl:grid-cols-4">
+            <div class="grid grid-cols-2 gap-px sm:grid-cols-3 xl:grid-cols-3">
                 {#each filteredList as m (m.character?.id)}
                     {@const classId = m.character?.playable_class?.id}
                     {@const spec = m.details?.active_spec?.name}
