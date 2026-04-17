@@ -177,7 +177,7 @@
     // ── Member list ───────────────────────────────────────────────────────────
     let selectedClass = $state<number | null>(null);
     let selectedRole  = $state<string | null>(null);
-    let selectedSpec  = $state<string | null>(null);
+    let selectedSpec = $state<{ spec: string; classId: number } | null>(null);
 
     const filteredList = $derived((() => {
         return pool.filter(m => {
@@ -187,7 +187,10 @@
                 const role = spec ? (SPEC_ROLE[spec] ?? 'Unknown') : 'Unknown';
                 if (role !== selectedRole) return false;
             }
-            if (selectedSpec != null && m.details?.active_spec?.name !== selectedSpec) return false;
+            if (selectedSpec != null && !(
+                m.details?.active_spec?.name === selectedSpec.spec &&
+                m.character?.playable_class?.id === selectedSpec.classId
+            )) return false;
             return true;
         }).sort((a, b) => {
             const lvlDiff = (b.character?.level ?? 0) - (a.character?.level ?? 0);
@@ -197,7 +200,7 @@
     })());
 
     const listLabel = $derived(
-        selectedSpec  != null ? selectedSpec :
+        selectedSpec  != null ? selectedSpec.spec :
         selectedClass != null ? wowClassName(selectedClass) :
         selectedRole  != null ? selectedRole + 's' : ''
     );
@@ -222,11 +225,22 @@
         selectedSpec  = null;
     }
 
-    function toggleSpec(spec: string) {
-        selectedSpec  = selectedSpec === spec ? null : spec;
-        selectedClass = null;
-        selectedRole  = null;
+    function toggleSpec(spec: string, classId: number) {
+        if (selectedSpec?.spec === spec && selectedSpec?.classId === classId) {
+            selectedSpec = null;
+        } else {
+            selectedSpec = { spec, classId };
+            selectedClass = null;
+            selectedRole  = null;
+        }
     }
+
+    function isSpecSelected(spec: string, classId: number) {
+        return selectedSpec?.spec === spec && selectedSpec?.classId === classId;
+    }
+    function isSpecFaded(spec: string, classId: number) {
+        return selectedSpec !== null && !isSpecSelected(spec, classId);
+    }    
 
     const totalMembers = $derived(members.length);
     const activeMembers = $derived(members.filter(m => {
@@ -360,19 +374,19 @@
                             <span class="text-xs font-semibold uppercase tracking-wide" style="color: {group.color}">{group.className}</span>
                         </div>
                         {#each group.specs as s (s.spec)}
-                            <button type="button" class="btn-row w-full flex items-center gap-2" onclick={() => toggleSpec(s.spec)}>
+                            <button type="button" class="btn-row w-full flex items-center gap-2" onclick={() => toggleSpec(s.spec, group.classId)}>
                             <span class="text-[10px] w-3 shrink-0 text-right font-mono tabular-nums transition-all"
-                                style="color: {selectedSpec === s.spec ? s.color : selectedSpec === null ? 'var(--orb-highlight)' : 'rgba(255,255,255,0.15)'}">
+                                style="color: {isSpecSelected(s.spec, group.classId) ? s.color : isSpecFaded(s.spec, group.classId) ? 'rgba(255,255,255,0.15)' : 'var(--orb-highlight)'}">
                                 {s.count}
                             </span>
                             <div class="flex-1 h-1.5 rounded-full overflow-hidden" style="background: var(--orb-bg-800)">
                                 <div
                                     class="h-full rounded-full transition-all duration-500"
-                                    style="width: {s.count / maxSpecCount * 100}%; background: {s.color}; opacity: {selectedSpec === s.spec || selectedSpec === null ? 1 : 0.15};"
+                                    style="width: {s.count / maxSpecCount * 100}%; background: {s.color}; opacity: {isSpecFaded(s.spec, group.classId) ? 0.15 : 1};"
                                 ></div>
                             </div>
                             <span class="text-xs w-24 truncate transition-colors text-left"
-                                style="color: {selectedSpec === s.spec ? s.color : selectedSpec === null ? 'var(--orb-highlight)' : 'rgba(255,255,255,0.15)'}">
+                                style="color: {isSpecSelected(s.spec, group.classId) ? s.color : isSpecFaded(s.spec, group.classId) ? 'rgba(255,255,255,0.15)' : 'var(--orb-highlight)'}">
                                 {s.spec}
                             </span>
                         </button>
