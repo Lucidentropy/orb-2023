@@ -6,7 +6,6 @@
     import { activeTheme } from '$lib/stores/themeStore';
 
 	let isWebampLoaded = false;
-	let drawerOpen = false;
 
     const loadWebamp = () => (isWebampLoaded = !isWebampLoaded);
 

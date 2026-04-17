@@ -5,21 +5,121 @@ export const WOW_LOCALE = 'en_US';
 
 export const max_level = 90;
 
-export const wowClassNames: Record<number, string> = {
-    1: 'Warrior',
-    2: 'Paladin',
-    3: 'Hunter',
-    4: 'Rogue',
-    5: 'Priest',
-    6: 'Death Knight',
-    7: 'Shaman',
-    8: 'Mage',
-    9: 'Warlock',
-    10: 'Monk',
-    11: 'Druid',
-    12: 'Demon Hunter',
-    13: 'Evoker'
+export const WOW_CLASSES: Record<number, {
+    name: string;
+    color: string;
+    specs: { name: string; abbrev: string; role: 'Tank' | 'Healer' | 'DPS' }[];
+}> = {
+    1: {
+        name: 'Warrior', color: '#C79C6E',
+        specs: [
+            { name: 'Arms', abbrev: 'Arms', role: 'DPS' },
+            { name: 'Fury', abbrev: 'Fury', role: 'DPS' },
+            { name: 'Protection', abbrev: 'Prot', role: 'Tank' },
+        ],
+    },
+    2: {
+        name: 'Paladin', color: '#F58CBA',
+        specs: [
+            { name: 'Holy', abbrev: 'Holy', role: 'Healer' },
+            { name: 'Protection', abbrev: 'Prot', role: 'Tank' },
+            { name: 'Retribution', abbrev: 'Ret', role: 'DPS' },
+        ],
+    },
+    3: {
+        name: 'Hunter', color: '#ABD473',
+        specs: [
+            { name: 'Beast Mastery', abbrev: 'BM', role: 'DPS' },
+            { name: 'Marksmanship', abbrev: 'MM', role: 'DPS' },
+            { name: 'Survival', abbrev: 'Surv', role: 'DPS' },
+        ],
+    },
+    4: {
+        name: 'Rogue', color: '#FFF569',
+        specs: [
+            { name: 'Assassination', abbrev: 'Assn', role: 'DPS' },
+            { name: 'Outlaw', abbrev: 'Outlaw', role: 'DPS' },
+            { name: 'Subtlety', abbrev: 'Sub', role: 'DPS' },
+        ],
+    },
+    5: {
+        name: 'Priest', color: '#FFFFFF',
+        specs: [
+            { name: 'Discipline', abbrev: 'Disc', role: 'Healer' },
+            { name: 'Holy', abbrev: 'Holy', role: 'Healer' },
+            { name: 'Shadow', abbrev: 'Shadow', role: 'DPS' },
+        ],
+    },
+    6: {
+        name: 'Death Knight', color: '#C41F3B',
+        specs: [
+            { name: 'Blood', abbrev: 'Blood', role: 'Tank' },
+            { name: 'Frost', abbrev: 'Frost', role: 'DPS' },
+            { name: 'Unholy', abbrev: 'Unholy', role: 'DPS' },
+        ],
+    },
+    7: {
+        name: 'Shaman', color: '#0070DE',
+        specs: [
+            { name: 'Elemental', abbrev: 'Ele', role: 'DPS' },
+            { name: 'Enhancement', abbrev: 'Enhance', role: 'DPS' },
+            { name: 'Restoration', abbrev: 'Resto', role: 'Healer' },
+        ],
+    },
+    8: {
+        name: 'Mage', color: '#69CCF0',
+        specs: [
+            { name: 'Arcane', abbrev: 'Arcane', role: 'DPS' },
+            { name: 'Fire', abbrev: 'Fire', role: 'DPS' },
+            { name: 'Frost', abbrev: 'Frost', role: 'DPS' },
+        ],
+    },
+    9: {
+        name: 'Warlock', color: '#9482C9',
+        specs: [
+            { name: 'Affliction', abbrev: 'Afflict', role: 'DPS' },
+            { name: 'Demonology', abbrev: 'Demo', role: 'DPS' },
+            { name: 'Destruction', abbrev: 'Destro', role: 'DPS' },
+        ],
+    },
+    10: {
+        name: 'Monk', color: '#00FF96',
+        specs: [
+            { name: 'Brewmaster', abbrev: 'Brew', role: 'Tank' },
+            { name: 'Mistweaver', abbrev: 'Mist', role: 'Healer' },
+            { name: 'Windwalker', abbrev: 'WW', role: 'DPS' },
+        ],
+    },
+    11: {
+        name: 'Druid', color: '#FF7D0A',
+        specs: [
+            { name: 'Balance', abbrev: 'BoomKin', role: 'DPS' },
+            { name: 'Feral', abbrev: 'Feral', role: 'DPS' },
+            { name: 'Guardian', abbrev: 'Guardian', role: 'Tank' },
+            { name: 'Restoration', abbrev: 'Resto', role: 'Healer' },
+        ],
+    },
+    12: {
+        name: 'Demon Hunter', color: '#A330C9',
+        specs: [
+            { name: 'Havoc', abbrev: 'Havoc', role: 'DPS' },
+            { name: 'Vengeance', abbrev: 'Veng', role: 'Tank' },
+        ],
+    },
+    13: {
+        name: 'Evoker', color: '#33937F',
+        specs: [
+            { name: 'Devastation', abbrev: 'Dev', role: 'DPS' },
+            { name: 'Preservation', abbrev: 'Pres', role: 'Healer' },
+            { name: 'Augmentation', abbrev: 'Aug', role: 'DPS' },
+        ],
+    },
 };
+
+export const wowClassNames = Object.fromEntries(Object.entries(WOW_CLASSES).map(([id, c]) => [id, c.name]));
+export const wowClassColors = Object.fromEntries(Object.entries(WOW_CLASSES).map(([id, c]) => [id, c.color]));
+export const SPEC_ROLE = Object.fromEntries(Object.values(WOW_CLASSES).flatMap(c => c.specs.map(s => [s.name, s.role])));
+export const wowSpecAbbrev = Object.fromEntries(Object.values(WOW_CLASSES).flatMap(c => c.specs.map(s => [s.name, s.abbrev])));
 
 export const wowRaceNames: Record<number, string> = {
     1: 'Human',
@@ -56,22 +156,6 @@ export const wowRaceNames: Record<number, string> = {
     91: 'Haranir'
 };
 
-export const wowClassColors: Record<number, string> = {
-    1: '#C79C6E', // Warrior
-    2: '#F58CBA', // Paladin
-    3: '#ABD473', // Hunter
-    4: '#FFF569', // Rogue
-    5: '#FFFFFF', // Priest
-    6: '#C41F3B', // Death Knight
-    7: '#0070DE', // Shaman
-    8: '#69CCF0', // Mage
-    9: '#9482C9', // Warlock
-    10: '#00FF96', // Monk
-    11: '#FF7D0A', // Druid
-    12: '#A330C9', // Demon Hunter
-    13: '#33937F' // Evoker
-};
-
 export const wowChannelColors = {
     lfg: '#FEC1C0',
     system: '#FFFF00',
@@ -94,43 +178,10 @@ export const wowRankNames: Record<number, string> = {
     7: 'New Crew'
 };
 
-export const wowSpecAbbrev: Record<string, string> = {
-    'Assassination': 'Assn',
-    'Subtlety': 'Sub',
-    'Beastmastery': 'BM',
-    'Beast Mastery': 'BM',
-    'Marksmanship': 'MM',
-    'Demonology': 'Demo',
-    'Destruction': 'Destro',
-    'Affliction': 'Afflict',
-    'Enhancement': 'Enhance',
-    'Elemental': 'Ele',
-    'Restoration': 'Resto',
-    'Discipline': 'Disc',
-    'Protection': 'Prot',
-    'Retribution': 'Ret',
-    'Unholy': 'Unholy',
-    'Devastation': 'Dev',
-    'Preservation': 'Pres',
-    'Augmentation': 'Aug',
-    'Windwalker': 'WW',
-    'Brewmaster': 'Brew',
-    'Mistweaver': 'Mist',
-    'Feral': 'Feral',
-    'Balance': 'BoomKin',
-    'Guardian': 'Guardian',
-    'Outlaw': 'Outlaw',
-    'Arms': 'Arms',
-    'Fury': 'Fury',
-    'Frost': 'Frost',
-    'Fire': 'Fire',
-    'Arcane': 'Arcane',
-    'Shadow': 'Shadow',
-    'Holy': 'Holy',
-    'Survival': 'Surv',
-    'Havoc': 'Havoc',
-    'Vengeance': 'Veng',
-    'Blood': 'Blood',
+export const ROLE_COLOR: Record<string, string> = {
+    Tank: '#dddd00',
+    Healer: '#63d363',
+    DPS: '#cb4848',
 };
 
 export const wowNeighborhoodMap = {

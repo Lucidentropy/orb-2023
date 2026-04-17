@@ -3,21 +3,34 @@
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { blur } from 'svelte/transition';
+	
 	import Container from '$lib/ThemeHandler.svelte';
+	import { factionName, realmName } from "$lib/client/wowData";
+	
 	import Roster from './Roster.svelte';
 	import Character from './Character.svelte';
 	import Cache from './Cache.svelte';
 	import Activity from './Activity.svelte';
 	import Neighborhood from './Neighborhood.svelte';
+	import GuildStats from './GuildStats.svelte';
 
-	import { factionName, realmName } from "$lib/client/wowData";
+	type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood' | 'guildstats';
+
+	const PANELS: { id: PanelView; name: string; url: string }[] = [
+		{ id: 'roster',       name: 'Roster',       url: '/wow' },
+		{ id: 'neighborhood', name: 'Neighborhood',  url: '/wow/neighborhood' },
+		{ id: 'guildstats',   name: 'Guild Stats',  url: '/wow/guildstats' },
+		{ id: 'cache',        name: 'Cache',         url: '/wow/cache' },
+	];
+
+	// panels that should not appear as nav tabs
+	const HIDDEN_PANELS = new Set<PanelView>(['character']);
 
 	let wowData: any = $state(null);
 	let loading = $state(true);
 	let error = $state('');
 	let currentCharTab = $state<'gear' | 'alts'>('gear');
 
-	type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood';
 	let panelView = $state<PanelView>('roster');
 	let selectedMember = $state<any>(null);
 
@@ -29,28 +42,17 @@
 		restorePanelFromPath();
 
 		const panelParam = $page.url.searchParams.get('panel');
-
-		if (panelParam === 'neighborhood') {
-			openPanel('neighborhood');
-			return;
-		}
-
-		if (panelParam === 'cache') {
-			openPanel('cache');
-			return;
-		}
-
-		if (panelParam === 'roster') {
-			openPanel('roster');
+		const matchedPanel = PANELS.find(p => p.id === panelParam);
+		if (matchedPanel) {
+			openPanel(matchedPanel.id);
 			return;
 		}
 
 		if (panelView !== 'roster') {
 			openPanel(panelView);
 		}
-		const handler = (e: PromiseRejectionEvent) => {
-			e.preventDefault();
-		};
+
+		const handler = (e: PromiseRejectionEvent) => { e.preventDefault(); };
 		window.addEventListener('unhandledrejection', handler);
 		return () => window.removeEventListener('unhandledrejection', handler);
 	});
@@ -67,19 +69,15 @@
 		try {
 			const response = await fetch('/api/wow');
 			let data: any;
-
 			try {
 				data = await response.json();
 			} catch {
 				throw new Error(`Server error (${response.status}) — response was not JSON`);
 			}
-
 			if (!response.ok || data?.error) {
 				throw new Error(data?.message || 'Failed to load guild data');
 			}
-
 			wowData = data;
-
 			restoreCharFromUrl(data);
 		} catch (err: unknown) {
 			error = err instanceof Error ? err.message : 'Unknown error';
@@ -97,34 +95,22 @@
 			return;
 		}
 
-		if (view === 'cache') {
-			updateUrl('/wow/cache');
-			return;
-		}
+		const panel = PANELS.find(p => p.id === view);
+		if (panel) updateUrl(panel.url);
 
 		if (view === 'neighborhood') {
-			updateUrl('/wow/neighborhood');
-
 			if (neighborhoodData || neighborhoodLoading) return;
-
 			neighborhoodLoading = true;
-
 			try {
 				const response = await fetch('/api/wow/neighborhood');
 				const data = await response.json();
-
-				if (!response.ok || data?.error) {
-					throw new Error(data?.message || 'Failed to load neighborhood data');
-				}
-
+				if (!response.ok || data?.error) throw new Error(data?.message || 'Failed to load neighborhood data');
 				neighborhoodData = data;
 			} catch (err: unknown) {
 				neighborhoodError = err instanceof Error ? err.message : 'Unknown error';
 			} finally {
 				neighborhoodLoading = false;
 			}
-
-			return;
 		}
 	}
 
@@ -136,17 +122,11 @@
 
 	function restorePanelFromPath() {
 		const path = window.location.pathname;
-
-		if (path === '/wow/neighborhood') {
-			openPanel('neighborhood');
+		const matched = PANELS.find(p => p.url === path && p.id !== 'roster');
+		if (matched) {
+			openPanel(matched.id);
 			return;
 		}
-
-		if (path === '/wow/cache') {
-			openPanel('cache');
-			return;
-		}
-
 		openPanel('roster');
 	}
 
@@ -170,7 +150,6 @@
 		} else {
 			const charParam = $page.url.searchParams.get('char');
 			if (!charParam) return;
-
 			const parts = charParam.split('/');
 			realm = parts[0] ?? '';
 			name = parts[1] ?? '';
@@ -189,13 +168,7 @@
 			selectedMember = found;
 			panelView = 'character';
 			currentCharTab = tab;
-
-			const nextPath = charPath(
-				found.character?.realm?.slug ?? realm,
-				found.character?.name ?? name,
-				tab
-			);
-
+			const nextPath = charPath(found.character?.realm?.slug ?? realm, found.character?.name ?? name, tab);
 			if (window.location.pathname !== nextPath) {
 				window.history.replaceState({}, '', nextPath);
 			}
@@ -206,10 +179,8 @@
 		selectedMember = member;
 		panelView = 'character';
 		currentCharTab = tab;
-
 		const realm = member?.character?.realm?.slug;
 		const name = member?.character?.name;
-
 		if (realm && name) {
 			window.history.pushState({}, '', `/wow/char/${realm}/${name}/${tab}`);
 		}
@@ -353,16 +324,16 @@
 			</header>
 
 			<div class="flex flex-wrap gap-2 mb-0">
-				{#each ['roster', 'neighborhood', 'cache'] as panel (panel)}
+				{#each PANELS.filter(p => !HIDDEN_PANELS.has(p.id)) as panel (panel.id)}
 					<button
 						type="button"
 						class={`btn-ghost rounded border px-3 py-2 text-xs font-semibold uppercase tracking-wider transition
-							${panelView === panel
+							${panelView === panel.id
 								? 'border-white/70 bg-bg-deep/70 text-white'
 								: 'border-border-faint/60 bg-bg-deep/40 text-orb-highlight hover:border-orb-highlight/60 hover:bg-bg-deep/70'}`}
-						on:click={() => openPanel(panel)}
+						onclick={() => openPanel(panel.id)}
 					>
-						{panel.charAt(0).toUpperCase() + panel.slice(1)}
+						{panel.name}
 					</button>
 				{/each}
 			</div>
@@ -431,6 +402,12 @@
 										onBack={() => openPanel('roster')}
 									/>
 								{/if}
+							{:else if panelView === 'guildstats'}
+								<GuildStats
+									members={wowData?.roster?.members || []}
+									guild={wowData?.guild}
+									onSelectMember={selectMember}
+								/>
 							{/if}
 						</div>
 					{/key}
