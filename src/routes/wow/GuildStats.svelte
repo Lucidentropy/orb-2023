@@ -119,7 +119,7 @@
     const byRole = $derived((() => {
         const counts: Record<string, number> = { Tank: 0, Healer: 0, DPS: 0, Unknown: 0 };
         for (const m of pool) {
-            const spec = m.details?.active_spec?.name;
+            const spec = getMemberSpec(m);
             const role = spec ? (SPEC_ROLE[spec] ?? 'Unknown') : 'Unknown';
             counts[role]++;
         }
@@ -137,7 +137,7 @@
         }>();
 
         for (const m of pool) {
-            const spec = m.details?.active_spec?.name;
+            const spec = getMemberSpec(m);
             if (!spec) continue;
             const role = SPEC_ROLE[spec] ?? 'Unknown';
             const classId = m.character?.playable_class?.id;
@@ -183,12 +183,12 @@
         return pool.filter(m => {
             if (selectedClass != null && m.character?.playable_class?.id !== selectedClass) return false;
             if (selectedRole != null) {
-                const spec = m.details?.active_spec?.name;
+                const spec = getMemberSpec(m);
                 const role = spec ? (SPEC_ROLE[spec] ?? 'Unknown') : 'Unknown';
                 if (role !== selectedRole) return false;
             }
             if (selectedSpec != null && !(
-                m.details?.active_spec?.name === selectedSpec.spec &&
+                getMemberSpec(m) === selectedSpec.spec &&
                 m.character?.playable_class?.id === selectedSpec.classId
             )) return false;
             return true;
@@ -233,6 +233,12 @@
             selectedClass = null;
             selectedRole  = null;
         }
+    }
+
+    function getMemberSpec(m: any): string | null {
+        return m.details?.active_spec?.name
+            ?? m.character?.active_spec?.name
+            ?? null;
     }
 
     function isSpecSelected(spec: string, classId: number) {
@@ -415,7 +421,7 @@
             <div class="grid grid-cols-2 gap-px sm:grid-cols-3 xl:grid-cols-3">
                 {#each filteredList as m (m.character?.id)}
                     {@const classId = m.character?.playable_class?.id}
-                    {@const spec = m.details?.active_spec?.name}
+                    {@const spec = getMemberSpec(m)}
                     {@const role = spec ? (SPEC_ROLE[spec] ?? null) : null}
                     {@const isAlt = altMainMap.has(m.character?.id)}
                     {@const mainName = altMainMap.get(m.character?.id)}

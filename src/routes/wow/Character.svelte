@@ -159,7 +159,7 @@
 		profile?.active_title?.display_string?.replace('{name}', member?.character?.name ?? '') ?? null
 	);
 
-	const decorCount = $derived(charData?.collections?.decor?.decor_collected?.length ?? null);
+    const decorCount = $derived(charData?.collections?.decor?.total ?? null);
 
 	const lastLogin = $derived(
 		(() => {

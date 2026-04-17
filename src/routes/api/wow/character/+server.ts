@@ -26,7 +26,6 @@ export const GET: RequestHandler = async ({ url }) => {
         const ns = profileNs();
         const staticNs = `namespace=static-${region}&locale=${locale}`;
 
-
         const [profile, media, equipment, achievements, mounts, pets, toys, decor] = await Promise.all([
             cachedFetch(['char', region, realm, name, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch((e: Error) => ({ _error: e.message })),
             cachedFetch(['char', region, realm, name, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null),
@@ -73,13 +72,20 @@ export const GET: RequestHandler = async ({ url }) => {
         return json({
             profile,
             media,
-            achievements,
+            achievements: {
+                total: achievements?.total_quantity ?? achievements?.achievements?.length ?? 0
+            },
             equipment: {
                 slots: enrichedSlots,
                 slotMap,
                 slotOrder: SLOT_ORDER
             },
-            collections: { mounts, pets, toys, decor },
+            collections: {
+                mounts: { total: mounts?.mounts?.length ?? 0 },
+                pets: { total: pets?.pets?.length ?? 0 },
+                toys: { total: toys?.toys?.length ?? 0 },
+                decor: { total: decor?.decor_collected?.length ?? 0 },
+            },
             meta: { realm, name, region, fetchedAt: new Date().toISOString() }
         });
     } catch (error: unknown) {

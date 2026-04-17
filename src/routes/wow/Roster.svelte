@@ -15,7 +15,6 @@
 		members = [],
 		realm = '',
 		onSelectMember,
-		onOpenCache
 	}: {
 		members: any[];
 		realm: string;
