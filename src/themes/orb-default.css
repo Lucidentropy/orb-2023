@@ -359,6 +359,40 @@
         border-radius: 2px;
     }
 
+    .btn-link {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        text-shadow: none;
+        cursor: pointer;
+        font: inherit;
+        color: var(--orb-link);
+        transition: color 0.2s ease;
+    }
+
+    .btn-link::before {
+        display: none;
+    }
+
+    .btn-link:hover {
+        color: #fff;
+        background: none;
+        border: none;
+        box-shadow: none;
+    }
+
+    .btn-link:active {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-link:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+
     .orb-card {
         @apply p-5 transition-all;
         background-image: var(--orb-gradient-panel);

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { StationData, FactionData } from './+page.server';
-
+    import type { StationData, FactionData } from '$lib/types/elite';
 	const {
 		stationData = null,
 		factions = [],
@@ -14,8 +13,6 @@
 	// ── Update these if you move ──
 	const HOME_SYSTEM  = 'Gende';
 	const INARA_URL    = 'https://inara.cz/elite/station/3862/';
-	const SUPERPOWER   = 'Empire';
-	const GAME_VERSION = 'Odyssey'; // 'Base', 'Horizons', or 'Odyssey'
 	const SUPERCARRIER: string | null = null; // set to carrier name when ready
 </script>
 
@@ -164,14 +161,6 @@
 </div>
 
 <style>
-	.insignia {
-		width: 2.25rem;
-		height: 2.25rem;
-		flex-shrink: 0;
-		opacity: 0.75;
-		color: #ff8c00;
-	}
-
 	.inara-link {
 		font-family: monospace;
 		font-size: 0.65rem !important;

@@ -4,7 +4,7 @@
 		{ title: 'INARA',   href: 'https://inara.cz',           desc: 'Commander profiles, squadron tools, engineers and trade routes' },
 		{ title: 'EDSY',    href: 'https://edsy.org',           desc: 'Ship outfitter and build planner' },
 		{ title: 'SPANSH',  href: 'https://spansh.co.uk',       desc: 'Neutron highway plotter and galaxy route tools' },
-		{ title: 'EDDB',    href: 'https://eddb.io',            desc: 'Station and commodity database' },
+		{ title: 'ROGUEY',    href: 'https://roguey.co.uk/elite-dangerous/',            desc: 'Elite & Dangerous Roguey' },
 		{ title: 'CANONN',  href: 'https://canonn.science',     desc: 'Xenobiology, Thargoid and Guardian research database' },
 	];
 </script>
@@ -14,7 +14,7 @@
 		EXTERNAL RESOURCES
 	</div>
 	<div class="grid grid-cols-3 gap-2 flex-1 overflow-hidden">
-		{#each links as { title, href, desc }}
+		{#each links as { title, href, desc } (href)}
 			<a {href} target="_blank" rel="noopener" class="ed-link-card link-card">
 				<div class="font-mono text-[0.72rem] font-bold tracking-[0.18em] uppercase" style="color: #ffa040">{title}</div>
 				<div class="text-[0.72rem] leading-relaxed" style="color: rgba(255,200,150,0.6)">{desc}</div>

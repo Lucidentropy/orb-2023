@@ -5,26 +5,25 @@
 		wowNeighborhoodFlightPoints,
 		wowNeighborhoodVendors
 	} from "$lib/client/wowData";
+	import type { WowNeighborhoodPlot } from '$lib/types/wow';
 
-    let { 
-        plots = [],
-        loading = false,
-        error = null,
-    }: {
-        plots: any[];
-        loading?: boolean;
-        error?: string | null;
-    } = $props();
+	let { 
+		plots = [],
+		loading = false,
+		error = null,
+	}: {
+		plots: WowNeighborhoodPlot[];
+		loading?: boolean;
+		error?: string | null;
+	} = $props();
 
 	let plotMap = $derived(new Map(plots.map((p) => [p.id, p])));
 
 	const offsetX = 6;
 	const offsetY = -29;
-
-    const mapScale = 1.8;
+	const mapScale = 1.8;
 	const mapOriginX = 60;
 	const mapOriginY = 90;
-
 	const xScale = 1.595;
 	const yScale = 1.815;
 
@@ -54,6 +53,7 @@
 		return getPlot(id)?.owner?.name ?? null;
 	}
 </script>
+
 {#if loading}
     <div class="rounded border border-border-faint/60 bg-bg-deep/20 p-6">
         <p class="mb-0 text-sm uppercase tracking-wider text-orb-highlight/65">

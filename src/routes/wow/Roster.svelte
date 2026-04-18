@@ -10,19 +10,24 @@
 		wowSpecName,
 		wowRankIcon,
 	} from "$lib/client/wowData";
+	import type { WowEnrichedMember } from '$lib/types/wow';
 
 	let {
 		members = [],
 		realm = '',
 		onSelectMember,
 	}: {
-		members: any[];
+		members: WowEnrichedMember[];
 		realm: string;
-		onSelectMember?: (member: any) => void;
+		onSelectMember?: (member: WowEnrichedMember) => void;
 		onOpenCache?: () => void;
 	} = $props();
 
 	type SortKey = 'name' | 'rank' | 'achievementPoints' | 'mounts' | 'toys' | 'pets' | 'decor' | 'ilvl';
+
+	interface GroupedMember extends WowEnrichedMember {
+		alts: WowEnrichedMember[];
+	}
 
 	const MIN_COLLECTION_COUNT = 5;
 
@@ -36,14 +41,14 @@
 	let hoveredId    = $state<number | null>(null);
 	let searchQuery  = $state('');
 
-	const isSearching     = $derived(searchQuery.trim().length > 0);
-	const baseMembers     = $derived(Array.isArray(members) ? members : []);
+	const isSearching   = $derived(searchQuery.trim().length > 0);
+	const baseMembers   = $derived(Array.isArray(members) ? members : []);
 	const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
 
 	const filteredMembers = $derived(
 		showInactive
 			? baseMembers
-			: baseMembers.filter((m: any) => {
+			: baseMembers.filter((m) => {
 				if (m.active === false) return false;
 				const ts = m.details?.last_login_timestamp;
 				if (ts == null) return false;
@@ -54,13 +59,13 @@
 	const searchedMembers = $derived((() => {
 		if (!isSearching) return filteredMembers;
 		const q = searchQuery.trim().toLowerCase();
-		return filteredMembers.filter((m: any) =>
+		return filteredMembers.filter((m) =>
 			m.character?.name?.toLowerCase().includes(q)
 		);
 	})());
 
 	const altBuckets = $derived((() => {
-		const buckets = new Map<string, any[]>();
+		const buckets = new Map<string, WowEnrichedMember[]>();
 		for (const m of filteredMembers) {
 			const toys = m.toys;
 			const pets = m.pets;
@@ -98,10 +103,10 @@
 	})());
 
 	const groupedMembers = $derived((() => {
-		if (!groupAlts || isSearching) return searchedMembers.map((m: any) => ({ ...m, alts: [] }));
-		const result: any[] = [];
+		if (!groupAlts || isSearching) return searchedMembers.map((m) => ({ ...m, alts: [] as WowEnrichedMember[] }));
+		const result: GroupedMember[] = [];
 		for (const group of altBuckets.values()) {
-			const inSearch = group.filter((m: any) => searchedMembers.includes(m));
+			const inSearch = group.filter((m) => searchedMembers.includes(m));
 			if (inSearch.length === 0) continue;
 			if (inSearch.length === 1) {
 				result.push({ ...inSearch[0], alts: [] });
@@ -121,7 +126,7 @@
 	const sortedMembers = $derived((() => {
 		const list = [...groupedMembers];
 		list.sort((a, b) => {
-			let av: any, bv: any;
+			let av: number | string, bv: number | string;
 			switch (sortKey) {
 				case 'name':              av = a.character?.name ?? '';              bv = b.character?.name ?? '';              break;
 				case 'rank':              av = a.rank ?? 99;                         bv = b.rank ?? 99;                         break;
@@ -217,8 +222,8 @@
 		return slug.toLowerCase().split('-').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
 	}
 
-	const grid     = 'grid-cols-[32px_minmax(0,1.6fr)_52px_64px_52px_48px_48px_48px_48px]';
-	const thClass  = 'cursor-pointer select-none hover:text-orb-highlight/80 transition-colors';
+	const grid    = 'grid-cols-[32px_minmax(0,1.6fr)_52px_64px_52px_48px_48px_48px_48px]';
+	const thClass = 'cursor-pointer select-none hover:text-orb-highlight/80 transition-colors';
 </script>
 
 <section class="space-y-4 h-full flex flex-col">
@@ -247,30 +252,31 @@
 				{/if}
 			</div>
 
-			<div class="flex items-center gap-3 text-xs uppercase tracking-wide text-orb-highlight/60">
-				<a href="#" class:opacity-40={safePage === 1} class="text-orb-link no-underline hover:text-white"
-					onclick={(e) => { e.preventDefault(); if (safePage > 1) setPage(safePage - 1); }}>Prev</a>
-				<p class="mb-0 px-1">Page {safePage} / {totalPages}</p>
-				<a href="#" class:opacity-40={safePage === totalPages} class="text-orb-link no-underline hover:text-white"
-					onclick={(e) => { e.preventDefault(); if (safePage < totalPages) setPage(safePage + 1); }}>Next</a>
-			</div>
+            <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-orb-highlight/60">
+                <button type="button" class="btn-link uppercase" disabled={safePage === 1}
+                    onclick={() => { if (safePage > 1) setPage(safePage - 1); }}>Prev</button>
+                <p class="mb-0 px-1">Page {safePage} / {totalPages}</p>
+                <button type="button" class="btn-link uppercase" disabled={safePage === totalPages}
+                    onclick={() => { if (safePage < totalPages) setPage(safePage + 1); }}>Next</button>
+            </div>
 		</div>
 
-		<div class="grid {grid} gap-2 border-b border-border-faint px-4 py-3 font-mono text-xs uppercase tracking-widest text-orb-highlight/40">
-			<div></div>
-			<div onclick={() => toggleSort('name')}              class="{thClass} whitespace-nowrap">Name{sortIndicator('name')}</div>
-			<div onclick={() => toggleSort('ilvl')}              class="{thClass} whitespace-nowrap" title="Equipped Item Level">iLvl{sortIndicator('ilvl')}</div>
-			<div onclick={() => toggleSort('achievementPoints')} class="{thClass} whitespace-nowrap" title="Achievement Points">Achiev{sortIndicator('achievementPoints')}</div>
-			<div onclick={() => toggleSort('mounts')}            class="{thClass} whitespace-nowrap" title="Mounts collected">Mounts{sortIndicator('mounts')}</div>
-			<div onclick={() => toggleSort('toys')}              class="{thClass} whitespace-nowrap" title="Toys collected">Toys{sortIndicator('toys')}</div>
-			<div onclick={() => toggleSort('pets')}              class="{thClass} whitespace-nowrap" title="Battle pets collected">Pets{sortIndicator('pets')}</div>
-			<div onclick={() => toggleSort('decor')}             class="{thClass} whitespace-nowrap" title="Housing decor collected">Decor{sortIndicator('decor')}</div>
-			<div class="whitespace-nowrap" title="Detected alts">Alts</div>
-		</div>
+        <div class="grid {grid} gap-2 border-b border-border-faint px-4 py-3 font-mono text-xs uppercase tracking-widest text-orb-highlight/40">
+            <div></div>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" onclick={() => toggleSort('name')}>Name{sortIndicator('name')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Equipped Item Level" onclick={() => toggleSort('ilvl')}>iLvl{sortIndicator('ilvl')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Achievement Points" onclick={() => toggleSort('achievementPoints')}>Achiev{sortIndicator('achievementPoints')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Mounts collected" onclick={() => toggleSort('mounts')}>Mounts{sortIndicator('mounts')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Toys collected" onclick={() => toggleSort('toys')}>Toys{sortIndicator('toys')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Battle pets collected" onclick={() => toggleSort('pets')}>Pets{sortIndicator('pets')}</button>
+            <button type="button" class="btn-link uppercase text-xs {thClass} whitespace-nowrap" title="Housing decor collected" onclick={() => toggleSort('decor')}>Decor{sortIndicator('decor')}</button>
+            <div class="whitespace-nowrap" title="Detected alts">Alts</div>
+        </div>
 
 		{#each pagedMembers as member, i (member?.character?.id ?? `empty-${i}`)}
 			{#if member === null}
 				<div class="grid {grid} gap-2 px-4 h-12" aria-hidden="true">
+                    <!-- eslint-disable-next-line @typescript-eslint/no-unused-vars, svelte/require-each-key -->
 					{#each Array(8) as _}<div class="h-12"></div>{/each}
 				</div>
 			{:else}
@@ -279,13 +285,15 @@
 				{@const expanded = expandedIds.has(id)}
 				{@const mainName = !groupAlts ? (altMainMap.get(Number(id)) ?? null) : null}
 
-				<button
-					type="button"
-					class="btn-row grid w-full {grid} gap-2 text-left text-sm transition-colors focus-visible:outline-none {hoveredId === id ? 'bg-bg-mid/60' : 'hover:bg-bg-mid/40'}"
-					onclick={() => onSelectMember?.(member)}
-					onmouseenter={() => hoveredId = id ?? null}
-					onmouseleave={() => hoveredId = null}
-				>
+                <div
+                    role="button"
+                    tabindex="0"
+                    class="grid w-full {grid} gap-2 text-left text-sm transition-colors focus-visible:outline-none cursor-pointer {hoveredId === id ? 'bg-bg-mid/60' : 'hover:bg-bg-mid/40'}"
+                    onclick={() => onSelectMember?.(member)}
+                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectMember?.(member); }}
+                    onmouseenter={() => hoveredId = id ?? null}
+                    onmouseleave={() => hoveredId = null}
+                >
 						<div class="flex items-center h-12">
 							{#if member.avatarUrl}
 								<img src={member.avatarUrl} alt={member.character?.name} class="h-8 w-8 rounded-sm object-cover" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
@@ -300,8 +308,14 @@
 
 						<div class="flex flex-col justify-center min-w-0 h-12">
 							<p class="mb-0 font-semibold truncate flex items-center gap-1" style="color: {wowClassColor(member.character?.playable_class?.id)}">
-								{member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}{#if mainName}&nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>{/if}&nbsp;{@html wowRankIcon(member.rank, 16)}
-							</p>
+                                {member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}
+                                {#if mainName}
+                                    &nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>
+                                {/if}
+                                &nbsp;
+                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                                {@html wowRankIcon(member.rank, 16)}
+                            </p>
 							<p class="mb-0 text-xs text-orb-highlight/50 truncate flex items-center gap-1">
 								<span class="text-white">{member.character?.level ?? '-'}</span> ·
 								{wowRaceName(member.character?.playable_race?.id)} ·
@@ -321,14 +335,14 @@
 							<button
 								type="button"
 								class="btn-row flex items-center gap-1 text-xs text-orb-highlight/60 hover:text-white w-full h-full"
-								onclick={(e) => toggleExpand(id, e)}
+								onclick={(e) => toggleExpand(id ?? 0, e)}
 							>
 								<span>{alts.length}</span>
 								<span class="transition-transform duration-200" class:rotate-180={expanded}>▾</span>
 							</button>
 						{/if}
 					</div>
-				</button>
+				</div>
 
 				{#if expanded && alts.length > 0}
 					<div class="grid grid-cols-2 gap-px border-t border-border-faint/30 bg-border-faint/10 px-4 py-3 sm:grid-cols-3" style="padding-left: 3rem;" onwheel={(e) => e.stopPropagation()}>
@@ -363,44 +377,46 @@
 		{/each}
 
 		<!-- hero strip: one image per visible member -->
-		{#if pagedMembers.some((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl))}
-			<div class="grid border-t border-border-faint/30 overflow-hidden" style="grid-template-columns: repeat({pagedMembers.filter((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)).length}, minmax(0, 1fr)); max-height: 260px;">
-				{#each pagedMembers.filter((m: any) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)) as m (m.character?.id)}
-					{@const classId = m.character?.playable_class?.id}
-					{@const inset = m.insetUrl ?? m.avatarUrl}
-					<div
-						class="relative overflow-hidden cursor-pointer transition-all duration-150"
-						style="height: 170px; background: {classId ? `url('/images/wow/character_bg_${classId}.webp') center/cover no-repeat` : '#000'}; {hoveredId === m.character?.id ? 'box-shadow: inset 0 0 0 2px rgba(102,204,255,0.5), 0 0 20px rgba(102,204,255,0.15); z-index: 20; position: relative;' : ''}"
-						title={m.character?.name}
-						onclick={() => onSelectMember?.(m)}
-						onmouseenter={() => hoveredId = m.character?.id ?? null}
-						onmouseleave={() => hoveredId = null}
-					>
-						<!-- character inset image -->
-						{#if inset}
-							<img
-								src={inset}
-								alt={m.character?.name}
-								class="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-200" style={hoveredId === m.character?.id ? "opacity: 1;" : "opacity: 0.8;"}
-								onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }}
-							/>
-						{/if}
-						<!-- bottom gradient + name -->
-						<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-1 pb-1 pt-4">
-							<p class="mb-0 text-center text-[9px] font-semibold leading-tight truncate" style="color: {wowClassColor(classId)}; text-shadow: 0 1px 3px #000;">
-								{m.character?.name}
-							</p>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
+        {#if pagedMembers.some((m) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl))}
+            <div class="grid border-t border-border-faint/30 overflow-hidden" style="grid-template-columns: repeat({pagedMembers.filter((m) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)).length}, minmax(0, 1fr)); max-height: 260px;">
+                {#each pagedMembers.filter((m) => m != null && m.character?.id != null && (m.avatarUrl || m.insetUrl)) as m (m.character?.id)}
+                    {@const classId = m.character?.playable_class?.id}
+                    {@const inset = m.insetUrl ?? m.avatarUrl}
+                    <div
+                        role="button"
+                        tabindex="0"
+                        class="relative overflow-hidden cursor-pointer transition-all duration-150"
+                        style="height: 170px; background: {classId ? `url('/images/wow/character_bg_${classId}.webp') center/cover no-repeat` : '#000'}; {hoveredId === m.character?.id ? 'box-shadow: inset 0 0 0 2px rgba(102,204,255,0.5), 0 0 20px rgba(102,204,255,0.15); z-index: 20; position: relative;' : ''}"
+                        title={m.character?.name}
+                        onclick={() => onSelectMember?.(m)}
+                        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectMember?.(m); }}
+                        onmouseenter={() => hoveredId = m.character?.id ?? null}
+                        onmouseleave={() => hoveredId = null}
+                    >
+                        {#if inset}
+                            <img
+                                src={inset}
+                                alt={m.character?.name}
+                                class="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-200"
+                                style={hoveredId === m.character?.id ? "opacity: 1;" : "opacity: 0.8;"}
+                                onerror={(e) => { (e.target as HTMLImageElement).style.display='none'; }}
+                            />
+                        {/if}
+                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-1 pb-1 pt-4">
+                            <p class="mb-0 text-center text-[9px] font-semibold leading-tight truncate" style="color: {wowClassColor(classId)}; text-shadow: 0 1px 3px #000;">
+                                {m.character?.name}
+                            </p>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {/if}
 
 		<div class="flex flex-wrap items-center justify-between gap-3 border-t border-border-faint px-4 py-3">
 			<p class="mb-0 text-xs uppercase tracking-wide text-orb-highlight/50 w-30 tabular-nums shrink-0">
 				Showing<br>
 				{sortedMembers.length ? (safePage - 1) * rosterPageSize + 1 : 0}
-				–
+				-
 				{Math.min(safePage * rosterPageSize, sortedMembers.length)} of {sortedMembers.length}
 			</p>
 			<div class="flex flex-1 justify-center gap-6">
@@ -421,13 +437,13 @@
 					</div>
 				</label>
 			</div>
-			<div class="flex items-center gap-3 text-xs uppercase tracking-wide text-orb-highlight/60 w-38 text-center">
-				<a href="#" class:opacity-40={safePage === 1} class="text-orb-link no-underline hover:text-white"
-					onclick={(e) => { e.preventDefault(); if (safePage > 1) setPage(safePage - 1); }}>Prev</a>
-				<p class="mb-0 leading-tight text-center">Page<br>{safePage} / {totalPages}</p>
-				<a href="#" class:opacity-40={safePage === totalPages} class="text-orb-link no-underline hover:text-white"
-					onclick={(e) => { e.preventDefault(); if (safePage < totalPages) setPage(safePage + 1); }}>Next</a>
-			</div>
+            <div class="flex items-center gap-3 text-xs uppercase tracking-wide text-orb-highlight/60 w-38 text-center">
+                <button type="button" class="btn-link uppercase px-2" disabled={safePage === 1}
+                    onclick={() => { if (safePage > 1) setPage(safePage - 1); }}>Prev</button>
+                <p class="mb-0 leading-tight text-center">Page<br>{safePage} / {totalPages}</p>
+                <button type="button" class="btn-link uppercase px-2" disabled={safePage === totalPages}
+                    onclick={() => { if (safePage < totalPages) setPage(safePage + 1); }}>Next</button>
+            </div>
 		</div>
 	</div>
 </section>

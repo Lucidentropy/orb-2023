@@ -4,6 +4,7 @@ import type { RequestHandler } from './$types';
 import {
     region, locale, TTL, getAccessToken, cachedFetch, batchedMap, charBaseUrl, profileNs
 } from '$lib/server/blizzard';
+import type { WowEquipmentItem, WowEquipmentResponse, WowMediaResponse, WowCollectionResponse, WowCharacter, WowProfileError } from '$lib/types/wow';
 
 const ITEM_MEDIA_TTL = 30 * 24 * 60 * 60 * 1000;
 
@@ -27,42 +28,42 @@ export const GET: RequestHandler = async ({ url }) => {
         const staticNs = `namespace=static-${region}&locale=${locale}`;
 
         const [profile, media, equipment, mounts, pets, toys, decor] = await Promise.all([
-            cachedFetch(['char', region, realm, name, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch((e: Error) => ({ _error: e.message })),
-            cachedFetch(['char', region, realm, name, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'equipment'], TTL.character, `${base}/equipment?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'mounts'], TTL.collections, `${base}/collections/mounts?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'decor'], TTL.collections, `${base}/collections/decor?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowCharacter | WowProfileError>(['char', region, realm, name, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch((e: Error) => ({ _error: e.message })),
+            cachedFetch<WowMediaResponse>(['char', region, realm, name, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowEquipmentResponse>(['char', region, realm, name, 'equipment'], TTL.character, `${base}/equipment?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowCollectionResponse>(['char', region, realm, name, 'mounts'], TTL.collections, `${base}/collections/mounts?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowCollectionResponse>(['char', region, realm, name, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowCollectionResponse>(['char', region, realm, name, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null),
+            cachedFetch<WowCollectionResponse>(['char', region, realm, name, 'decor'], TTL.collections, `${base}/collections/decor?${ns}`, accessToken).catch(() => null),
         ]);
 
-        if (profile && '_error' in profile) {
-            const is404 = profile._error?.includes('404');
+        const p = profile as WowCharacter & WowProfileError;
+        if (p?._error) {
+            const is404 = p._error?.includes('404');
             return json(
-                { error: true, notFound: is404, message: profile._error },
+                { error: true, notFound: is404, message: p._error },
                 { status: is404 ? 404 : 500 }
             );
         }
 
-        const slots: any[] = equipment?.equipped_items ?? [];
+        const slots: WowEquipmentItem[] = (equipment as WowEquipmentResponse)?.equipped_items ?? [];
 
-        const enrichedSlots = await batchedMap(slots, async (item: any) => {
+        const enrichedSlots = await batchedMap(slots, async (item: WowEquipmentItem) => {
             const itemId = item.item?.id;
             if (!itemId) return item;
 
-            const itemMedia = await cachedFetch(
+            const itemMedia = await cachedFetch<WowMediaResponse>(
                 ['item-media', region, String(itemId)],
                 ITEM_MEDIA_TTL,
                 `https://${region}.api.blizzard.com/data/wow/media/item/${itemId}?${staticNs}`,
                 accessToken
             ).catch(() => null);
 
-            const iconUrl = itemMedia?.assets?.find((a: any) => a.key === 'icon')?.value ?? null;
-
+            const iconUrl = itemMedia?.assets?.find((a) => a.key === 'icon')?.value ?? null;
             return { ...item, iconUrl };
         }, 10);
 
-        const slotMap: Record<string, any> = {};
+        const slotMap: Record<string, WowEquipmentItem> = {};
         for (const item of enrichedSlots) {
             const slotType = item.slot?.type;
             if (slotType) slotMap[slotType] = item;

@@ -1,40 +1,26 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { gsap } from 'gsap';
-	import { CSSPlugin } from 'gsap/CSSPlugin';
+	import { tick } from 'svelte';
 	import Container from '$lib/ThemeHandler.svelte';
 	import LiveFeed from './LiveFeed.svelte';
 	import OrbHomeSystem from './OrbHomeSystem.svelte';
 	import HelpfulLinks from './HelpfulLinks.svelte';
+	import EDIntro from './EDIntro.svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
 
-	gsap.registerPlugin(CSSPlugin);
-
-	const triSize = 20;
-	const gap = 2;
-	const waveInDur = 1;
-	const waveOutDur = 1;
-	const waveOutDelay = 0;
-	const ringWidth = 40;
-	const gridDelay = 2.2;
-
-	interface Tri { x: number; y: number; up: boolean; }
-	let tris: Tri[] = [];
-	let container: HTMLDivElement;
-	let canvas: HTMLCanvasElement;
-
 	let activePanel: 'galnet' | 'homebase' | 'links' = $state('galnet');
 	let panelWrap: HTMLDivElement;
 
-	function switchPanel(next: 'galnet' | 'homebase' | 'links') {
+	async function switchPanel(next: 'galnet' | 'homebase' | 'links') {
 		if (next === activePanel) return;
-		gsap.timeline()
-			.to(panelWrap, { opacity: 0, scaleY: 0.97, duration: 0.15, ease: 'power2.in' })
-			.call(() => { activePanel = next; })
-			.set(panelWrap, { opacity: 0, scaleY: 1.02 })
-			.to(panelWrap, { opacity: 1, scaleY: 1, duration: 0.2, ease: 'power2.out' });
+		await gsap.to(panelWrap, { opacity: 0, scaleY: 0.97, duration: 0.15, ease: 'power2.in' });
+		activePanel = next;
+		await tick();
+		panelWrap.scrollTop = 0;
+		panelWrap.querySelector('.ed-scroll')?.scrollTo({ top: 0 });
+		gsap.fromTo(panelWrap, { opacity: 0, scaleY: 1.02 }, { opacity: 1, scaleY: 1, duration: 0.2, ease: 'power2.out' });
 	}
 
 	const tabs: { id: 'galnet' | 'homebase' | 'links'; label: string }[] = [
@@ -42,137 +28,39 @@
 		{ id: 'homebase', label: 'ORB HOME SYSTEM'  },
 		{ id: 'links',    label: 'HELPFUL LINKS'    },
 	];
-
-	function setupGrid(cols: number, rows: number) {
-		tris = [];
-		const stepX = triSize + gap;
-		const stepY = triSize + gap;
-		for (let j = 0; j < rows; j++) {
-			for (let i = 0; i < cols; i++) {
-				const x = i * stepX + (j % 2) * (stepX / 2) + triSize / 2;
-				const y = j * stepY + triSize / 2;
-				tris.push({ x, y, up: (i + j) % 2 === 0 });
-			}
-		}
-	}
-
-	function drawInitial() {
-		const ctx = canvas.getContext('2d')!;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		tris.forEach((tri) => {
-			ctx.globalAlpha = 1;
-			ctx.beginPath();
-			if (tri.up) {
-				ctx.moveTo(tri.x - triSize / 2, tri.y + triSize / 2);
-				ctx.lineTo(tri.x, tri.y - triSize / 2);
-				ctx.lineTo(tri.x + triSize / 2, tri.y + triSize / 2);
-			} else {
-				ctx.moveTo(tri.x - triSize / 2, tri.y - triSize / 2);
-				ctx.lineTo(tri.x + triSize / 2, tri.y - triSize / 2);
-				ctx.lineTo(tri.x, tri.y + triSize / 2);
-			}
-			ctx.closePath();
-			ctx.fillStyle = 'white';
-			ctx.fill();
-		});
-	}
-
-	function drawWave() {
-		const ctx = canvas.getContext('2d')!;
-		const w = canvas.width, h = canvas.height;
-		const cx = w / 2, cy = h / 2;
-		const maxR = Math.hypot(cx, cy);
-		const start = performance.now();
-
-		function frame(t: number) {
-			const elapsed = (t - start) / 1000;
-			const R1 = Math.min(elapsed / waveInDur, 1) * maxR;
-			const R2raw = elapsed - waveInDur - waveOutDelay;
-			const R2 = Math.max(0, Math.min(R2raw / waveOutDur, 1)) * maxR;
-
-			ctx.clearRect(0, 0, w, h);
-			tris.forEach((tri) => {
-				const d = Math.hypot(tri.x - cx, tri.y - cy);
-				let alpha = 0;
-				if (d <= R1) alpha = 0.4;
-				if (Math.abs(d - R1) < ringWidth) alpha = 1;
-				if (R2raw > 0 && d <= R2) alpha = 0;
-				if (alpha > 0) {
-					ctx.globalAlpha = alpha;
-					ctx.beginPath();
-					if (tri.up) {
-						ctx.moveTo(tri.x - triSize / 2, tri.y + triSize / 2);
-						ctx.lineTo(tri.x, tri.y - triSize / 2);
-						ctx.lineTo(tri.x + triSize / 2, tri.y + triSize / 2);
-					} else {
-						ctx.moveTo(tri.x - triSize / 2, tri.y - triSize / 2);
-						ctx.lineTo(tri.x + triSize / 2, tri.y - triSize / 2);
-						ctx.lineTo(tri.x, tri.y + triSize / 2);
-					}
-					ctx.closePath();
-					ctx.fillStyle = 'white';
-					ctx.fill();
-				}
-			});
-
-			if (elapsed < waveInDur + waveOutDelay + waveOutDur) {
-				requestAnimationFrame(frame);
-			}
-		}
-		requestAnimationFrame(frame);
-	}
-
-	onMount(() => {
-		const ro = new ResizeObserver(() => {
-			const r = container.getBoundingClientRect();
-			canvas.width = r.width;
-			canvas.height = r.height;
-			const cols = Math.ceil(r.width / (triSize + gap)) + 2;
-			const rows = Math.ceil(r.height / (triSize * 0.866 + gap)) + 2;
-			setupGrid(cols, rows);
-			drawInitial();
-		});
-		ro.observe(container);
-
-		const waveTotal = waveInDur + waveOutDelay + waveOutDur;
-		const tl = gsap.timeline();
-		tl.set('.overlay', { opacity: 0 })
-			.set('.station-content', { opacity: 0 })
-			.set('.grid-placeholder', { opacity: 0 })
-			.set('.station-inner', { x: 40, opacity: 0 })
-			.set('.loader-bar', { scaleX: 0, transformOrigin: 'left center' })
-			.to('.overlay', { opacity: 0.5, duration: 0.5 })
-			.add(drawWave)
-			.addLabel('waveDone', `+=${waveTotal}`)
-			.to('.station-content', { opacity: 1, duration: 0 }, 'waveDone')
-			.to('.station-inner', { x: 0, opacity: 1, duration: 0.6, ease: 'power2.out' }, 'waveDone')
-			.to('.loader-bar', { scaleX: 1, duration: 1.2, ease: 'power2.inOut' }, 'waveDone+=0.2')
-			.to('.station-inner', { x: -40, opacity: 0, duration: 0.6, ease: 'power2.in' }, 'waveDone+=1.6')
-			.to('.grid-placeholder', { opacity: 1, duration: 0.4 }, 'waveDone+=2.2')
-			.addLabel('gridShow', `waveDone+=${gridDelay}`)
-			.set('.grid-placeholder', { opacity: 1 }, 'gridShow')
-			.to('.grid-placeholder > div', { backgroundColor: '#ffffff', duration: 0.05, stagger: 0.05 }, 'gridShow')
-			.to('.grid-placeholder > div', { backgroundColor: 'rgba(255,162,0,0.1)', duration: 0.2, stagger: 0.05 }, 'gridShow+=0.05');
-	});
 </script>
 
-<Container>
-	<div bind:this={container} class="ed-root relative w-full aspect-video overflow-hidden bg-black">
-		<canvas bind:this={canvas} class="absolute inset-0 w-full h-full"></canvas>
-		<div class="overlay absolute inset-0 bg-black/50 pointer-events-none"></div>
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Eurocaps&display=swap" rel="stylesheet">
+</svelte:head>
 
-		<div class="station-content absolute inset-0 flex items-center justify-center pointer-events-none opacity-0">
-			<div class="station-inner relative mx-auto flex items-center w-1/2 text-left">
-				<img src="./images/elite/Coriolis.svg" alt="Coriolis Station" class="max-h-[50px] w-auto mr-4 flex-shrink-0" />
-				<div class="flex-1 flex flex-col justify-between h-full">
-					<div class="text-orange-500 uppercase tracking-wide text-3xl font-bold">WELCOME TO</div>
-					<div class="loader-bar w-3/4 h-[2px] bg-white self-start"></div>
-					<div class="text-white uppercase tracking-wide text-3xl font-bold">ELITE ORBITAL</div>
+<EDIntro />
+
+<Container>
+	<div class="ed-root relative w-full aspect-video overflow-hidden bg-black">
+
+		<div class="absolute inset-x-4 bottom-4 top-4 flex flex-col gap-3">
+
+			<!-- Squadron header -->
+			<div class="sq-header flex-shrink-0 flex items-stretch border border-[rgba(255,140,0,0.22)] border-b-[rgba(255,140,0,0.10)]" style="background:linear-gradient(to right,#120800 0%,#1a0e00 50%,#120800 100%)">
+				<!-- Icon box -->
+				<div class="flex items-center justify-center w-16 shrink-0 border-r border-[rgba(255,140,0,0.18)] bg-[rgba(255,100,0,0.04)]">
+					<svg viewBox="0 0 40 40" width="30" height="30" fill="none">
+						<polygon points="20,4 36,36 4,36" stroke="rgba(255,160,60,0.55)" stroke-width="1.5" fill="none"/>
+						<polygon points="20,11 30,30 10,30" stroke="rgba(255,140,0,0.28)" stroke-width="1" fill="none"/>
+					</svg>
+				</div>
+				<!-- Name + motto -->
+				<div class="flex flex-col justify-center gap-1 py-2.5 px-4 min-w-0">
+					<div class="flex items-baseline gap-3">
+						<span class="sq-name text-[1.1rem] tracking-[0.14em] text-[#ffd090] uppercase">ORB</span>
+						<span class="sq-tag text-[0.85rem] tracking-[0.12em] text-[rgba(255,160,60,0.45)] uppercase font-normal">| ORB0</span>
+					</div>
+					<div class="h-px w-full" style="background:linear-gradient(to right,rgba(255,140,0,0.4),transparent)"></div>
+					<div class="sq-motto text-[0.72rem] tracking-[0.16em] uppercase text-[rgba(255,160,60,0.5)]">"See you space cowboy ..."</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="grid-placeholder absolute inset-x-4 bottom-4 top-4 flex flex-col gap-3 opacity-0">
 
 			<!-- Tab bar -->
 			<div class="flex items-stretch gap-0.5 h-9 flex-shrink-0">
@@ -186,10 +74,10 @@
 					</button>
 				{/each}
 				<div class="flex-1"></div>
-				<span class="self-center pr-4 font-mono text-[0.65rem] tracking-[0.15em] uppercase text-orange-500/40">CLAN ORB // EST. 2000</span>
+				<span class="self-center pr-4 ed-font text-[0.72rem] tracking-[0.18em] uppercase text-orange-500/35">CLAN ORB // EST. 2000</span>
 			</div>
 
-			<!-- Panel wrapper — stays mounted so GSAP bind is stable -->
+			<!-- Panel wrapper -->
 			<div bind:this={panelWrap} class="flex-1 min-h-0">
 				{#if activePanel === 'galnet'}
 					<LiveFeed articles={data.articles ?? []} />
@@ -209,6 +97,11 @@
 </Container>
 
 <style>
+	/* ── Eurocaps applied everywhere inside ed-root ── */
+	:global(.ed-root *) {
+		font-family: 'Eurocaps', 'Eurostile', monospace;
+	}
+
 	/* ── Elite Dangerous color tokens ── */
 	.ed-root {
 		--ed-orange:        #ff8c00;
@@ -265,8 +158,8 @@
 	}
 
 	:global(.ed-facility-badge) {
-		font-family: monospace;
-		font-size: 0.62rem;
+		font-family: 'Eurocaps', 'Eurostile', monospace;
+		font-size: 0.72rem;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		padding: 0.15rem 0.5rem;
@@ -283,8 +176,8 @@
 	}
 
 	:global(.ed-state-badge) {
-		font-family: monospace;
-		font-size: 0.55rem;
+		font-family: 'Eurocaps', 'Eurostile', monospace;
+		font-size: 0.65rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		padding: 0.1rem 0.35rem;
@@ -299,9 +192,9 @@
 		gap: 0.5rem;
 		padding: 0 1rem;
 		height: 100%;
-		font-family: monospace;
-		font-size: 0.7rem;
-		font-weight: 700;
+		font-family: 'Eurocaps', 'Eurostile', monospace;
+		font-size: 0.8rem;
+		font-weight: 400;
 		letter-spacing: 0.18em;
 		text-transform: uppercase;
 		cursor: pointer;
@@ -339,5 +232,13 @@
 		background: #ff8c00;
 		border-color: #ff8c00;
 		box-shadow: 0 0 4px #ff8c00;
+	}
+
+	/* ── Squadron header ── */
+	.sq-name { font-weight: 700; }
+
+	/* ── Eurocaps utility class ── */
+	.ed-font {
+		font-family: 'Eurocaps', 'Eurostile', monospace;
 	}
 </style>

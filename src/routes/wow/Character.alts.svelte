@@ -1,12 +1,13 @@
 <script lang="ts">
     import { max_level, wowClassColor, wowSpecName } from "$lib/client/wowData";
+    import type { WowEnrichedMember } from '$lib/types/wow';
 
     let {
         detectedAlts = [],
         onSelectMember,
     }: {
-        detectedAlts: any[];
-        onSelectMember?: (member: any) => void;
+        detectedAlts: WowEnrichedMember[];
+        onSelectMember?: (member: WowEnrichedMember) => void;
     } = $props();
 
     function formatRealmSlug(slug?: string) {
@@ -15,9 +16,9 @@
     }
 
     const altGroups = $derived((() => {
-        const maxAlts = detectedAlts.filter((a: any) => (a.character?.level ?? 0) >= max_level);
-        const rest = detectedAlts.filter((a: any) => (a.character?.level ?? 0) < max_level);
-        const buckets = new Map<string, any[]>();
+        const maxAlts = detectedAlts.filter((a) => (a.character?.level ?? 0) >= max_level);
+        const rest = detectedAlts.filter((a) => (a.character?.level ?? 0) < max_level);
+        const buckets = new Map<string, WowEnrichedMember[]>();
         for (const a of rest) {
             const lvl = a.character?.level ?? 0;
             const floor = Math.floor(lvl / 10) * 10;
@@ -25,7 +26,7 @@
             if (!buckets.has(key)) buckets.set(key, []);
             buckets.get(key)!.push(a);
         }
-        const groups: { label: string; alts: any[] }[] = [];
+        const groups: { label: string; alts: WowEnrichedMember[] }[] = [];
         if (maxAlts.length) groups.push({ label: 'Max Level', alts: maxAlts });
         for (const [label, alts] of [...buckets.entries()].sort((a, b) => parseInt(b[0]) - parseInt(a[0]))) {
             groups.push({ label, alts });

@@ -1,11 +1,12 @@
 <script lang="ts">
     import { wowQualityColor } from "$lib/client/wowData";
+    import type { WowCharacterData, WowSlotItem, WowItemEnchantment, WowItemSocket, WowMediaAsset } from '$lib/types/wow';
 
     let {
         charData,
         classId,
     }: {
-        charData: any;
+        charData: WowCharacterData;
         classId: number | undefined;
     } = $props();
 
@@ -13,51 +14,48 @@
     const rightSlots = ['HANDS','WAIST','LEGS','FEET','FINGER_1','FINGER_2','TRINKET_1','TRINKET_2'];
     const weaponSlots = ['MAIN_HAND','OFF_HAND'];
 
-    const slotMap = $derived(charData?.equipment?.slotMap ?? {});
+    const slotMap = $derived(charData?.equipment?.slotMap ?? {} as Record<string, WowSlotItem>);
 
-    function itemEnchant(item: any): { text: string; id: number } | null {
-        const enchant = item?.enchantments?.find((e: any) => e.enchantment_slot?.type === 'PERMANENT');
+    function itemEnchant(item: WowSlotItem): { text: string; id: number } | null {
+        const enchant = item?.enchantments?.find((e: WowItemEnchantment) => e.enchantment_slot?.type === 'PERMANENT');
         if (!enchant?.display_string) return null;
-
         const slotNames = ['Helm', 'Shoulders', 'Chest', 'Ring', 'Boots', 'Bracers', 'Cloak', 'Gloves', 'Legs', 'Weapon', 'Shield', '2H Weapon'];
-
         const text = enchant.display_string
             .replace(/^Enchanted:\s*/i, '')
             .replace(new RegExp(`^Enchant (${slotNames.join('|')}) - `, 'i'), '')
             .replace(/\|A:[^|]+\|a/g, '')
             .trim();
-
-        return { text, id: enchant.enchantment_id };
+        return { text, id: enchant.enchantment_id ?? 0 };
     }
 
-    function itemGems(item: any): { name: string; iconUrl: string; displayString: string }[] {
+    function itemGems(item: WowSlotItem): { name: string; iconUrl: string; displayString: string }[] {
         return (item?.sockets ?? [])
-            .filter((s: any) => s.item?.id)
-            .map((s: any) => ({
-                name: s.item.name,
+            .filter((s: WowItemSocket) => s.item?.id)
+            .map((s: WowItemSocket) => ({
+                name: s.item?.name ?? '',
                 iconUrl: s.iconUrl ?? '',
                 displayString: s.display_string ?? '',
             }));
     }
 
-    function wowheadAttrs(item: any): { href: string; dataWowhead: string } {
+    function wowheadAttrs(item: WowSlotItem): { href: string; dataWowhead: string } {
         const id = item?.item?.id;
         const qualityMap: Record<string, number> = {
             POOR: 0, COMMON: 1, UNCOMMON: 2, RARE: 3,
             EPIC: 4, LEGENDARY: 5, ARTIFACT: 6, HEIRLOOM: 7,
         };
-        const params: Record<string, string | number> = { item: id };
+        const params: Record<string, string | number> = { item: id ?? 0 };
         const quality = item?.quality?.type;
         if (quality && qualityMap[quality] !== undefined) params.quality = qualityMap[quality];
         const ilvl = item?.level?.value;
         if (ilvl) params.ilvl = ilvl;
         const bonusList: number[] = (item?.bonus_list ?? []).filter(Boolean);
         if (bonusList.length) params.bonus = bonusList.join(':');
-        const enchant = item?.enchantments?.find((e: any) => e.enchantment_slot?.type === 'PERMANENT');
+        const enchant = item?.enchantments?.find((e: WowItemEnchantment) => e.enchantment_slot?.type === 'PERMANENT');
         if (enchant?.enchantment_id) params.ench = enchant.enchantment_id;
-        const gemIds: number[] = (item?.sockets ?? []).map((s: any) => s.item?.id).filter(Boolean);
+        const gemIds: number[] = (item?.sockets ?? []).map((s: WowItemSocket) => s.item?.id).filter((id): id is number => id != null);
         if (gemIds.length) params.gems = gemIds.join(':');
-        const pcs = Object.values(slotMap).map((s: any) => s?.item?.id).filter(Boolean);
+        const pcs = Object.values(slotMap).map((s: WowSlotItem) => s?.item?.id).filter((id): id is number => id != null);
         if (pcs.length) params.pcs = pcs.join(':');
         const qs = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
         return {
@@ -65,7 +63,6 @@
             dataWowhead: qs,
         };
     }
-
 </script>
 
 <div
@@ -123,7 +120,7 @@
                                     </a>
                                     {#if gems.length}
                                         <div class="flex items-center gap-0.5 mt-0.5">
-                                            {#each gems as gem}
+                                            {#each gems as gem (gem)}
                                                 <img
                                                     src={gem.iconUrl}
                                                     alt={gem.name}
@@ -161,8 +158,8 @@
                 <div class="relative flex-1 z-10" style="min-height: 480px;">
                     <div
                         class="absolute inset-x-0 top-0 bottom-0 z-10 pointer-events-none"
-                        style={charData?.media?.assets?.find((a:any) => a.key === 'main-raw')?.value
-                            ? `background-image: url('${charData.media.assets.find((a:any) => a.key === 'main-raw').value}'); background-size: 120%; background-repeat: no-repeat; background-position: center 60%;`
+                        style={charData?.media?.assets?.find((a: WowMediaAsset) => a.key === 'main-raw')?.value
+                            ? `background-image: url('${charData.media.assets.find((a: WowMediaAsset) => a.key === 'main-raw')?.value}'); background-size: 120%; background-repeat: no-repeat; background-position: center 60%;`
                             : ''}
                     ></div>
 
@@ -295,7 +292,7 @@
                                     </a>
                                     {#if gems.length}
                                         <div class="flex items-center justify-end gap-0.5 mt-0.5">
-                                            {#each gems as gem}
+                                            {#each gems as gem (gem)}
                                                 <img
                                                     src={gem.iconUrl}
                                                     alt={gem.name}

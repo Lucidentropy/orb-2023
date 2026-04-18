@@ -1,14 +1,15 @@
 <script lang="ts">
     import { wowClassColor, wowClassName, max_level, SPEC_ROLE, ROLE_COLOR } from '$lib/client/wowData';
+    import type { WowEnrichedMember, WowGuildResponse } from '$lib/types/wow';
 
     let {
         members = [],
         guild = null,
         onSelectMember,
     }: {
-        members: any[];
-        guild?: any;
-        onSelectMember?: (member: any) => void;
+        members: WowEnrichedMember[];
+        guild?: WowGuildResponse | null;
+        onSelectMember?: (member: WowEnrichedMember) => void;
     } = $props();
 
     const guildAge = $derived((() => {
@@ -35,7 +36,7 @@
 
     // ── Alt detection (self-contained) ───────────────────────────────────────
     const altBuckets = $derived((() => {
-        const buckets = new Map<string, any[]>();
+        const buckets = new Map<string, WowEnrichedMember[]>();
         for (const m of members) {
             const toys = m.toys, pets = m.pets;
             const canGroup = toys != null && pets != null
@@ -97,7 +98,7 @@
         }
 
         if (!includeAlts) {
-            list = list.filter(m => mainIds.has(m.character?.id));
+            list = list.filter(m => mainIds.has(m.character?.id ?? 0));
         }
 
         return list;
@@ -235,7 +236,7 @@
         }
     }
 
-    function getMemberSpec(m: any): string | null {
+    function getMemberSpec(m: WowEnrichedMember): string | null {
         return m.details?.active_spec?.name
             ?? m.character?.active_spec?.name
             ?? null;
@@ -423,8 +424,8 @@
                     {@const classId = m.character?.playable_class?.id}
                     {@const spec = getMemberSpec(m)}
                     {@const role = spec ? (SPEC_ROLE[spec] ?? null) : null}
-                    {@const isAlt = altMainMap.has(m.character?.id)}
-                    {@const mainName = altMainMap.get(m.character?.id)}
+                    {@const isAlt = altMainMap.has(m.character?.id ?? 0)}
+                    {@const mainName = altMainMap.get(m.character?.id ?? 0)}
                     <button type="button" class="btn-row flex items-center gap-2 rounded px-2 py-2 w-full text-left transition-colors hover:bg-white/5" onclick={() => onSelectMember?.(m)}>
                         {#if m.avatarUrl}
                             <img src={m.avatarUrl} alt={m.character?.name} class="h-8 w-8 flex-shrink-0 rounded-sm object-cover" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />

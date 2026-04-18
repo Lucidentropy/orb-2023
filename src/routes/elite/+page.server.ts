@@ -1,4 +1,5 @@
 import type { PageServerLoad } from './$types';
+import type { JsonValue } from '$lib/types/generic';
 
 const HOME_SYSTEM  = 'Gende';
 const HOME_STATION = 'Baliunas Hub';
@@ -6,41 +7,7 @@ const HOME_STATION = 'Baliunas Hub';
 const TTL_GALNET = 2 * 60 * 60 * 1000; // 2 hours
 const TTL_EDSM   = 1 * 60 * 60 * 1000; // 1 hour
 
-export interface GalNetArticle {
-	id: string;
-	attributes: {
-		title: string;
-		body: { value: string };
-		published_at: string;
-		field_galnet_image: string | null;
-	};
-}
-
-export interface StationData {
-	name: string;
-	type: string;
-	distanceToArrival: number;
-	allegiance: string;
-	government: string;
-	economy: string;
-	haveMarket: boolean;
-	haveShipyard: boolean;
-	haveOutfitting: boolean;
-	controllingFaction: { name: string };
-}
-
-export interface FactionData {
-	id: number;
-	name: string;
-	allegiance: string;
-	government: string;
-	influence: number;
-	state: string;
-	isPlayer: boolean;
-	pendingStates: { state: string; trend: number }[];
-	recoveringStates: { state: string; trend: number }[];
-	lastUpdate?: number;
-}
+import type { GalNetArticle, StationData, FactionData } from '$lib/types/elite';
 
 // Lazy-load the cache handler so an import/DB failure doesn't kill the whole page
 async function tryGetCache<T>(service: string, keyParts: string[], maxAge: number): Promise<T | null> {
@@ -52,7 +19,7 @@ async function tryGetCache<T>(service: string, keyParts: string[], maxAge: numbe
 	}
 }
 
-async function trySetCache<T>(service: string, keyParts: string[], data: T, ttl: number): Promise<void> {
+async function trySetCache<T extends JsonValue>(service: string, keyParts: string[], data: T, ttl: number): Promise<void> {
 	try {
 		const { setCachedJson } = await import('$lib/server/cacheHandler');
 		await setCachedJson(service, keyParts, data, ttl);
@@ -115,7 +82,7 @@ async function fetchFactions(): Promise<{ factions: FactionData[]; lastUpdate: s
 		: null;
 
 	const result = { factions, lastUpdate };
-	await trySetCache('elite', ['edsm', 'factions', HOME_SYSTEM], result, TTL_EDSM);
+	await trySetCache('elite', ['edsm', 'factions', HOME_SYSTEM], result as unknown as JsonValue, TTL_EDSM);
 	return result;
 }
 

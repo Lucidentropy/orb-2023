@@ -1,3 +1,6 @@
+import type { WowCharacter, WowFaction, WowRealm, WowRosterMember } from '$lib/types/wow';
+
+
 export const WOW_REGION = 'us';
 export const WOW_REALM_SLUG = 'stormreaver';
 export const WOW_GUILD_SLUG = 'orb';
@@ -295,17 +298,17 @@ export function wowRankName(rank?: number) {
         : 'Unknown';
 }
 
-export function wowCharUrl(character: any): string | null {
+export function wowCharUrl(character: WowCharacter): string | null {
     const realm = character?.realm?.slug;
     const name = character?.name;
     if (!realm || !name) return null;
     return `/wow/char/${realm}/${name}/gear`;
 }
 
-export function wowCharLink(character: any): string {
+export function wowCharLink(character: WowCharacter): string {
     const url = wowCharUrl(character);
     const name = character?.name ?? String(character ?? 'Unknown');
-    const color = wowClassColor(character?.playable_class?.id ?? null);
+    const color = wowClassColor(character?.playable_class?.id ?? undefined);
     if (!url) return name;
     return `<a href="${url}" style="color:${color};text-decoration:none;">${name}</a>`;
 }
@@ -327,18 +330,18 @@ export function wowSpecName(name?: string | null, abbreviated = false): string |
     return abbreviated ? (wowSpecAbbrev[name] ?? name) : name;
 }
 
-export function factionName(faction: any) {
+export function factionName(faction: WowFaction | null | undefined) {
     if (!faction) return 'Unknown';
     return faction.name || faction.type || 'Unknown';
 }
 
-export function realmName(realm: any, wowData?: any) {
+export function realmName(realm: WowRealm | null | undefined, wowData?: { meta?: { realm?: string } }) {
     if (!realm) return wowData?.meta?.realm || 'Unknown';
     return realm.name || wowData?.meta?.realm || 'Unknown';
 }
 
-export function sortRosterMembers(members: any[]) {
-    return members.slice().sort((a: any, b: any) => {
+export function sortRosterMembers(members: WowRosterMember[]) {
+    return members.slice().sort((a, b) => {
         const rankA = Number(a?.rank ?? 999);
         const rankB = Number(b?.rank ?? 999);
         if (rankA !== rankB) return rankA - rankB;

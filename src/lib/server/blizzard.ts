@@ -4,6 +4,9 @@ import {
 } from '$env/static/private';
 import { getCachedJson, setCachedJson } from '$lib/server/cacheHandler';
 
+import type { WowEnrichedMember } from '$lib/types/wow';
+
+
 export const region = 'us';
 export const locale = 'en_US';
 export const realmSlug = 'stormreaver';
@@ -48,7 +51,7 @@ export async function getAccessToken(): Promise<string> {
             },
             body: new URLSearchParams({ grant_type: 'client_credentials' })
         });
-    } catch (networkErr) {
+    } catch {
         // Retry once on network failure
         await sleep(500);
         tokenResponse = await fetch('https://oauth.battle.net/token', {
@@ -80,18 +83,18 @@ export async function getAccessToken(): Promise<string> {
     return tokenCache.accessToken;
 }
 
-export async function cachedFetch(
+export async function cachedFetch<T = unknown>(
     keyParts: string[],
     ttlMs: number,
     url: string,
     accessToken: string,
     attempt = 1,
     bust = false
-): Promise<any> {
+): Promise<T> {
     if (!bust) {
-        const cached = await getCachedJson<any>('wow', keyParts, ttlMs);
+        const cached = await getCachedJson<T>('wow', keyParts, ttlMs);
         if (cached) {
-            if (cached?._negative) throw new Error(cached.reason ?? 'Cached failure');
+            if ((cached as Record<string, unknown>)?._negative) throw new Error((cached as Record<string, unknown>).reason as string ?? 'Cached failure');
             return cached;
         }
     }
@@ -99,12 +102,12 @@ export async function cachedFetch(
     let response: Response;
     try {
         response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-    } catch (networkErr: unknown) {
+    } catch (_networkErr: unknown) {
         if (attempt < 3) {
             await sleep(500 * attempt);
             return cachedFetch(keyParts, ttlMs, url, accessToken, attempt + 1, bust);
         }
-        throw networkErr;
+        throw _networkErr;
     }
 
     if (response.status === 429 || response.status >= 500) {
@@ -140,8 +143,8 @@ export async function batchedMap<T, R>(
     return results;
 }
 
-export function detectCollectionCandidates(members: any[]): Set<number> {
-    const byRealm = new Map<string, any[]>();
+export function detectCollectionCandidates(members: WowEnrichedMember[]): Set<number> {
+    const byRealm = new Map<string, WowEnrichedMember[]>();
     for (const m of members) {
         if ((m.character?.level ?? 0) < MIN_LEVEL_MAIN) continue;
         const key = m.character?.realm?.slug ?? 'unknown';
@@ -170,8 +173,8 @@ export function detectCollectionCandidates(members: any[]): Set<number> {
     return candidateIds;
 }
 
-export function detectMains(members: any[]): Set<number> {
-    const buckets = new Map<string, any[]>();
+export function detectMains(members: WowEnrichedMember[]): Set<number> {
+    const buckets = new Map<string, WowEnrichedMember[]>();
     for (const m of members) {
         const toys = m.toys, pets = m.pets;
         const canGroup = toys != null && pets != null

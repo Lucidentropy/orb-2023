@@ -1,20 +1,14 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+import type { WowEnrichedMember, WowCharData, WowSectionCache } from '$lib/types/wow';
 
     let {
         charData,
         member,
     }: {
-        charData: any;
-        member: any;
+        charData: WowCharData;
+        member: WowEnrichedMember | null;
     } = $props();
-
-    type SectionCache = {
-        section: string;
-        fetchedAt: string | null;
-        expiresAt: string | null;
-        stale: boolean;
-    };
 
     const LABELS: Record<string, string> = {
         profile: 'Profile', equipment: 'Equipment', media: 'Media',
@@ -22,7 +16,7 @@
         decor: 'Decor', achievements: 'Achievements',
     };
 
-    let sections = $state<SectionCache[]>([]);
+    let sections = $state<WowSectionCache[]>([]);
     let loading = $state(true);
     let error = $state('');
 
@@ -81,7 +75,7 @@
         return `${Math.floor(hrs / 24)}d`;
     }
 
-    function formatBytes(bytes: number | null) {
+    function formatBytes(bytes: number | null | undefined) {
         if (!bytes) return null;
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;

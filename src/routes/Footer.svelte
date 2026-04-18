@@ -18,6 +18,87 @@
     ];
 </script>
 
+<svelte:head>
+	<style lang="scss">
+		footer {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.tagline {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			font-weight: bold;
+			color: var(--orb-highlight);
+			opacity: 0.7;
+		}
+
+		.more-btn {
+			font-size: 0.7rem;
+			opacity: 0.6;
+
+			&:hover { opacity: 1; }
+		}
+
+		.drawer {
+			width: 100%;
+			max-width: 600px;
+			display: grid;
+			grid-template-rows: 0fr;
+			transition: grid-template-rows 0.3s ease;
+
+			&.open {
+				grid-template-rows: 1fr;
+			}
+		}
+
+		.drawer-inner {
+			overflow: hidden;
+		}
+
+		.drawer-row {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1.25rem;
+			font-size: 0.75rem;
+			color: var(--orb-highlight);
+			opacity: 0.6;
+
+			a, .winamp-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				color: inherit;
+				font-size: 0.75rem;
+				transition: opacity 0.2s;
+
+				&:hover { opacity: 1; color: inherit; }
+			}
+		}
+
+		.theme-select {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+
+			.field-label {
+				margin: 0;
+				white-space: nowrap;
+			}
+
+			.field-input {
+				font-size: 0.65rem;
+				padding: 0.25rem 0.5rem;
+				min-width: 100px;
+			}
+		}
+	</style>
+</svelte:head>
+
 {#if isWebampLoaded}
     <div class="fixed top-0 left-0 w-screen h-screen z-50 pointer-events-none">
         <Webamp />
@@ -49,7 +130,7 @@
 		<div class="theme-select">
 			<label for="theme-select" class="field-label">Theme</label>
 			<select id="theme-select" class="field-input" bind:value={$activeTheme}>
-				{#each themes as option}
+				{#each themes as option (option.value)}
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>
@@ -57,81 +138,3 @@
 	</div>
 </footer>
 
-<style lang="scss">
-    footer {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .tagline {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-weight: bold;
-        color: var(--orb-highlight);
-        opacity: 0.7;
-    }
-
-    .more-btn {
-        font-size: 0.7rem;
-        opacity: 0.6;
-
-        &:hover { opacity: 1; }
-    }
-
-    .drawer {
-        width: 100%;
-        max-width: 600px;
-        display: grid;
-        grid-template-rows: 0fr;
-        transition: grid-template-rows 0.3s ease;
-
-        &.open {
-            grid-template-rows: 1fr;
-        }
-    }
-
-    .drawer-inner {
-        overflow: hidden;
-    }
-
-	.drawer-row {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 1.25rem;
-		font-size: 0.75rem;
-		color: var(--orb-highlight);
-		opacity: 0.6;
-
-		a, .winamp-btn {
-			display: inline-flex;
-			align-items: center;
-			gap: 0.35rem;
-			color: inherit;
-			font-size: 0.75rem;
-			transition: opacity 0.2s;
-
-			&:hover { opacity: 1; color: inherit; }
-		}
-	}
-
-	.theme-select {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-
-		.field-label {
-			margin: 0;
-			white-space: nowrap;
-		}
-
-		.field-input {
-			font-size: 0.65rem;
-			padding: 0.25rem 0.5rem;
-			min-width: 100px;
-		}
-	}
-</style>

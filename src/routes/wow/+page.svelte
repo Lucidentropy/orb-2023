@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { replaceState } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { blur } from 'svelte/transition';
+
+	import type { WowEnrichedMember, WowApiResponse } from '$lib/types/wow';
 
 	import Container from '$lib/ThemeHandler.svelte';
 	import { factionName, realmName } from "$lib/client/wowData";
@@ -26,14 +27,14 @@
 
 	const HIDDEN_PANELS = new Set<PanelView>(['character']);
 
-	let wowData: any = $state(null);
+	let wowData = $state<WowApiResponse | null>(null);
 	let loading = $state(true);
 	let error = $state('');
 	let currentCharTab = $state<CharacterTab>('gear');
 	let panelView = $state<PanelView>('roster');
-	let selectedMember = $state<any>(null);
+	let selectedMember = $state<WowEnrichedMember | null>(null);
 
-	let neighborhoodData: any = $state(null);
+	let neighborhoodData: { plots: unknown[] } | null = $state(null);
 	let neighborhoodLoading = $state(false);
 	let neighborhoodError = $state('');
 
@@ -89,7 +90,7 @@
 				clearTimeout(timeout);
 			}
 
-			let data: any;
+			let data: WowApiResponse;
 			try {
 				data = await response.json();
 			} catch {
@@ -138,7 +139,7 @@
 		}
 	}
 
-	function restoreFromUrl(data: any) {
+	function restoreFromUrl(data: WowApiResponse) {
 		const path = window.location.pathname;
 
 		if (path.startsWith('/wow/neighborhood')) { openPanel('neighborhood'); return; }
@@ -153,19 +154,19 @@
 		const tab = pathMatch[3].toLowerCase() as CharacterTab;
 
 		const found = (data?.roster?.members ?? []).find(
-			(m: any) =>
+			(m: WowEnrichedMember) =>
 				m.character?.realm?.slug?.toLowerCase() === realm.toLowerCase() &&
 				m.character?.name?.toLowerCase() === name.toLowerCase()
 		);
 
 		if (found) {
-			selectedMember = found;
+			selectedMember = found as WowEnrichedMember;
 			panelView = 'character';
 			currentCharTab = tab;
 		}
 	}
 
-	function selectMember(member: any, tab: CharacterTab = 'gear') {
+	function selectMember(member: WowEnrichedMember, tab: CharacterTab = 'gear') {
 		selectedMember = member;
 		panelView = 'character';
 		currentCharTab = tab;
@@ -176,11 +177,11 @@
 		}
 	}
 
-	const rosterMembers = $derived(wowData?.roster?.members || []);
+	const rosterMembers = $derived((wowData?.roster?.members ?? []) as WowEnrichedMember[]);
 
 	const rosterMap = $derived(
 		Object.fromEntries(
-			rosterMembers.map((m: any) => {
+			rosterMembers.map((m) => {
 				const key = `${m.character?.name?.toLowerCase()}-${m.character?.realm?.slug}`;
 				return [key, { classId: m.character?.playable_class?.id }];
 			})
@@ -301,7 +302,7 @@
 
 							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
 								<p class="field-label">Achievement Points</p>
-								<p class="mb-0 text-lg text-orb-highlight">{wowData.guild?.achievement_points ?? 0}</p>
+								<p class="mb-0 text-lg text-orb-highlight">{wowData?.guild?.achievement_points ?? 0}</p>
 							</div>
 
 							<div class="border-t border-border-faint pt-3 text-center sm:text-left">

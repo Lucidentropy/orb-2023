@@ -36,7 +36,9 @@ export async function getCachedJson<T>(
     }
 }
 
-export async function setCachedJson<T>(
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+export async function setCachedJson<T extends JsonValue>(
     service: string,
     keyParts: string[],
     data: T,
@@ -46,7 +48,7 @@ export async function setCachedJson<T>(
         const key = buildKey(service, keyParts);
         await sql`
             INSERT INTO wow_cache (key, data, fetched_at, ttl_ms)
-            VALUES (${key}, ${sql.json(data as object)}, now(), ${ttlMs})
+            VALUES (${key}, ${sql.json(data)}, now(), ${ttlMs})
             ON CONFLICT (key) DO UPDATE
             SET data       = EXCLUDED.data,
                 fetched_at = EXCLUDED.fetched_at,
@@ -60,6 +62,7 @@ export async function setCachedJson<T>(
 export function cacheKeyFilename(keyParts: string[]): string {
     return `${keyParts.map(v => v.toLowerCase().replace(/[^a-z0-9-_]/g, '-')).join('-')}.json`;
 }
+
 export async function deleteCachedByPrefix(service: string, prefix: string[]): Promise<void> {
     try {
         const safe = (v: string) => v.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
