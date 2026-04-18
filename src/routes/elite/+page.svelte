@@ -5,7 +5,7 @@
 	import LiveFeed from './LiveFeed.svelte';
 	import OrbHomeSystem from './OrbHomeSystem.svelte';
 	import HelpfulLinks from './HelpfulLinks.svelte';
-	import EDIntro from './EdIntro.svelte';
+	import EdIntro from './EdIntro.svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
@@ -35,7 +35,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Eurocaps&display=swap" rel="stylesheet">
 </svelte:head>
 
-<EDIntro />
+<EdIntro />
 
 <Container>
 	<div class="ed-root relative w-full aspect-video overflow-hidden bg-black">
