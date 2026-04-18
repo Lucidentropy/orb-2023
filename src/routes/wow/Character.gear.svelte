@@ -301,7 +301,6 @@
                                         {item.name}
                                     </a>
                                     {#if gems.length}
-                                        {console.log(item)}
                                         <div class="flex items-center justify-end gap-0.5 mt-0.5">
                                             {#each gems as gem}
                                                 <img

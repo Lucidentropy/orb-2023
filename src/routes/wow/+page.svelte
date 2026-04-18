@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pushState } from '$app/navigation';
+	import { replaceState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { blur } from 'svelte/transition';
-	
+
 	import Container from '$lib/ThemeHandler.svelte';
 	import { factionName, realmName } from "$lib/client/wowData";
-	
+
 	import Roster from './Roster.svelte';
 	import Character from './Character.svelte';
 	import Cache from './Cache.svelte';
@@ -15,22 +15,21 @@
 	import GuildStats from './GuildStats.svelte';
 
 	type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood' | 'guildstats';
+	type CharacterTab = 'gear' | 'alts';
 
 	const PANELS: { id: PanelView; name: string; url: string }[] = [
-		{ id: 'roster',       name: 'Roster',       url: '/wow' },
-		{ id: 'neighborhood', name: 'Neighborhood',  url: '/wow/neighborhood' },
+		{ id: 'roster',       name: 'Roster',      url: '/wow' },
+		{ id: 'neighborhood', name: 'Neighborhood', url: '/wow/neighborhood' },
 		{ id: 'guildstats',   name: 'Guild Stats',  url: '/wow/guildstats' },
-		{ id: 'cache',        name: 'Cache',         url: '/wow/cache' },
+		{ id: 'cache',        name: 'Cache',        url: '/wow/cache' },
 	];
 
-	// panels that should not appear as nav tabs
 	const HIDDEN_PANELS = new Set<PanelView>(['character']);
 
 	let wowData: any = $state(null);
 	let loading = $state(true);
 	let error = $state('');
-	let currentCharTab = $state<'gear' | 'alts'>('gear');
-
+	let currentCharTab = $state<CharacterTab>('gear');
 	let panelView = $state<PanelView>('roster');
 	let selectedMember = $state<any>(null);
 
@@ -39,25 +38,33 @@
 	let neighborhoodError = $state('');
 
 	onMount(() => {
-		restorePanelFromPath();
-
-		const panelParam = $page.url.searchParams.get('panel');
-		const matchedPanel = PANELS.find(p => p.id === panelParam);
-		if (matchedPanel) {
-			openPanel(matchedPanel.id);
-			return;
-		}
-
-		if (panelView !== 'roster') {
-			openPanel(panelView);
-		}
-
 		const handler = (e: PromiseRejectionEvent) => { e.preventDefault(); };
 		window.addEventListener('unhandledrejection', handler);
 		return () => window.removeEventListener('unhandledrejection', handler);
 	});
 
+
 	onMount(async () => {
+		const url = new URL(window.location.href);
+		const panel = url.searchParams.get('panel');
+		const char = url.searchParams.get('char');
+		if (char) {
+			const parts = char.split('/');
+			const realm = parts[0] ?? '';
+			const name = parts[1] ?? '';
+			const tab = parts[2] ?? 'gear';
+			if (realm && name) window.history.replaceState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+		} else if (panel) {
+			const panelMap: Record<string, string> = {
+				roster: '/wow',
+				neighborhood: '/wow/neighborhood',
+				guildstats: '/wow/guildstats',
+				cache: '/wow/cache',
+			};
+			const target = panelMap[panel];
+			if (target) window.history.replaceState({}, '', target);
+		}
+
 		if (!document.getElementById('wowhead-tooltip-script')) {
 			const script = document.createElement('script');
 			script.id = 'wowhead-tooltip-script';
@@ -65,22 +72,39 @@
 			script.async = true;
 			document.head.appendChild(script);
 		}
-		
+
 		try {
-			const response = await fetch('/api/wow');
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 5000);
+
+			let response: Response;
+			try {
+				response = await fetch('/api/wow', { signal: controller.signal });
+			} catch (err: unknown) {
+				if (err instanceof Error && err.name === 'AbortError') {
+					throw new Error('Request timed out after 5s — Battle.net may be unavailable');
+				}
+				throw new Error(`Network error: ${err instanceof Error ? err.message : 'Unknown'}`);
+			} finally {
+				clearTimeout(timeout);
+			}
+
 			let data: any;
 			try {
 				data = await response.json();
 			} catch {
-				throw new Error(`Server error (${response.status}) — response was not JSON`);
+				throw new Error(`Server returned non-JSON response (status ${response.status})`);
 			}
+
 			if (!response.ok || data?.error) {
-				throw new Error(data?.message || 'Failed to load guild data');
+				throw new Error(data?.message || `API error (${response.status})`);
 			}
+
 			wowData = data;
-			restoreCharFromUrl(data);
+			restoreFromUrl(data);
 		} catch (err: unknown) {
-			error = err instanceof Error ? err.message : 'Unknown error';
+			error = err instanceof Error ? err.message : 'Unknown error loading guild data';
+			console.error('[wow page]', err);
 		} finally {
 			loading = false;
 		}
@@ -91,12 +115,12 @@
 
 		if (view === 'roster') {
 			selectedMember = null;
-			updateUrl('/wow');
+			replaceState('/wow', {});
 			return;
 		}
 
 		const panel = PANELS.find(p => p.id === view);
-		if (panel) updateUrl(panel.url);
+		if (panel) replaceState(panel.url, {});
 
 		if (view === 'neighborhood') {
 			if (neighborhoodData || neighborhoodLoading) return;
@@ -114,49 +138,19 @@
 		}
 	}
 
-	function updateUrl(path: string) {
-		if (window.location.pathname !== path) {
-			window.history.replaceState({}, '', path);
-		}
-	}
-
-	function restorePanelFromPath() {
+	function restoreFromUrl(data: any) {
 		const path = window.location.pathname;
-		const matched = PANELS.find(p => p.url === path && p.id !== 'roster');
-		if (matched) {
-			openPanel(matched.id);
-			return;
-		}
-		openPanel('roster');
-	}
 
-	type CharacterTab = 'gear' | 'alts';
+		if (path.startsWith('/wow/neighborhood')) { openPanel('neighborhood'); return; }
+		if (path.startsWith('/wow/guildstats')) { panelView = 'guildstats'; return; }
+		if (path.startsWith('/wow/cache')) { panelView = 'cache'; return; }
 
-	function charPath(realm: string, name: string, tab: CharacterTab = 'gear') {
-		return `/wow/char/${encodeURIComponent(realm)}/${encodeURIComponent(name)}/${tab}`;
-	}
+		const pathMatch = path.match(/^\/wow\/char\/([^/]+)\/([^/]+)\/(gear|alts|cache)$/i);
+		if (!pathMatch) return;
 
-	function restoreCharFromUrl(data: any) {
-		let realm = '';
-		let name = '';
-		let tab: CharacterTab = 'gear';
-
-		const pathMatch = window.location.pathname.match(/^\/wow\/char\/([^/]+)\/([^/]+)\/(gear|alts)$/i);
-
-		if (pathMatch) {
-			realm = decodeURIComponent(pathMatch[1]);
-			name = decodeURIComponent(pathMatch[2]);
-			tab = pathMatch[3].toLowerCase() as CharacterTab;
-		} else {
-			const charParam = $page.url.searchParams.get('char');
-			if (!charParam) return;
-			const parts = charParam.split('/');
-			realm = parts[0] ?? '';
-			name = parts[1] ?? '';
-			tab = ((parts[2] ?? 'gear').toLowerCase() as CharacterTab);
-		}
-
-		if (!realm || !name) return;
+		const realm = decodeURIComponent(pathMatch[1]);
+		const name = decodeURIComponent(pathMatch[2]);
+		const tab = pathMatch[3].toLowerCase() as CharacterTab;
 
 		const found = (data?.roster?.members ?? []).find(
 			(m: any) =>
@@ -168,26 +162,18 @@
 			selectedMember = found;
 			panelView = 'character';
 			currentCharTab = tab;
-			const nextPath = charPath(found.character?.realm?.slug ?? realm, found.character?.name ?? name, tab);
-			if (window.location.pathname !== nextPath) {
-				window.history.replaceState({}, '', nextPath);
-			}
 		}
 	}
 
-	function selectMember(member: any, tab: 'gear' | 'alts' = 'gear') {
+	function selectMember(member: any, tab: CharacterTab = 'gear') {
 		selectedMember = member;
 		panelView = 'character';
 		currentCharTab = tab;
 		const realm = member?.character?.realm?.slug;
 		const name = member?.character?.name;
 		if (realm && name) {
-			window.history.pushState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+			replaceState(`/wow/char/${realm}/${name}/${tab}`, {});
 		}
-	}
-
-	function memberRows() {
-		return wowData?.roster?.members || [];
 	}
 
 	const rosterMembers = $derived(wowData?.roster?.members || []);
@@ -251,12 +237,21 @@
 	{:else if error}
 		<div class="space-y-4">
 			<h1>World of Warcraft</h1>
-			<div class="alert-danger">
-				<span class="font-mono">⛔</span>
-				<div>
-					<p class="font-semibold">Failed to load guild data.</p>
-					<p class="opacity-80">{error}</p>
+			<div class="rounded border border-red-500/40 bg-red-950/30 p-6 space-y-3">
+				<div class="flex items-center gap-3">
+					<span class="font-mono text-xl">⛔</span>
+					<p class="font-semibold text-red-300 mb-0">Failed to load guild data</p>
 				</div>
+				<div class="rounded border border-red-500/20 bg-black/40 px-4 py-3 font-mono text-xs text-red-200/80 break-all whitespace-pre-wrap">
+					{error}
+				</div>
+				<button
+					type="button"
+					class="btn-ghost rounded border border-border-faint/60 px-3 py-2 text-xs uppercase tracking-wider"
+					onclick={() => { loading = true; error = ''; location.reload(); }}
+				>
+					Retry
+				</button>
 			</div>
 		</div>
 
@@ -301,7 +296,7 @@
 
 							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
 								<p class="field-label">Members</p>
-								<p class="mb-0 text-lg text-orb-highlight">{memberRows().length}</p>
+								<p class="mb-0 text-lg text-orb-highlight">{(wowData?.roster?.members || []).length}</p>
 							</div>
 
 							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
@@ -359,12 +354,10 @@
 								onSelectMember={selectMember}
 								onSelectTab={(tab: 'gear' | 'alts') => {
 									currentCharTab = tab;
-
 									const realm = selectedMember?.character?.realm?.slug;
 									const name = selectedMember?.character?.name;
-
 									if (realm && name) {
-										window.history.pushState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+										replaceState(`/wow/char/${realm}/${name}/${tab}`, {});
 									}
 								}}
 								initialTab={currentCharTab}
@@ -397,7 +390,7 @@
 				</div>
 
 				<div class="h-full">
-					<Activity wowData={wowData} rosterMap={rosterMap} />
+					<Activity wowData={wowData} rosterMap={rosterMap} onSelectMember={selectMember}/>
 				</div>
 			</div>
 		</div>

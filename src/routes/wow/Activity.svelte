@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {wowClassColor} from "$lib/client/wowData";
+	import { wowClassColor, wowCharLink } from "$lib/client/wowData";
 	let activityPage = 1;
 	const activityPageSize = 9;
 
@@ -39,6 +39,11 @@
 		return rosterMap[key]?.classId || null;
 	}
 
+	function charLink(name: string | null, realm: string | null): string | null {
+		if (!name || !realm) return null;
+		return `/wow/char/${realm}/${name}/gear`;
+	}
+
 	function setPage(page: number) {
 		activityPage = Math.min(Math.max(1, page), totalPages);
 	}
@@ -58,9 +63,12 @@
 		}
 
 		if (item.character_achievement) {
+			const name = item.character_achievement?.character?.name || 'Unknown';
+			const realm = item.character_achievement?.character?.realm?.slug || null;
 			return {
 				type: 'achievement',
-				character: item.character_achievement?.character?.name || 'Unknown',
+				character: name,
+				charUrl: charLink(name, realm),
 				achievement: item.character_achievement?.achievement?.name || 'Achievement earned',
 				id: item.character_achievement?.achievement?.id
 			};
@@ -70,6 +78,7 @@
 			return {
 				type: 'achievement',
 				character: 'Guild',
+				charUrl: null,
 				achievement: item.guild_achievement?.achievement?.name || 'Guild achievement earned',
 				id: item.guild_achievement?.achievement?.id
 			};
@@ -83,16 +92,24 @@
 		}
 
 		if (item.character_level_up) {
+			const name = item.character_level_up?.character?.name || 'Unknown';
+			const realm = item.character_level_up?.character?.realm?.slug || null;
 			return {
-				type: 'text',
-				text: `${item.character_level_up?.character?.name || 'Unknown'} reached level ${item.character_level_up?.level || '?'}`
+				type: 'level',
+				character: name,
+				charUrl: charLink(name, realm),
+				level: item.character_level_up?.level || '?'
 			};
 		}
 
 		if (item.item_looted) {
+			const name = item.item_looted?.character?.name || 'Unknown';
+			const realm = item.item_looted?.character?.realm?.slug || null;
 			return {
-				type: 'text',
-				text: `${item.item_looted?.character?.name || 'Unknown'} looted ${item.item_looted?.item?.name || 'an item'}`
+				type: 'loot',
+				character: name,
+				charUrl: charLink(name, realm),
+				item: item.item_looted?.item?.name || 'an item'
 			};
 		}
 

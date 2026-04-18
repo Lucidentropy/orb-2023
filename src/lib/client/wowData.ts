@@ -295,6 +295,21 @@ export function wowRankName(rank?: number) {
         : 'Unknown';
 }
 
+export function wowCharUrl(character: any): string | null {
+    const realm = character?.realm?.slug;
+    const name = character?.name;
+    if (!realm || !name) return null;
+    return `/wow/char/${realm}/${name}/gear`;
+}
+
+export function wowCharLink(character: any): string {
+    const url = wowCharUrl(character);
+    const name = character?.name ?? String(character ?? 'Unknown');
+    const color = wowClassColor(character?.playable_class?.id ?? null);
+    if (!url) return name;
+    return `<a href="${url}" style="color:${color};text-decoration:none;">${name}</a>`;
+}
+
 export function wowClassColor(id?: number) {
     return id ? wowClassColors[id] || '#888888' : '#888888';
 }

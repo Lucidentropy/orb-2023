@@ -286,37 +286,36 @@
 					onmouseenter={() => hoveredId = id ?? null}
 					onmouseleave={() => hoveredId = null}
 				>
-					<div class="flex items-center h-12">
-						{#if member.avatarUrl}
-							<img src={member.avatarUrl} alt={member.character?.name} class="h-8 w-8 rounded-sm object-cover" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-						{:else}
-							<div class="h-8 w-8 rounded-sm bg-border-faint/10 flex items-center justify-center">
-								<svg viewBox="0 0 24 24" class="h-5 w-5 text-orb-highlight/20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-									<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-								</svg>
-							</div>
-						{/if}
-					</div>
+						<div class="flex items-center h-12">
+							{#if member.avatarUrl}
+								<img src={member.avatarUrl} alt={member.character?.name} class="h-8 w-8 rounded-sm object-cover" onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+							{:else}
+								<div class="h-8 w-8 rounded-sm bg-border-faint/10 flex items-center justify-center">
+									<svg viewBox="0 0 24 24" class="h-5 w-5 text-orb-highlight/20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+										<path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+									</svg>
+								</div>
+							{/if}
+						</div>
 
-					<div class="flex flex-col justify-center min-w-0 h-12">
-						<p class="mb-0 font-semibold truncate flex items-center gap-1" style="color: {wowClassColor(member.character?.playable_class?.id)}">
-							{member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}{#if mainName}&nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>{/if}&nbsp;{@html wowRankIcon(member.rank, 16)}
-						</p>
-						<p class="mb-0 text-xs text-orb-highlight/50 truncate flex items-center gap-1">
-							<span class="text-white">{member.character?.level ?? '-'}</span> ·
-							{wowRaceName(member.character?.playable_race?.id)} ·
-							<img src={`/images/wow/icon_class_${member.character?.playable_class?.id}.jpg`} alt="" class="inline h-3.5 w-3.5 rounded-sm align-middle" />
-							{wowSpecName(member.details?.active_spec?.name ?? null) ?? wowClassName(member.character?.playable_class?.id)}
-						</p>
-					</div>
+						<div class="flex flex-col justify-center min-w-0 h-12">
+							<p class="mb-0 font-semibold truncate flex items-center gap-1" style="color: {wowClassColor(member.character?.playable_class?.id)}">
+								{member.character?.name || 'Unknown'}{#if (member.character?.realm?.slug || realm)?.toLowerCase() !== 'stormreaver'}-{formatRealmSlug(member.character?.realm?.slug || realm)}{/if}{#if mainName}&nbsp;<span class="font-normal text-orb-highlight/30">({mainName})</span>{/if}&nbsp;{@html wowRankIcon(member.rank, 16)}
+							</p>
+							<p class="mb-0 text-xs text-orb-highlight/50 truncate flex items-center gap-1">
+								<span class="text-white">{member.character?.level ?? '-'}</span> ·
+								{wowRaceName(member.character?.playable_race?.id)} ·
+								<img src={`/images/wow/icon_class_${member.character?.playable_class?.id}.jpg`} alt="" class="inline h-3.5 w-3.5 rounded-sm align-middle" />
+								{wowSpecName(member.details?.active_spec?.name ?? null) ?? wowClassName(member.character?.playable_class?.id)}
+							</p>
+						</div>
 
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.details?.equipped_item_level ?? '—'}</div>
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.achievementPoints != null ? member.achievementPoints.toLocaleString() : '—'}</div>
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.mounts ?? '—'}</div>
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.toys ?? '—'}</div>
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.pets ?? '—'}</div>
-					<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.decor ?? '—'}</div>
-
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.details?.equipped_item_level ?? '—'}</div>
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.achievementPoints != null ? member.achievementPoints.toLocaleString() : '—'}</div>
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.mounts ?? '—'}</div>
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.toys ?? '—'}</div>
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.pets ?? '—'}</div>
+						<div class="flex items-center h-12 text-orb-highlight/75 text-xs">{member.decor ?? '—'}</div>
 					<div class="flex items-center h-12">
 						{#if alts.length > 0}
 							<button
