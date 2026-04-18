@@ -461,7 +461,7 @@
 		padding: 0;
 	}
 	.wf-panel-main {
-		/* min-height: calc(36px + 96px * 8 + 36px); */
+		min-height: calc(121px * 5 + 30px);
 	}
 	.wf-panel::before {
 		content: '';
