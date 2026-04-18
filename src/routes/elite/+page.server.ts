@@ -45,7 +45,7 @@ export interface FactionData {
 // Lazy-load the cache handler so an import/DB failure doesn't kill the whole page
 async function tryGetCache<T>(service: string, keyParts: string[], maxAge: number): Promise<T | null> {
 	try {
-		const { getCachedJson } = await import('$lib/cacheHandler');
+		const { getCachedJson } = await import('$lib/server/cacheHandler');
 		return await getCachedJson<T>(service, keyParts, maxAge);
 	} catch {
 		return null;
@@ -54,7 +54,7 @@ async function tryGetCache<T>(service: string, keyParts: string[], maxAge: numbe
 
 async function trySetCache<T>(service: string, keyParts: string[], data: T, ttl: number): Promise<void> {
 	try {
-		const { setCachedJson } = await import('$lib/cacheHandler');
+		const { setCachedJson } = await import('$lib/server/cacheHandler');
 		await setCachedJson(service, keyParts, data, ttl);
 	} catch {
 		// cache write failure is non-fatal

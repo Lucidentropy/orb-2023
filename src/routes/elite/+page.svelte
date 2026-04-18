@@ -28,8 +28,6 @@
 	let activePanel: 'galnet' | 'homebase' | 'links' = $state('galnet');
 	let panelWrap: HTMLDivElement;
 
-	// Tab switching — GSAP animates the wrapper div, not the child component,
-	// so panelWrap stays mounted and the bind is stable throughout.
 	function switchPanel(next: 'galnet' | 'homebase' | 'links') {
 		if (next === activePanel) return;
 		gsap.timeline()
