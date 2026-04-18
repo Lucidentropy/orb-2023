@@ -42,31 +42,24 @@
 
     function wowheadAttrs(item: any): { href: string; dataWowhead: string } {
         const id = item?.item?.id;
-
         const qualityMap: Record<string, number> = {
             POOR: 0, COMMON: 1, UNCOMMON: 2, RARE: 3,
             EPIC: 4, LEGENDARY: 5, ARTIFACT: 6, HEIRLOOM: 7,
         };
-
         const params: Record<string, string | number> = { item: id };
-
         const quality = item?.quality?.type;
         if (quality && qualityMap[quality] !== undefined) params.quality = qualityMap[quality];
-
         const ilvl = item?.level?.value;
         if (ilvl) params.ilvl = ilvl;
-
         const bonusList: number[] = (item?.bonus_list ?? []).filter(Boolean);
         if (bonusList.length) params.bonus = bonusList.join(':');
-
         const enchant = item?.enchantments?.find((e: any) => e.enchantment_slot?.type === 'PERMANENT');
         if (enchant?.enchantment_id) params.ench = enchant.enchantment_id;
-
         const gemIds: number[] = (item?.sockets ?? []).map((s: any) => s.item?.id).filter(Boolean);
         if (gemIds.length) params.gems = gemIds.join(':');
-
+        const pcs = Object.values(slotMap).map((s: any) => s?.item?.id).filter(Boolean);
+        if (pcs.length) params.pcs = pcs.join(':');
         const qs = Object.entries(params).map(([k, v]) => `${k}=${v}`).join('&');
-
         return {
             href: `https://www.wowhead.com/item=${id}`,
             dataWowhead: qs,
