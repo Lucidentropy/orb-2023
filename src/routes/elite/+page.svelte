@@ -6,6 +6,9 @@
 	import LiveFeed from './LiveFeed.svelte';
 	import OrbHomeSystem from './OrbHomeSystem.svelte';
 	import HelpfulLinks from './HelpfulLinks.svelte';
+	import type { PageData } from './$types';
+
+	const { data }: { data: PageData } = $props();
 
 	gsap.registerPlugin(CSSPlugin);
 
@@ -22,17 +25,25 @@
 	let container: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
 
-	let activePanel: 'galnet' | 'homebase' | 'links' = 'galnet';
-	let panelEl: HTMLDivElement;
+	let activePanel: 'galnet' | 'homebase' | 'links' = $state('galnet');
+	let panelWrap: HTMLDivElement;
 
+	// Tab switching — GSAP animates the wrapper div, not the child component,
+	// so panelWrap stays mounted and the bind is stable throughout.
 	function switchPanel(next: 'galnet' | 'homebase' | 'links') {
 		if (next === activePanel) return;
 		gsap.timeline()
-			.to(panelEl, { opacity: 0, scaleY: 0.97, duration: 0.15, ease: 'power2.in' })
+			.to(panelWrap, { opacity: 0, scaleY: 0.97, duration: 0.15, ease: 'power2.in' })
 			.call(() => { activePanel = next; })
-			.set(panelEl, { opacity: 0, scaleY: 1.02 })
-			.to(panelEl, { opacity: 1, scaleY: 1, duration: 0.2, ease: 'power2.out' });
+			.set(panelWrap, { opacity: 0, scaleY: 1.02 })
+			.to(panelWrap, { opacity: 1, scaleY: 1, duration: 0.2, ease: 'power2.out' });
 	}
+
+	const tabs: { id: 'galnet' | 'homebase' | 'links'; label: string }[] = [
+		{ id: 'galnet',   label: 'GALNET LIVE FEED' },
+		{ id: 'homebase', label: 'ORB HOME SYSTEM'  },
+		{ id: 'links',    label: 'HELPFUL LINKS'    },
+	];
 
 	function setupGrid(cols: number, rows: number) {
 		tris = [];
@@ -167,26 +178,30 @@
 
 			<!-- Tab bar -->
 			<div class="flex items-stretch gap-0.5 h-9 flex-shrink-0">
-				{#each [['galnet','GALNET LIVE FEED'],['homebase','ORB HOME SYSTEM'],['links','HELPFUL LINKS']] as [tab, label]}
+				{#each tabs as tab (tab.id)}
 					<button
-						class="ed-tab {activePanel === tab ? 'active' : ''}"
-						onclick={() => switchPanel(tab as 'galnet' | 'homebase' | 'links')}
+						class="ed-tab {activePanel === tab.id ? 'active' : ''}"
+						onclick={() => switchPanel(tab.id)}
 					>
-						<span class="ed-tab-pip {activePanel === tab ? 'active' : ''}"></span>
-						{label}
+						<span class="ed-tab-pip {activePanel === tab.id ? 'active' : ''}"></span>
+						{tab.label}
 					</button>
 				{/each}
 				<div class="flex-1"></div>
 				<span class="self-center pr-4 font-mono text-[0.65rem] tracking-[0.15em] uppercase text-orange-500/40">CLAN ORB // EST. 2000</span>
 			</div>
 
-			<!-- Panel area -->
-			<div bind:this={panelEl} class="flex-1 min-h-0">
+			<!-- Panel wrapper — stays mounted so GSAP bind is stable -->
+			<div bind:this={panelWrap} class="flex-1 min-h-0">
 				{#if activePanel === 'galnet'}
-					<LiveFeed />
+					<LiveFeed articles={data.articles ?? []} />
 				{:else if activePanel === 'homebase'}
-					<OrbHomeSystem />
-				{:else if activePanel === 'links'}
+					<OrbHomeSystem
+						stationData={data.stationData ?? null}
+						factions={data.factions ?? []}
+						factionsUpdated={data.factionsUpdated ?? null}
+					/>
+				{:else}
 					<HelpfulLinks />
 				{/if}
 			</div>
@@ -210,7 +225,6 @@
 		--ed-border-faint:  rgba(255, 140, 0, 0.2);
 	}
 
-	/* ── Shared panel shell — used by child components via :global ── */
 	:global(.ed-panel) {
 		background: rgba(20, 10, 0, 0.85) !important;
 		border: 1px solid rgba(255, 140, 0, 0.5) !important;
@@ -218,7 +232,6 @@
 		box-shadow: inset 0 0 20px rgba(255, 100, 0, 0.05), 0 0 8px rgba(255, 100, 0, 0.1);
 		position: relative;
 	}
-
 	:global(.ed-panel::before) {
 		content: '';
 		position: absolute;
@@ -229,7 +242,6 @@
 		pointer-events: none;
 	}
 
-	/* ── Scrollbars ── */
 	:global(.ed-scroll) {
 		scrollbar-width: thin;
 		scrollbar-color: rgba(255, 140, 0, 0.3) transparent;
@@ -238,7 +250,6 @@
 	:global(.ed-scroll::-webkit-scrollbar-track) { background: transparent; }
 	:global(.ed-scroll::-webkit-scrollbar-thumb) { background: rgba(255, 140, 0, 0.3); border-radius: 0; }
 
-	/* ── Scanline ── */
 	:global(.ed-scanline) {
 		background: repeating-linear-gradient(
 			0deg, transparent, transparent 2px,
@@ -246,7 +257,6 @@
 		);
 	}
 
-	/* ── Link cards ── */
 	:global(.ed-link-card) {
 		color: inherit !important;
 		text-decoration: none !important;
@@ -256,7 +266,6 @@
 		text-decoration: none !important;
 	}
 
-	/* ── Facility badges ── */
 	:global(.ed-facility-badge) {
 		font-family: monospace;
 		font-size: 0.62rem;
@@ -275,7 +284,6 @@
 		color: rgba(255, 140, 0, 0.25);
 	}
 
-	/* ── BGS state badge ── */
 	:global(.ed-state-badge) {
 		font-family: monospace;
 		font-size: 0.55rem;
@@ -287,7 +295,6 @@
 		border-radius: 2px;
 	}
 
-	/* ── Tab buttons ── */
 	.ed-tab {
 		display: inline-flex !important;
 		align-items: center;
@@ -322,7 +329,6 @@
 		box-shadow: inset 0 -2px 0 #ff8c00 !important;
 	}
 
-	/* ── Tab pip ── */
 	.ed-tab-pip {
 		width: 5px;
 		height: 5px;

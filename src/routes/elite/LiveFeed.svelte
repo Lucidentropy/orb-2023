@@ -1,19 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import type { GalNetArticle } from './+page.server';
 
-	interface GalNetArticle {
-		id: string;
-		attributes: {
-			title: string;
-			body: { value: string };
-			published_at: string;
-			field_galnet_image: string | null;
-		};
-	}
+	const { articles = [] }: { articles: GalNetArticle[] } = $props();
 
-	let articles: GalNetArticle[] = $state([]);
-	let activeArticle: GalNetArticle | null = $state(null);
-	let galnetError = $state(false);
+	let activeArticle: GalNetArticle | null = $state(articles[0] ?? null);
+
+	$effect(() => {
+		if (!activeArticle && articles.length > 0) activeArticle = articles[0];
+	});
 
 	const activeIndex = $derived(
 		activeArticle ? articles.findIndex(a => a.id === activeArticle!.id) : -1
@@ -21,13 +15,8 @@
 	const hasPrev = $derived(activeIndex > 0);
 	const hasNext = $derived(activeIndex >= 0 && activeIndex < articles.length - 1);
 
-	function prev() {
-		if (hasPrev) activeArticle = articles[activeIndex - 1];
-	}
-
-	function next() {
-		if (hasNext) activeArticle = articles[activeIndex + 1];
-	}
+	function prev() { if (hasPrev) activeArticle = articles[activeIndex - 1]; }
+	function next() { if (hasNext) activeArticle = articles[activeIndex + 1]; }
 
 	function stripHtml(html: string) {
 		return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -38,19 +27,6 @@
 			day: '2-digit', month: 'short', year: 'numeric'
 		});
 	}
-
-	onMount(async () => {
-		try {
-			const res = await fetch(
-				'https://cms.zaonce.net/en-GB/jsonapi/node/galnet_article?sort=-published_at&page[offset]=0&page[limit]=20'
-			);
-			const json = await res.json();
-			articles = json.data ?? [];
-			if (articles.length) activeArticle = articles[0];
-		} catch {
-			galnetError = true;
-		}
-	});
 </script>
 
 <div class="h-full grid grid-cols-[1fr_2fr] gap-3">
@@ -60,10 +36,8 @@
 		<div class="px-3 pt-2 pb-1 font-mono text-[0.65rem] tracking-[0.2em] uppercase text-orange-500/50 border-b border-orange-500/20 flex-shrink-0">
 			RECENT DISPATCHES
 		</div>
-		{#if galnetError}
+		{#if articles.length === 0}
 			<div class="px-3 py-2 text-sm text-orange-500/60 uppercase">Signal lost — no data</div>
-		{:else if articles.length === 0}
-			<div class="px-3 py-2 text-sm text-orange-500/50 uppercase animate-pulse">Receiving…</div>
 		{:else}
 			<div class="flex flex-col gap-px overflow-y-auto flex-1 ed-scroll">
 				{#each articles as article (article.id)}
@@ -125,7 +99,7 @@
 			</div>
 		{:else}
 			<div class="flex-1 flex items-center justify-center text-orange-500/30 uppercase text-sm tracking-widest">
-				Select a dispatch
+				No dispatches received
 			</div>
 		{/if}
 	</div>
@@ -190,7 +164,6 @@
 		color: #ffa040 !important;
 	}
 
-	/* Prev / Next nav buttons */
 	.nav-btn {
 		display: inline-flex !important;
 		align-items: center;
