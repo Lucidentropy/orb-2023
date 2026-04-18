@@ -26,11 +26,10 @@ export const GET: RequestHandler = async ({ url }) => {
         const ns = profileNs();
         const staticNs = `namespace=static-${region}&locale=${locale}`;
 
-        const [profile, media, equipment, achievements, mounts, pets, toys, decor] = await Promise.all([
+        const [profile, media, equipment, mounts, pets, toys, decor] = await Promise.all([
             cachedFetch(['char', region, realm, name, 'profile'], TTL.character, `${base}?${ns}`, accessToken).catch((e: Error) => ({ _error: e.message })),
             cachedFetch(['char', region, realm, name, 'media'], TTL.media, `${base}/character-media?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'equipment'], TTL.character, `${base}/equipment?${ns}`, accessToken).catch(() => null),
-            cachedFetch(['char', region, realm, name, 'achievements'], TTL.achievements, `${base}/achievements?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'mounts'], TTL.collections, `${base}/collections/mounts?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'pets'], TTL.collections, `${base}/collections/pets?${ns}`, accessToken).catch(() => null),
             cachedFetch(['char', region, realm, name, 'toys'], TTL.collections, `${base}/collections/toys?${ns}`, accessToken).catch(() => null),
@@ -72,9 +71,6 @@ export const GET: RequestHandler = async ({ url }) => {
         return json({
             profile,
             media,
-            achievements: {
-                total: achievements?.total_quantity ?? achievements?.achievements?.length ?? 0
-            },
             equipment: {
                 slots: enrichedSlots,
                 slotMap,

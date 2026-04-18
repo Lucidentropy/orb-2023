@@ -379,29 +379,12 @@
 								/>
 
 							{:else if panelView === 'neighborhood'}
-								{#if neighborhoodLoading}
-									<div class="rounded border border-border-faint/60 bg-bg-deep/20 p-6">
-										<p class="mb-0 text-sm uppercase tracking-wider text-orb-highlight/65">
-											Loading neighborhood data...
-										</p>
-									</div>
-
-								{:else if neighborhoodError}
-									<div class="alert-danger">
-										<span class="font-mono">⛔</span>
-										<div>
-											<p class="font-semibold">Failed to load neighborhood data.</p>
-											<p class="opacity-80">{neighborhoodError}</p>
-										</div>
-									</div>
-
-								{:else}
-									<Neighborhood
-										plots={neighborhoodData?.plots || []}
-										mapSrc={neighborhoodData?.meta?.mapSrc || '/images/wow/neighborhood-map.jpg'}
-										onBack={() => openPanel('roster')}
-									/>
-								{/if}
+								<Neighborhood
+									plots={neighborhoodData?.plots || []}
+									loading={neighborhoodLoading}
+									error={neighborhoodError}
+									onBack={() => openPanel('roster')}
+								/>
 							{:else if panelView === 'guildstats'}
 								<GuildStats
 									members={wowData?.roster?.members || []}
