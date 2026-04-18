@@ -5,7 +5,7 @@
 	import LiveFeed from './LiveFeed.svelte';
 	import OrbHomeSystem from './OrbHomeSystem.svelte';
 	import HelpfulLinks from './HelpfulLinks.svelte';
-	import EDIntro from './EDIntro.svelte';
+	import EDIntro from './EdIntro.svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
