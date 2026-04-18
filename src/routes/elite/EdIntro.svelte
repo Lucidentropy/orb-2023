@@ -3,20 +3,18 @@
 	import { gsap } from 'gsap';
 
 	const TRI = 10;
-	const GAP = 1;
+	const GAP = 4;
 	const STEP_X = TRI + GAP;
 	const STEP_Y = TRI * 0.866 + GAP;
 
-	// Wave timings (seconds)
-	const WAVE_SPREAD  = 1.2;  // time for wavefront to reach edge
-	const WAVE_HOLD    = 0.1;  // pause at full coverage before vanish
-	const WAVE_VANISH  = 1.0;  // time for erase wave to reach edge
+	const WAVE_SPREAD = 1.2;
+	const WAVE_HOLD   = 0.1;
+	const WAVE_VANISH = 1.0;
 
-	// Text / loader timings, relative to when vanish wave completes
-	const TEXT_IN      = 0.1;
-	const LOADER_DUR   = 1.2;
-	const TEXT_OUT     = 1.7;
-	const CONTENT_IN   = 2.4;
+	const TEXT_IN    = 0.1;
+	const LOADER_DUR = 1.2;
+	const TEXT_OUT   = 1.7;
+	const CONTENT_IN = 2.4;
 
 	interface Tri { x: number; y: number; up: boolean; dist: number; }
 
@@ -44,21 +42,20 @@
 	function drawTri(ctx: CanvasRenderingContext2D, tri: Tri, scale: number, alpha: number) {
 		if (alpha <= 0 || scale <= 0) return;
 		const h = TRI * 0.866;
-		const r = TRI * 0.28 * scale; // corner radius, scales with tri
+		const r = TRI * 0.32 * scale;
 
-		// Compute the three raw vertices (already scaled around centre)
 		let pts: [number, number][];
 		if (tri.up) {
 			pts = [
-				[tri.x,                    tri.y - h * 2/3 * scale],
-				[tri.x - TRI/2 * scale,    tri.y + h * 1/3 * scale],
-				[tri.x + TRI/2 * scale,    tri.y + h * 1/3 * scale],
+				[tri.x,                tri.y - h * 2/3 * scale],
+				[tri.x - TRI/2 * scale, tri.y + h * 1/3 * scale],
+				[tri.x + TRI/2 * scale, tri.y + h * 1/3 * scale],
 			];
 		} else {
 			pts = [
-				[tri.x,                    tri.y + h * 2/3 * scale],
-				[tri.x - TRI/2 * scale,    tri.y - h * 1/3 * scale],
-				[tri.x + TRI/2 * scale,    tri.y - h * 1/3 * scale],
+				[tri.x,                tri.y + h * 2/3 * scale],
+				[tri.x - TRI/2 * scale, tri.y - h * 1/3 * scale],
+				[tri.x + TRI/2 * scale, tri.y - h * 1/3 * scale],
 			];
 		}
 
@@ -72,18 +69,14 @@
 			const [bx, by] = pts[(i + 1) % 3];
 			const [cx2, cy2] = pts[(i + 2) % 3];
 
-			// Vector from vertex to each neighbour, then pull back by r
-			const ab = Math.hypot(bx - ax, by - ay);
-			const ac = Math.hypot(cx2 - ax, cy2 - ay);
-			const t1x = ax + (bx - ax) / ab * r;
-			const t1y = ay + (by - ay) / ab * r;
-			const t2x = ax + (cx2 - ax) / ac * r;
-			const t2y = ay + (cy2 - ay) / ac * r;
+			if (i === 0) {
+				const ca = Math.hypot(ax - cx2, ay - cy2);
+				const tx = ax + (cx2 - ax) / ca * r;
+				const ty = ay + (cy2 - ay) / ca * r;
+				ctx.moveTo(tx, ty);
+			}
 
-			if (i === 0) ctx.moveTo(t1x, t1y);
-			else ctx.lineTo(t1x, t1y);
-
-			ctx.quadraticCurveTo(ax, ay, t2x, t2y);
+			ctx.arcTo(ax, ay, bx, by, r);
 		}
 
 		ctx.closePath();
@@ -96,9 +89,9 @@
 		canvas.width  = w;
 		canvas.height = h;
 
-		const tris  = buildGrid(w, h);
-		const maxR  = Math.hypot(w / 2, h / 2);
-		const ctx   = canvas.getContext('2d')!;
+		const tris = buildGrid(w, h);
+		const maxR = Math.hypot(w / 2, h / 2);
+		const ctx  = canvas.getContext('2d')!;
 
 		let rafId = 0;
 		let startTime = 0;
@@ -109,32 +102,22 @@
 			if (!startTime) startTime = now;
 			const t = (now - startTime) / 1000;
 
-			// Spread wave: wavefront moves out from centre
 			const spreadFront = Math.min(t / WAVE_SPREAD, 1) * maxR;
-			// Vanish wave: starts after spread + hold, erases inward-to-out
-			const vanishT = t - WAVE_SPREAD - WAVE_HOLD;
+			const vanishT     = t - WAVE_SPREAD - WAVE_HOLD;
 			const vanishFront = vanishT > 0 ? Math.min(vanishT / WAVE_VANISH, 1) * maxR : -1;
 
 			ctx.clearRect(0, 0, w, h);
 
 			for (const tri of tris) {
 				const d = tri.dist;
-
-				// Has the spread wave reached this tri?
 				if (d > spreadFront) continue;
-
-				// Has the vanish wave passed this tri? (vanish sweeps outward same as spread)
 				if (vanishFront >= 0 && d <= vanishFront) continue;
 
-				// Spread leading edge: tri scales in as wave passes
 				const spreadProgress = Math.min((spreadFront - d) / (maxR * 0.08), 1);
-				// Vanish leading edge: tri scales out as erase wave approaches
 				let vanishProgress = 1;
 				if (vanishFront >= 0) {
-					const gap = vanishFront - d;
-					// positive gap means wave has passed — already hidden above
-					// negative gap means wave is approaching; shrink as it nears
 					const approach = maxR * 0.06;
+					const gap = vanishFront - d;
 					vanishProgress = gap < 0 ? Math.max(0, 1 - (-gap) / approach) : 1;
 				}
 

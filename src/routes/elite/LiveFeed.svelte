@@ -66,11 +66,11 @@
 	<div class="ed-panel flex flex-col overflow-hidden">
 		{#if activeArticle}
 			{#if activeArticle.attributes.field_galnet_image}
-				<div class="relative h-[120px] overflow-hidden shrink-0">
+				<div class="relative h-[200px] overflow-hidden shrink-0">
 					<img
 						src="https://hosting.zaonce.net/elite-dangerous/galnet/{activeArticle.attributes.field_galnet_image}.png"
 						alt={activeArticle.attributes.title}
-						class="w-full h-full object-cover object-top saturate-[0.7] brightness-[0.8] sepia-[0.3]"
+						class="w-full h-full object-cover object-bottom saturate-[0.7] brightness-[0.8] sepia-[0.3]"
 					/>
 					<div class="ed-scanline absolute inset-0 pointer-events-none"></div>
 				</div>
