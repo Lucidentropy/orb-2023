@@ -7,7 +7,19 @@
 		Invasion,
 		Sortie,
 		Nightwave,
+		NightwaveChallenge
 	} from '$lib/types/warframe';
+
+	const wfRoster = [
+		{ name: 'orb.lux',          rank: 'Warlord',  mr: 36, displayName: 'Legendary Captain orb.lux', frames: ['Nidus'] },
+		{ name: 'LucidEntropy',    	rank: 'Leader',  mr: 30, frames: ['Octavia', 'Ivara', 'Equinox'] },
+		{ name: 'Flintok',          rank: 'Veteran',  mr: 23, },
+		{ name: 'Lefty_the_Dingo',  rank: 'Officer',  mr: 18, },
+		{ name: '-Cosmic-Rift-',    rank: 'Veteran',  mr: 10, },
+		{ name: 'GracefulOnion',    rank: 'Soldier',  mr: 10, },
+		{ name: 'Murrdyn',          rank: 'General',  mr: 7, },
+		{ name: 'Doubledown11',     rank: 'Initiate', mr: 3,  },
+	];
 
 	const TIER_ORDER: Record<string, number> = { Lith: 1, Meso: 2, Neo: 3, Axi: 4, Requiem: 5, Omnia: 6 };
 	const TIER_DURATION_MS: Record<string, number> = { Lith: 10, Meso: 15, Neo: 20, Axi: 25, Requiem: 30, Omnia: 20 };
@@ -22,12 +34,12 @@
 	};
 
 	const TIER_IMG: Record<string, string> = {
-		Lith:    '/images/warframe/IconProjectionT1(xWhite).png',
-		Meso:    '/images/warframe/IconProjectionT2(xWhite).png',
-		Neo:     '/images/warframe/IconProjectionT3(xWhite).png',
-		Axi:     '/images/warframe/IconProjectionT4(xWhite).png',
-		Requiem: '/images/warframe/IconProjectionT4(xWhite).png',
-		Omnia:   '/images/warframe/IconProjectionT4(xWhite).png',
+		Lith:    '/images/warframe/fissures/1.svg',
+		Meso:    '/images/warframe/fissures/2.svg',
+		Neo:     '/images/warframe/fissures/3.svg',
+		Axi:     '/images/warframe/fissures/4.svg',
+		Requiem: '/images/warframe/fissures/5.svg',
+		Omnia:   '/images/warframe/fissures/4.svg',
 	};
 
 	const TIER_HUE: Record<string, string> = {
@@ -117,6 +129,10 @@
 	const challengeOrder = (c: NightwaveChallenge) => c.isDaily ? 0 : c.isElite ? 2 : 1;
 </script>
 
+<svelte:head>
+	<title>Orb - Warframe</title>
+</svelte:head>
+
 <Container>
 	<h1>Warframe
 		<p>Clan Orb · Shadow Tier · Est. 2004</p>
@@ -147,39 +163,54 @@
 			{:else}
 				<div class="flex-1">
 
-				<!-- FISSURES -->
-				{#if activeTab === 'fissures'}
-					<div class="flex items-center gap-2 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
-						<span>VOID FISSURES</span>
-						<span class="wf-live-dot"></span>
-					</div>
-					<div class="wf-scroll-list" style="--row-height:121px;--max-rows:5">
-						{#each fissures as f (f.id)}
-							{@const cfg = TIER_CONFIG[f.tier] ?? TIER_CONFIG['Omnia']}
-							<div class="wf-row" style="--tc:{cfg.color};--tg:{cfg.glow}">
-								<div class="relative shrink-0 flex items-center justify-center w-14 h-14" style="filter:drop-shadow(0 0 10px {cfg.glow})">
-									<img src={TIER_IMG[f.tier] ?? TIER_IMG['Lith']} alt={f.tier} width="52" height="52"
-										style="object-fit:contain;filter:sepia(1) saturate(5) hue-rotate({TIER_HUE[f.tier] ?? '10deg'}) brightness(1.2);opacity:0.9" />
-								</div>
-								<div class="min-w-0 flex-1">
-									<div class="font-mono text-sm font-bold tracking-wide" style="color:{FACTION_COLOR[f.enemy] ?? '#ccc'}">
-										{f.missionType.toUpperCase()} — {f.enemy.toUpperCase()}
-										{#if f.isHard}<span class="ml-1.5 inline-block border border-[rgba(217,138,138,0.6)] px-1.5 align-middle font-mono text-[0.6rem] tracking-widest text-[#d98a8a]">SP</span>{/if}
-									</div>
-									<div class="mt-0.5 text-base font-semibold text-white">{f.tier} Fissure</div>
-									<div class="mt-0.5 text-sm text-orb-highlight/60">{f.node}</div>
-									<div class="mt-2 flex items-center gap-2">
-										<div class="h-[2px] flex-1 overflow-hidden bg-orb-highlight/10">
-											<div class="h-full" style={barStyle(f.expiry, f.tier, cfg.color)}></div>
-										</div>
-										<img src="/images/warframe/IconTimer(xWhite).png" alt="" width="11" height="11" class="shrink-0 opacity-40" />
-										<span class="font-mono text-sm text-white/70">{fmt(f.expiry)}</span>
-									</div>
-								</div>
-								<div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none font-mono text-[2rem] font-black opacity-[0.06] tracking-tight" style="color:{cfg.color}">{f.tier}</div>
+			<!-- FISSURES -->
+			{#if activeTab === 'fissures'}
+				<div class="flex items-center gap-2 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
+					<span>VOID FISSURES</span>
+					<span class="wf-live-dot"></span>
+				</div>
+				<div class="wf-scroll-list" style="--row-height:121px;--max-rows:5">
+					{#each fissures as f (f.id)}
+						{@const cfg = TIER_CONFIG[f.tier] ?? TIER_CONFIG['Omnia']}
+						{@const factionIcon = ({
+							Grineer:   { src: '/images/warframe/IconGrineerOn(xWhite).png',     style: 'filter:hue-rotate(320deg)' },
+							Corpus:    { src: '/images/warframe/CorpusGlyph.png',               style: ''  },
+							Infested:  { src: '/images/warframe/Infested.svg',        style: ''   },
+							Corrupted: { src: '/images/warframe/64px-InvasionIcon(xBlack).png', style: ''        },
+							'The Murmur':    { src: '/images/warframe/MurmurIcon(xWhite).png', style: ''        },
+							Orokin: 	{ src: '/images/warframe/IconOrokinOn(xWhite).png', style:''},
+							Crossfire: { src: '/images/warframe/64px-InvasionIcon(xBlack).png', style:'filter:invert(1)'}
+						} as Record<string, {src:string;style:string}>)[f.enemy]}
+						<div class="wf-row" style="--tc:{cfg.color};--tg:{cfg.glow}">
+							<div class="relative shrink-0 flex items-center justify-center w-18 h-18" style="filter:drop-shadow(0 0 10px {cfg.glow})">
+								<img src={TIER_IMG[f.tier] ?? TIER_IMG['Lith']} alt={f.tier} width="80" height="80"
+									style="object-fit:contain;filter:invert(1) saturate(5) hue-rotate({TIER_HUE[f.tier] ?? '10deg'}) brightness(1.2);opacity:1;" />
 							</div>
-						{/each}
-					</div>
+							<div class="min-w-0 flex-1">
+								<div class="font-mono text-sm font-bold tracking-wide" style="color:{FACTION_COLOR[f.enemy] ?? '#ccc'}">
+									{f.missionType.toUpperCase()} — {f.enemy.toUpperCase()}
+									{#if f.isHard}<span class="ml-1.5 inline-block border border-[rgba(217,138,138,0.6)] px-1.5 align-middle font-mono text-[0.6rem] tracking-widest text-[#d98a8a]">SP</span>{/if}
+								</div>
+								<div class="mt-0.5 text-base font-semibold text-white">{f.tier} Fissure</div>
+								<div class="mt-0.5 text-sm text-orb-highlight/60">{f.node}</div>
+								<div class="mt-2 flex items-center gap-2">
+									<div class="h-[2px] flex-1 overflow-hidden bg-orb-highlight/10">
+										<div class="h-full" style={barStyle(f.expiry, f.tier, cfg.color)}></div>
+									</div>
+									<img src="/images/warframe/IconTimer(xWhite).png" alt="" width="11" height="11" class="shrink-0 opacity-40" />
+									<span class="font-mono text-sm text-white/70">{fmt(f.expiry)}</span>
+								</div>
+							</div>
+							{#if factionIcon}
+								<div class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 select-none opacity-[0.5]">
+									<img src={factionIcon.src} alt={f.enemy} width="80" height="80" style="{factionIcon.style};object-fit:contain" />
+								</div>
+							{:else}
+								<div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none font-mono text-[2rem] font-black opacity-[0.06] tracking-tight" style="color:{cfg.color}">{f.tier}</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
 
 				<!-- ALERTS -->
 				{:else if activeTab === 'alerts'}
@@ -268,7 +299,7 @@
 					{:else}
 						<div class="flex items-center justify-between gap-4 border-b border-orb-highlight/10 bg-orb-highlight/[0.02] px-5 py-3">
 							<div>
-								<div class="font-mono text-sm font-bold tracking-widest text-white">{sortie.boss}</div>
+								<div class="font-mono text-lg font-bold tracking-widest text-white">{sortie.boss}</div>
 								<div class="mt-0.5 font-mono text-sm tracking-widest" style="color:{FACTION_COLOR[sortie.faction] ?? '#aaa'}">{sortie.faction.toUpperCase()}</div>
 							</div>
 							<div class="flex items-center gap-2 text-right">
@@ -286,8 +317,8 @@
 								</div>
 								<div class="min-w-0 flex-1">
 									<div class="font-mono text-sm font-bold tracking-wide text-[#d4b45a]">{v.missionType.toUpperCase()}</div>
-									<div class="mt-0.5 text-base font-semibold text-danger-muted">{v.modifier}</div>
 									<div class="mt-0.5 text-sm text-orb-highlight/60">{v.node}</div>
+									<div class="mt-0.5 text-base font-semibold text-danger-muted">{v.modifier}</div>
 									{#if v.modifierDescription}
 										<div class="mt-2 rounded-sm border border-orb-highlight/[0.1] bg-black/30 px-3 py-2 font-mono text-xs leading-relaxed text-orb-highlight/60">
 											{v.modifierDescription}
@@ -386,68 +417,74 @@
 
 	<!-- Right column -->
 	<div class="flex flex-col gap-4">
-
 		<section class="wf-panel m-0">
-			<div class="flex items-center gap-2 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
-				<img src="/images/warframe/IconQuest(xWhite).png" alt="" width="13" height="13" class="opacity-55" />
-				<span>TENNO RESOURCES</span>
+			<div class="flex items-center gap-2 mb-1 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
+				<img src="/images/warframe/IconArbitrationDrone(xWhite).png" alt="" width="13" height="13" class="opacity-55" />
+				<span>CLAN ROSTER</span>
+				<span class="ml-auto text-orb-highlight/30">{wfRoster.length} TENNO</span>
 			</div>
-			<ul class="m-0 list-none pl-0">
-				{#each [
-					{ label: 'Warframe Wiki',   url: 'https://wiki.warframe.com',       note: 'Drops, missions, lore'   },
-					{ label: 'Overframe',       url: 'https://overframe.gg',            note: 'Build theorycrafting'    },
-					{ label: 'Warframe Hub',    url: 'https://hub.warframestat.us',     note: 'Live worldstate'         },
-					{ label: 'Semlar',          url: 'https://semlar.com/relicrewards', note: 'Relic drop tables'       },
-					{ label: 'Warframe.market', url: 'https://warframe.market',         note: 'Platinum trading'        },
-					{ label: 'Tenno.tools',     url: 'https://tenno.tools',             note: 'Profile & riven stats'   },
-				] as link (link.url)}
-					<li class="border-b border-orb-highlight/[0.07] last:border-none">
-						<a href={link.url} target="_blank" rel="noopener noreferrer"
-							class="flex items-baseline justify-between gap-2 px-4 py-2.5 no-underline transition-colors hover:bg-orb-highlight/5 hover:text-white">
-							<span class="text-sm font-semibold text-orb-highlight/80">{link.label}</span>
-							<span class="text-right font-mono text-xs text-orb-highlight/40">{link.note}</span>
-						</a>
+			<ul class="m-0 list-none p-0">
+				{#each wfRoster as member (member.name)}
+					<li class="flex items-center gap-3 border-b border-orb-highlight/[0.06] last:border-none hover:bg-orb-highlight/[0.02] transition-colors">
+						<div class="relative shrink-0 w-20 h-20 bg-black/40 flex items-center justify-center">
+							<img src="/images/warframe/IconRank{member.mr}.png" alt="Rank {member.mr}" title="Rank {member.mr}"
+								width="80" height="80" class="object-contain" />
+							{#if member.mr > 30}
+								{@const masterlevel = member.mr - 30}
+								<span class="absolute bottom-0.5 right-1 text-[.9rem] bg-black/80 p-1 font-bold text-white/70 leading-none whitespace-nowrap">
+									<img src="/images/warframe/LegendaryIcon.png" alt="Legendary" width="12" height="12" class="inline m-0 align-top"/>
+									{masterlevel}
+								</span>
+							{:else}
+								<span class="absolute bottom-0.5 right-1 font-mono text-[.9rem] bg-black/80 p-1 font-bold text-white/70 leading-none">{member.mr}</span>
+							{/if}
+						</div>
+						<div class="min-w-0 flex-1 py-2.5">
+							{#if member.displayName}
+								<div class="font-mono text-[0.8rem] tracking-wide text-orb-highlight leading-none mb-0.5">{member.displayName.replace(member.name, '').trim()}</div>
+							{/if}
+							<div class="text-sm font-semibold text-white/90 truncate">{member.name}</div>
+							{#if member.frames?.length}
+								<div class="mt-1.5 flex flex-wrap gap-1">
+									{#each member.frames as frame (frame)}
+										<span class="badge badge-neutral text-[0.6rem]">{frame}</span>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<div class="shrink-0 pr-4 font-mono text-sm text-orb-highlight/60">{member.rank}</div>
 					</li>
 				{/each}
 			</ul>
+			<div class="block m-8"></div>
 		</section>
-
-		<section class="wf-panel m-0">
-			<div class="flex items-center gap-2 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
-				<img src="/images/warframe/IconCheckmark(xWhite).png" alt="" width="13" height="13" class="opacity-55" />
-				<span>CLAN DOJO</span>
-			</div>
-			<ul class="m-0 list-none pl-0">
-				{#each [
-					{ label: 'Hema',                done: true  },
-					{ label: 'Ignis Wraith BP',     done: true  },
-					{ label: 'All Clan Pigments',   done: true  },
-					{ label: 'All Weapon Research', done: true  },
-					{ label: 'Dry Dock',            done: false },
-				] as item (item.label)}
-					<li class="flex items-center gap-3 border-b border-orb-highlight/[0.06] px-4 py-2.5 text-sm last:border-none {item.done ? 'text-success/90' : 'text-orb-highlight/30'}">
-						<img
-							src={item.done ? '/images/warframe/IconCheckmark(xWhite).png' : '/images/warframe/IconCheckmarkOutline(xWhite).png'}
-							alt={item.done ? '✓' : '○'} width="14" height="14" class="shrink-0"
-							style="filter:{item.done ? 'sepia(1) saturate(3) hue-rotate(80deg)' : 'none'};opacity:{item.done ? '0.85' : '0.3'}"
-						/>
-						{item.label}
-					</li>
-				{/each}
-			</ul>
-			<div class="space-y-1.5 border-t border-orb-highlight/10 px-4 py-3">
-				{#each [['CLAN', 'Clan Orb'], ['TIER', 'Shadow'], ['INVITE', 'Ask in Discord']] as [k, v] (k)}
-					<div class="flex justify-between text-sm">
-						<span class="font-mono tracking-widest text-orb-highlight/35">{k}</span>
-						<span class="text-white/80">{v}</span>
-					</div>
-				{/each}
-			</div>
-		</section>
-
 	</div> <!-- end right column -->
+</div> <!-- end outer grid -->
 
-	</div> <!-- end outer grid -->
+<section class="wf-panel m-0 space-y-3 mt-4">
+	<div class="flex items-center gap-2 border-b border-orb-highlight/[0.12] bg-orb-highlight/[0.04] px-4 py-2 font-mono text-[0.7rem] tracking-[0.2em] text-orb-highlight/60">
+		<img src="/images/warframe/IconQuest(xWhite).png" alt="" width="13" height="13" class="opacity-55" />
+		<span>TENNO RESOURCES</span>
+	</div>
+	<ul class="m-0 list-none pl-0">
+		{#each [
+			{ label: 'Warframe Wiki',   url: 'https://wiki.warframe.com',       note: 'Drops, missions, lore'   },
+			{ label: 'Overframe',       url: 'https://overframe.gg',            note: 'Build theorycrafting'    },
+			{ label: 'Warframe Hub',    url: 'https://hub.warframestat.us',     note: 'Live worldstate'         },
+			{ label: 'Warframe.market', url: 'https://warframe.market',         note: 'Platinum trading'        },
+			{ label: 'Tenno.tools',     url: 'https://tenno.tools',             note: 'Profile & riven stats'   },
+		] as link (link.url)}
+			<li class="border-b border-orb-highlight/[0.07] last:border-none">
+				<a href={link.url} target="_blank" rel="noopener noreferrer"
+					class="flex items-baseline justify-between gap-2 px-4 py-2.5 no-underline transition-colors hover:bg-orb-highlight/5 hover:text-white">
+					<span class="text-sm font-semibold text-orb-highlight/80">{link.label}</span>
+					<span class="text-right font-mono text-xs text-orb-highlight/40">{link.note}</span>
+				</a>
+			</li>
+		{/each}
+	</ul>
+</section>
+
 </Container>
 
 <style>

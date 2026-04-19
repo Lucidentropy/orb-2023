@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getCachedJson, setCachedJson } from '$lib/server/cacheHandler';
+import { getCachedJson, setCachedJson, getStaleJson } from '$lib/server/cacheHandler';
 
 import type { Fissure,
     Alert,
@@ -15,17 +15,19 @@ const WARFRAME_CACHE_TTL_MS = 60 * 1000;
 export const GET: RequestHandler = async () => {
     try {
         const cached = await getCachedJson<WarframeData>(
-            'warframe',
-            ['worldstate', 'pc', 'v2'],
-            WARFRAME_CACHE_TTL_MS
+            'warframe', ['worldstate', 'pc', 'v2'], WARFRAME_CACHE_TTL_MS
         );
-
         if (cached) return json(cached);
 
-        const fresh = await fetchWarframeData();
-        await setCachedJson('warframe', ['worldstate', 'pc', 'v2'], fresh, WARFRAME_CACHE_TTL_MS);
-
-        return json(fresh);
+        try {
+            const fresh = await fetchWarframeData();
+            await setCachedJson('warframe', ['worldstate', 'pc', 'v2'], fresh, WARFRAME_CACHE_TTL_MS);
+            return json(fresh);
+        } catch (fetchError) {
+            const stale = await getStaleJson<WarframeData>('warframe', ['worldstate', 'pc', 'v2']);
+            if (stale) return json(stale);
+            throw fetchError;
+        }
     } catch (error: unknown) {
         return json(
             { error: true, message: error instanceof Error ? error.message : 'Unknown error' },

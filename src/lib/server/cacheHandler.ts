@@ -1,3 +1,4 @@
+// 
 import postgres from 'postgres';
 import { DATABASE_URL } from '$env/static/private';
 
@@ -31,6 +32,21 @@ export async function getCachedJson<T>(
         if (age > Math.min(maxAgeMs, ttl)) return null;
 
         return data as T;
+    } catch {
+        return null;
+    }
+}
+
+export async function getStaleJson<T>(
+    service: string,
+    keyParts: string[]
+): Promise<T | null> {
+    try {
+        const key = buildKey(service, keyParts);
+        const rows = await sql<{ data: T }[]>`
+            SELECT data FROM wow_cache WHERE key = ${key} LIMIT 1
+        `;
+        return rows.length ? rows[0].data as T : null;
     } catch {
         return null;
     }
