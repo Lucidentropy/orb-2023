@@ -1,284 +1,193 @@
 <script lang="ts">
-	import Container from '$lib/ThemeHandler.svelte';
+	// routes/gta/guides/+page.svelte
+	const bombBayVehicles = ['Streamer216','RO-86 Alkonost','B-11 Strikeforce','Avenger','Volatol','Seabreeze','Mogul','RM-10 Bombushka','Tula','Rogue','LF-22 Starling'];
+	const boostVehicles = ['Scramjet','Oppressor Mk II','Vigilante','Rocket Voltic','Toreador'];
+	const stashCodes = ['73-27-38','24-10-81','01-23-45','72-68-83','77-79-73','28-03-98','02-12-87','28-11-97','44-23-37','05-02-91'];
 
-    const bombBayVehicles = ['Streamer216','RO-86 Alkonost','B-11 Strikeforce','Avenger','Volatol','Seabreeze','Mogul','RM-10 Bombushka','Tula','Rogue','LF-22 Starling'];
-    const boostVehicles = ['Scramjet', 'Oppressor Mk II', 'Vigilante', 'Rocket Voltic', 'Toreador'];
+	const acidLabStings = [
+		{ location: 'LSIA Airport Parking',       dropOff: 'Rancho Warehouse Near the LSCM' },
+		{ location: 'Von Crastenburg Richman',    dropOff: 'Davis near the drain' },
+		{ location: 'Pillbox Hill Ammu-nation',   dropOff: 'Up the street of the Diamond Casino Entrance' },
+	];
 
-    const stashCodes = ['73-27-38','24-10-81','01-23-45','72-68-83','77-79-73','28-03-98','02-12-87','28-11-97','44-23-37','05-02-91'];
+	const businessPayouts = [
+		{ name: 'Nightclub',     investment: 'min: $1,255,000\nmax: $6,165,000\nupg: $5,330,000', passive: 'Max Popularity — $50,000',          repeatable: 'Promote Club — $10,000',                    big: 'Warehouse Sell — $1,400,000' },
+		{ name: 'Agency',        investment: '$6,165,000',                                         passive: 'Complete 200 Contracts — $20,000', repeatable: 'Security Contracts, Payphone Hits — $50k–$70k', big: 'Dr. Dre Contract — $1,000,000' },
+		{ name: 'Arcade',        investment: 'min: $1,235,000\nmax: $4,082,500',                   passive: 'All Arcade Machines — $3,600',     repeatable: 'n/a',                                        big: 'Diamond Casino Heist — $1,000,000' },
+		{ name: 'Car Wash',      investment: '$1,000,000',                                         passive: 'All Businesses — ~$30,000',        repeatable: 'Money Laundering — $35,000',                 big: 'n/a' },
+		{ name: 'Salvage Yard',  investment: 'min: $1,620,000\nmax: $2,690,000',                   passive: 'Max Popularity — $24,000',         repeatable: '2x Salvage Cars/gameday — $60k–$80k',        big: '3x Cars Sold/Week — ~$1,000,000' },
+		{ name: 'Auto Shop',     investment: 'min: $1,620,000\nmax: $2,690,000',                   passive: 'n/a',                              repeatable: '10x Exotic Imports/day — $60k–$80k',         big: 'Mini-Heist, each — $150k–$300k' },
+	];
+
+	const phoneContacts = [
+		{ contact: 'Lester',       feature: 'Remove Bounty, Remove Wanted Level, Request Assassination, Request Vehicle Delivery' },
+		{ contact: 'Ron',          feature: 'Request Airstrike, Request Vehicle Delivery' },
+		{ contact: 'Morse Mutual', feature: 'Claim Insurance, Request Vehicle Delivery' },
+	];
+
+	const garageSpaces = [
+		{ location: 'Apartments/Garages x10', garage: 100, dedicated: 0,  notes: '' },
+		{ location: 'Office',                 garage: 60,  dedicated: 0,  notes: '' },
+		{ location: 'Eclipse Blvd',           garage: 50,  dedicated: 0,  notes: '' },
+		{ location: 'Nightclub',              garage: 30,  dedicated: 5,  notes: 'Terrorbyte, Oppressor Mk2, Custom Speedo, Mule, Pounder' },
+		{ location: 'Arena Workshop',         garage: 27,  dedicated: 4,  notes: '3x Cerberus, RC Bandito' },
+		{ location: 'Agency',                 garage: 20,  dedicated: 0,  notes: '' },
+		{ location: 'Autoshop',               garage: 10,  dedicated: 0,  notes: '' },
+		{ location: 'Casino Penthouse',       garage: 10,  dedicated: 0,  notes: '' },
+		{ location: 'Arcade',                 garage: 10,  dedicated: 0,  notes: '' },
+		{ location: 'MC Clubhouse',           garage: 0,   dedicated: 10, notes: 'Motorcycles' },
+		{ location: 'Facility',               garage: 7,   dedicated: 5,  notes: 'Avenger, TM-02 Khanjali, Chernobog, RCV, Thruster' },
+		{ location: 'Bail Office',            garage: 2,   dedicated: 1,  notes: 'Bail Office Transporter' },
+		{ location: 'Vehicle Warehouse',      garage: 0,   dedicated: 8,  notes: 'Ruiner 2000, Rocket Voltic, Armored Boxville, Wastelander, Phantom Wedge, Ramp Buggy, Technical Aqua, Blazer Aqua' },
+		{ location: 'Kosatka',                garage: 0,   dedicated: 3,  notes: 'Sparrow, Avisa, Toreador' },
+		{ location: 'Freakshop',              garage: 0,   dedicated: 2,  notes: 'Acid Lab, Delivery Bike' },
+		{ location: 'Bunker',                 garage: 0,   dedicated: 2,  notes: 'Mobile Operations Center, Anti-Aircraft Trailer' },
+	];
 </script>
 
-<Container>
-    <a href="/gta" class="hover:underline text-blue-600 absolute top-3 right-5">← Back to GTA</a>
-    <h1>Grand Theft Auto 5: Online Info and References</h1>
+<div class="flex flex-col gap-6">
+	<h3>GTA Online — Info &amp; References</h3>
+	<p class="body-secondary -mt-4">A collection of reference tables and lookup guides. Credit to the GTA community for the data.</p>
 
-    <p>This page is meant to be a collection of information tables and lookup references in one place. I do not take credit for creating these.</p>
+	<section>
+		<div class="section-label">Acid Lab Sting Locations</div>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-border-faint">
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Sting Location</th>
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Actual Drop Off</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each acidLabStings as row (row.location)}
+						<tr class="border-b border-border-faint/40 hover:bg-orb-highlight/5 transition-colors">
+							<td class="p-2 text-white">{row.location}</td>
+							<td class="p-2 text-orb-highlight/70">{row.dropOff}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
 
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">Acid Lab Sting Locations</h3>
+	<section>
+		<div class="section-label">Diamond Casino Helicopter Spawn Route</div>
+		<p class="text-sm text-orb-highlight/60 mb-3">Path in green shows the guaranteed helicopter spawn route.</p>
+		<img src="https://i.redd.it/r2xuudyiheg51.jpg" class="w-full max-w-2xl rounded border border-border-faint" alt="Diamond Casino Helicopter Spawn Route" />
+	</section>
 
-        <div class="w-full max-w-2xl border border-gray-300 rounded text-xs mx-auto">
+	<section>
+		<div class="section-label">Stash House Safe Codes</div>
+		<ul class="grid grid-cols-2 sm:grid-cols-5 gap-2 list-none pl-0">
+			{#each stashCodes as code (code)}
+				<li class="font-mono text-lg text-center text-white tracking-widest py-2 border border-border-faint bg-black/30 rounded">{code}</li>
+			{/each}
+		</ul>
+	</section>
 
-          <div class="grid grid-cols-2 bg-gray-100 border-b border-gray-300">
-            <div class="p-2 font-semibold text-gray-700 border-r border-gray-300">Sting Location</div>
-            <div class="p-2 font-semibold text-gray-700">Actual Drop Off</div>
-          </div>
+	<section>
+		<div class="section-label">Vehicle Groups <span class="font-mono text-[0.65rem] text-warning/60 tracking-widest uppercase ml-2">WIP</span></div>
+		<div class="flex flex-col gap-4">
+			<div>
+				<p class="field-label mb-2">Vehicles with bomb bays</p>
+				<ul class="columns-2 sm:columns-4 gap-2 list-none pl-0">
+					{#each bombBayVehicles as v (v)}
+						<li class="text-sm text-orb-highlight/70 mb-1">{v}</li>
+					{/each}
+				</ul>
+			</div>
+			<div>
+				<p class="field-label mb-2">Vehicles with boost</p>
+				<ul class="columns-2 sm:columns-4 gap-2 list-none pl-0">
+					{#each boostVehicles as v (v)}
+						<li class="text-sm text-orb-highlight/70 mb-1">{v}</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+	</section>
 
-          <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="p-2 border-r border-gray-200">LSIA Airport Parking</div>
-            <div class="p-2">Rancho Warehouse Near the LSCM</div>
-          </div>
-          <div class="grid grid-cols-2 border-b border-gray-200">
-            <div class="p-2 border-r border-gray-200">Von Crastenburg Richman</div>
-            <div class="p-2">Davis near the drain</div>
-          </div>
-          <div class="grid grid-cols-2">
-            <div class="p-2 border-r border-gray-200">Pillbox Hill Ammu-nation</div>
-            <div class="p-2">Up the street of the Diamond Casino Entrance</div>
-          </div>
-        </div>
-    </section>
+	<section>
+		<div class="section-label">Business Payouts <span class="font-mono text-[0.65rem] text-warning/60 tracking-widest uppercase ml-2">WIP</span></div>
+		<p class="text-sm text-orb-highlight/50 mb-3">Rough estimates of income from GTA Online business investments.</p>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-border-faint">
+						{#each ['Business','Investment','Passive','Repeatable','Big Payout'] as h (h)}
+							<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">{h}</th>
+						{/each}
+					</tr>
+				</thead>
+				<tbody>
+					{#each businessPayouts as row (row.name)}
+						<tr class="border-b border-border-faint/40 hover:bg-orb-highlight/5 transition-colors align-top">
+							<td class="p-2 text-white font-display">{row.name}</td>
+							<td class="p-2 font-mono text-xs text-orb-highlight/60 whitespace-pre-line">{row.investment}</td>
+							<td class="p-2 text-orb-highlight/70 text-xs">{row.passive}</td>
+							<td class="p-2 text-orb-highlight/70 text-xs">{row.repeatable}</td>
+							<td class="p-2 text-orb-highlight/70 text-xs">{row.big}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
 
+	<section>
+		<div class="section-label">Phone Contacts <span class="font-mono text-[0.65rem] text-warning/60 tracking-widest uppercase ml-2">WIP</span></div>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-border-faint">
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Contact</th>
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Features</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each phoneContacts as row (row.contact)}
+						<tr class="border-b border-border-faint/40 hover:bg-orb-highlight/5 transition-colors">
+							<td class="p-2 text-white">{row.contact}</td>
+							<td class="p-2 text-orb-highlight/70">{row.feature}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
 
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">Diamond Casino Helicopter Spawn Route</h3>
-        <p class="text-sm mb-4">Path in green with gaurantee helicopter spawn.</p>
-        <img src="https://i.redd.it/r2xuudyiheg51.jpg" class="w-full max-w-2xl mx-auto mb-4" alt="Diamond Casino Helicopter Spawn Route">
-    </section>
-
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">Stash House Safe Codes</h3>
-        <ul class="list-disc text-md list-inside mb-4 text-left columns-2 gap-4 mx-auto w-1/2 ">
-            {#each stashCodes as code}
-                <li class="text-center list-none text-lg letter-spacing-wide">{code}</li>
-            {/each}
-        </ul>
-    </section>
-
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">Vehicle Groups WIP</h3>
-
-        <h4 class="text-sm font-semibold mb-2">Vehicles that have bomb bays</h4>
-        <ul class="list-disc text-xs list-inside mb-4 text-left columns-4 gap-4">
-            {#each bombBayVehicles as vehicle}
-                <li>{vehicle}</li>
-            {/each}
-        </ul>
-
-
-        <h4 class="text-sm font-semibold mb-2">Vehicles that have boost</h4>
-        <ul class="list-disc text-xs list-inside mb-4 text-left columns-4 gap-4">
-            {#each boostVehicles as vehicle}
-                <li>{vehicle}</li>
-            {/each}
-        </ul>
-    </section>
-
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">Business Payouts WIP</h3>
-
-        <p class="text-sm mb-4">This is a rough estimate of how much passive income you can expect to earn from an investment in GTA Online.</p>
-        <table class="w-full mx-auto text-xs">
-            <thead>
-                <tr class="bg-gray-800">
-                    <th class="p-2">Business</th>
-                    <th class="p-2">Investment</th>
-                    <th class="p-2">Passive</th>
-                    <th class="p-2">Repeatable</th>
-                    <th class="p-2">Big</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="p-2">Nightclub</td>
-                    <td class="p-2 font-mono">
-                        min: $1,255,000 <br>
-                        max: $6,165,000 <br>
-                        upg: $5,330,000
-                    </td>
-                    <td class="p-2"><strong>Max Popularity</strong><br>$50,000</td>
-                    <td class="p-2"><strong>Promote Club</strong><br>$10,000</td>
-                    <td class="p-2"><strong>Warehouse Sell</strong><br>
-                        $1,400,000
-                    </td>
-                </tr>
-                <tr>
-                    <td class="p-2">Agency</td>
-                    <td class="p-2 font-mono">$6,165,000</td>
-                    <td class="p-2"><strong>Complete 200 Contracts</strong><br>$20,000</td>
-                    <td class="p-2"><strong>Security Contracts, Payphone Hits</strong><br>$50,000-$70,000</td>
-                    <td class="p-2"><strong>Dr. Dre Contract</strong><br>
-                        $1,000,000
-                    </td>
-                </tr>
-                <tr>
-                    <td class="p-2">Arcade</td>
-                    <td class="p-2 font-mono">min: 1,235,000<br>max: $4,082,500</td>
-                    <td class="p-2"><strong>All Arcade Machine Slots</strong><br>$3,600</td>
-                    <td class="p-2"><strong></strong><br>n/a</td>
-                    <td class="p-2"><strong>Diamond Casino Heist</strong><br>
-                        $1,000,000
-                    </td>
-                </tr>
-                <tr>
-                    <td class="p-2">Car Wash</td>
-                    <td class="p-2 font-mono">$1,000,000</td>
-                    <td class="p-2"><strong>All Businesses</strong><br>~$30,000</td>
-                    <td class="p-2"><strong>Money Laundering</strong><br>$35,000</td>
-                    <td class="p-2"><strong></strong><br>
-                        n/a
-                    </td>
-                </tr>
-                <tr>
-                    <td class="p-2">Salvage Yard</td>
-                    <td class="p-2 font-mono">min:$1,620,000<br>max:$2,690,000</td>
-                    <td class="p-2"><strong>Max Salvage Popularity</strong><br>$24,000</td>
-                    <td class="p-2"><strong>2x Salvage Cars/gameday</strong><br>$60,000-$80,000</td>
-                    <td class="p-2"><strong>3x Cars Sold/Week</strong><br>
-                        ~$1,000,000
-                    </td>
-                </tr>
-                <tr>
-                    <td class="p-2">Auto Shop</td>
-                    <td class="p-2 font-mono">min:$1,620,000<br>max:$2,690,000</td>
-                    <td class="p-2">n/a</td>
-                    <td class="p-2"><strong>10x Exotic Imports/day</strong><br>$60,000-$80,000</td>
-                    <td class="p-2"><strong>Mini-Heist, each</strong><br>
-                        $150,000-$300,000
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
-    </section>
-
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center">
-        <h3 class="text-xl font-bold mb-4">All Phone Contact Features WIP</h3>
-
-        <p class="text-sm mb-4">This is a list of all the phone contact features in GTA Online.</p>
-        <table class="w-full mx-auto text-xs">
-            <thead>
-                <tr class="bg-gray-800">
-                    <th class="p-2">Contact</th>
-                    <th class="p-2">Feature</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="p-2">Lester</td>
-                    <td class="p-2">Remove Bounty, Remove Wanted Level, Request Assassination, Request Vehicle Delivery</td>
-                </tr>
-                <tr>
-                    <td class="p-2">Ron</td>
-                    <td class="p-2">Request Airstrike, Request Vehicle Delivery</td>
-                </tr>
-                <tr>
-                    <td class="p-2">Morse Mutual</td>
-                    <td class="p-2">Claim Insurance, Request Vehicle Delivery</td>
-                </tr>
-
-            </tbody>
-        </table>
-    </section>
-
-    <section class="border border-gray-500 rounded p-4 mb-8 text-center text-sm">
-        <h3 class="text-xl font-bold mb-4">All Garage Space</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-            <div class="font-bold">Location</div>
-            <div class="font-bold">Garage Slots</div>
-            <div class="font-bold">Dedicated Slots</div>
-            <div class="font-bold">Notes</div>
-
-            <div>Aparments/Garages x10</div>
-            <div>100</div>
-            <div></div>
-            <div></div>
-
-            <div>Office</div>
-            <div>60</div>
-            <div></div>
-            <div></div>
-
-            <div>Eclipse Blvd</div>
-            <div>50</div>
-            <div></div>
-            <div></div>
-
-            <div>Nightclub</div>
-            <div>30</div>
-            <div>5</div>
-            <div>Terrorbyte, Opressor MK2, Custom Speedo, Mule, Pounder</div>
-
-            <div>Arena Workshop</div>
-            <div>27</div>
-            <div>4</div>
-            <div>3x Cerberus, RC Bandito</div>
-
-            <div>Agency</div>
-            <div>20</div>
-            <div></div>
-            <div></div>
-
-            <div>Autoshop</div>
-            <div>10</div>
-            <div></div>
-            <div></div>
-
-            <div>Casino Penthouse</div>
-            <div>10</div>
-            <div></div>
-            <div></div>
-
-            <div>Arcade</div>
-            <div>10</div>
-            <div></div>
-            <div></div>
-
-            <div>MC Clubhouse</div>
-            <div></div>
-            <div>10</div>
-            <div>Motorcycles</div>
-
-            <div>Facility</div>
-            <div>7</div>
-            <div>5</div>
-            <div>Avenger, TM-02 Khanjali, Chernobog, RCV, Thruster</div>
-
-            <div>Bail Office</div>
-            <div>2</div>
-            <div>1</div>
-            <div>Bail Office Transporter</div>
-
-            <div>Vehicle Warehouse</div>
-            <div></div>
-            <div>8</div>
-            <div>Ruiner 2000, Rocket Voltic, Armored Boxville, Wastelander, Phantom Wedge, Ramp Buggy, Technical Aqua, Blazer Aqua</div>
-
-            <div>Kosatka</div>
-            <div></div>            
-            <div>3</div>
-            <div>Sparrow, Avisa, Toreador</div>
-
-            <div>Freakshop</div>
-            <div></div>            
-            <div>2</div>
-            <div>Acid Lab, Delivery Bike</div>
-
-            <div>Bunker</div>
-            <div></div>            
-            <div>2</div>
-            <div>Mobile Operations Center, Anti-Aircraft Trailer</div>
-        </div>
-
-            
-          <p><strong>Special Vehicles : </strong> 20</p>
-          <p><strong>Personal Vehicles : </strong> 350</p>
-          <br>
-          <p><strong>Totals vehicle storage : </strong> 350</p>
-
-    </section>
-
-
-
-</Container>
+	<section>
+		<div class="section-label">Garage Space</div>
+		<div class="overflow-x-auto">
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-border-faint">
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Location</th>
+						<th class="text-right p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Garage</th>
+						<th class="text-right p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Dedicated</th>
+						<th class="text-left p-2 font-mono text-[0.7rem] uppercase tracking-widest text-orb-highlight/50">Notes</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each garageSpaces as row (row.location)}
+						<tr class="border-b border-border-faint/40 hover:bg-orb-highlight/5 transition-colors">
+							<td class="p-2 text-white">{row.location}</td>
+							<td class="p-2 text-right font-mono text-orb-highlight/70">{row.garage || '—'}</td>
+							<td class="p-2 text-right font-mono text-orb-highlight/70">{row.dedicated || '—'}</td>
+							<td class="p-2 text-xs text-orb-highlight/50">{row.notes}</td>
+						</tr>
+					{/each}
+				</tbody>
+				<tfoot>
+					<tr class="border-t border-border-faint">
+						<td class="p-2 text-white font-display">Totals</td>
+						<td class="p-2 text-right font-mono text-white">{garageSpaces.reduce((n, r) => n + r.garage, 0)}</td>
+						<td class="p-2 text-right font-mono text-white">{garageSpaces.reduce((n, r) => n + r.dedicated, 0)}</td>
+						<td class="p-2 text-xs text-orb-highlight/40">350 personal · 20 special</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</section>
+</div>

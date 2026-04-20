@@ -1,0 +1,718 @@
+{
+    "crewRanks": [
+        {
+            "name": "Leader",
+            "rankOrder": 0,
+            "rankPermissions": {
+                "canWriteOnWall": true,
+                "canInvite": true,
+                "canPublishMultipleEmblems": true,
+                "canDeleteFromWall": true,
+                "canDemote": true,
+                "canPromote": true,
+                "canKick": true,
+                "canViewSettings": true,
+                "canEditSettings": true,
+                "canPostMessages": true,
+                "canUpdateStatus": true,
+                "canManageRanks": true
+            },
+            "memberCount": 1,
+            "rankMembers": [
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/custom-avatars/n/kj8GkE6OJ0OmajNNIzR1uQ.png",
+                    "nickname": "Lucidentropy",
+                    "rockstarId": 9300633,
+                    "dateJoined": "2015-04-17T19:56:08.000Z",
+                    "rankOrder": 0,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "Lucidentropy",
+                    "primaryClan": {
+                        "id": 75867305,
+                        "name": "The Zodiac Herd",
+                        "tag": "HERD",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#46540DAA",
+                        "rankOrder": 1
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Rank1",
+            "rankOrder": 1,
+            "rankPermissions": {
+                "canWriteOnWall": true,
+                "canInvite": true,
+                "canPublishMultipleEmblems": true,
+                "canDeleteFromWall": true,
+                "canDemote": true,
+                "canPromote": true,
+                "canKick": true,
+                "canViewSettings": true,
+                "canEditSettings": true,
+                "canPostMessages": true,
+                "canUpdateStatus": true,
+                "canManageRanks": false
+            },
+            "memberCount": 2,
+            "rankMembers": [
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAVCAnniversary/GTAVC44.png",
+                    "nickname": "Dr_Tacocat",
+                    "rockstarId": 67963993,
+                    "dateJoined": "2015-05-09T05:11:44.000Z",
+                    "rankOrder": 1,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 1
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAO/SC_AVATARS_DOOMSDAY_256x256_C_V01.png",
+                    "nickname": "Lefty_the_Dingo",
+                    "rockstarId": 14677334,
+                    "dateJoined": "2021-07-11T22:48:33.000Z",
+                    "rankOrder": 1,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 75867305,
+                        "name": "The Zodiac Herd",
+                        "tag": "HERD",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#46540DAA",
+                        "rankOrder": 1
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Rank2",
+            "rankOrder": 2,
+            "rankPermissions": {
+                "canWriteOnWall": true,
+                "canInvite": true,
+                "canPublishMultipleEmblems": true,
+                "canDeleteFromWall": true,
+                "canDemote": true,
+                "canPromote": false,
+                "canKick": false,
+                "canViewSettings": true,
+                "canEditSettings": false,
+                "canPostMessages": false,
+                "canUpdateStatus": false,
+                "canManageRanks": false
+            },
+            "memberCount": 0,
+            "rankMembers": []
+        },
+        {
+            "name": "Rank3",
+            "rankOrder": 3,
+            "rankPermissions": {
+                "canWriteOnWall": true,
+                "canInvite": true,
+                "canPublishMultipleEmblems": true,
+                "canDeleteFromWall": false,
+                "canDemote": false,
+                "canPromote": false,
+                "canKick": false,
+                "canViewSettings": false,
+                "canEditSettings": false,
+                "canPostMessages": false,
+                "canUpdateStatus": false,
+                "canManageRanks": false
+            },
+            "memberCount": 0,
+            "rankMembers": []
+        },
+        {
+            "name": "Rank4",
+            "rankOrder": 4,
+            "rankPermissions": {
+                "canWriteOnWall": true,
+                "canInvite": false,
+                "canPublishMultipleEmblems": false,
+                "canDeleteFromWall": false,
+                "canDemote": false,
+                "canPromote": false,
+                "canKick": false,
+                "canViewSettings": false,
+                "canEditSettings": false,
+                "canPostMessages": false,
+                "canUpdateStatus": false,
+                "canManageRanks": false
+            },
+            "memberCount": 26,
+            "rankMembers": [
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTALONDON/RSL0.png",
+                    "nickname": "aKiBa_55",
+                    "rockstarId": 32267547,
+                    "dateJoined": "2022-01-09T23:33:06.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RedDeadRedemption/RDR01.png",
+                    "nickname": "Brisk321",
+                    "rockstarId": 7644358,
+                    "dateJoined": "2022-01-28T03:15:36.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "burglarsolarceny",
+                    "rockstarId": 72169562,
+                    "dateJoined": "2016-06-23T02:04:21.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "Demonotron",
+                    "rockstarId": 89243682,
+                    "dateJoined": "2016-06-29T03:00:56.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/MaxPayne3/MP3_34.png",
+                    "nickname": "DR.Vesuvius",
+                    "rockstarId": 21438832,
+                    "dateJoined": "2015-04-20T04:11:06.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 722,
+                        "name": "Red Dead Rustlers",
+                        "tag": "RDR",
+                        "isOpenClan": true,
+                        "isSystemClan": true,
+                        "isPrivateClan": false,
+                        "isFounderClan": false,
+                        "color": "#F99D27",
+                        "rankOrder": 1
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RDR2/rdr2_molly_oshea_256x256.png",
+                    "nickname": "emkeev",
+                    "rockstarId": 78698418,
+                    "dateJoined": "2017-07-21T01:36:18.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 35311237,
+                        "name": "Untold Destiny",
+                        "tag": "untd",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#6938bd",
+                        "rankOrder": 2
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RedDeadRedemption/Avatar14.png",
+                    "nickname": "gimmic",
+                    "rockstarId": 259811,
+                    "dateJoined": "2015-04-19T21:35:49.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAIII/GTA317.png",
+                    "nickname": "jinzodefiler",
+                    "rockstarId": 17115824,
+                    "dateJoined": "2015-11-04T00:24:21.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAV/gtav62.png",
+                    "nickname": "Johnny.Wick",
+                    "rockstarId": 14509221,
+                    "dateJoined": "2015-09-30T06:03:57.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 22023246,
+                        "name": "Team Wick",
+                        "tag": "WICK",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#990902",
+                        "rankOrder": 0
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAV/gtav20.png",
+                    "nickname": "loki-coyote",
+                    "rockstarId": 31789085,
+                    "dateJoined": "2015-10-24T04:01:04.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "Lordjakoby",
+                    "rockstarId": 65608739,
+                    "dateJoined": "2015-11-12T01:15:39.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAV/gtav62.png",
+                    "nickname": "Luxstorm89",
+                    "rockstarId": 100878748,
+                    "dateJoined": "2020-12-21T02:13:57.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 30942785,
+                        "name": "Reg ChickenSandwhich",
+                        "tag": "BEAK",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#339900",
+                        "rankOrder": 0
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RedDeadRevolver/RDR-0.png",
+                    "nickname": "Mentova",
+                    "rockstarId": 10368779,
+                    "dateJoined": "2015-04-19T18:14:56.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/StateofEmergency/stateofemergency1.png",
+                    "nickname": "Mobileflugabwehr",
+                    "rockstarId": 68410448,
+                    "dateJoined": "2015-10-11T15:20:35.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 735,
+                        "name": "IGN Crew",
+                        "tag": "IGN",
+                        "isOpenClan": true,
+                        "isSystemClan": true,
+                        "isPrivateClan": false,
+                        "isFounderClan": false,
+                        "color": "#f99d27",
+                        "rankOrder": 1
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "morikahn",
+                    "rockstarId": 77179159,
+                    "dateJoined": "2015-11-12T02:28:20.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/MaxPayne2/MP-1.png",
+                    "nickname": "MrPenPen91",
+                    "rockstarId": 98358628,
+                    "dateJoined": "2021-08-10T04:14:11.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "Murrdyn",
+                    "rockstarId": 65760420,
+                    "dateJoined": "2015-04-30T03:50:21.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAO/SC_AVATARS_DOOMSDAY_256x256_E_V01.png",
+                    "nickname": "oCerberus0",
+                    "rockstarId": 46424494,
+                    "dateJoined": "2016-01-06T02:59:16.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "OrbMonky",
+                    "rockstarId": 69408298,
+                    "dateJoined": "2015-06-02T04:04:07.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAV/gtav46.png",
+                    "nickname": "PleasurePhD",
+                    "rockstarId": 11023751,
+                    "dateJoined": "2015-10-02T04:28:28.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 27985130,
+                        "name": "Curse Rogue ",
+                        "tag": "Cure",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#693199",
+                        "rankOrder": 2
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/default.png",
+                    "nickname": "regularBaltazar",
+                    "rockstarId": 123732210,
+                    "dateJoined": "2018-09-10T02:27:32.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/GTAIV/GTAIV_BRANDS237.png",
+                    "nickname": "Sweatygoat",
+                    "rockstarId": 8661982,
+                    "dateJoined": "2015-05-18T14:54:06.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RedDeadRedemption/MPg15.png",
+                    "nickname": "Treshnell",
+                    "rockstarId": 12767599,
+                    "dateJoined": "2015-04-18T15:44:23.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/MaxPayne3/MP3_26.png",
+                    "nickname": "Trimagister",
+                    "rockstarId": 93674335,
+                    "dateJoined": "2016-10-03T02:37:04.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/custom-avatars/n/ET1m727WYEue0UsXmX9M6Q.png",
+                    "nickname": "UntoldForce",
+                    "rockstarId": 9950990,
+                    "dateJoined": "2015-12-18T04:23:23.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 35311237,
+                        "name": "Untold Destiny",
+                        "tag": "untd",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#6938bd",
+                        "rankOrder": 0
+                    }
+                },
+                {
+                    "avatarUrl": "https://prod-avatars.akamaized.net/stock-avatars/n/RedDeadRedemption/RDR_undead06.png",
+                    "nickname": "Zipstor",
+                    "rockstarId": 20693390,
+                    "dateJoined": "2022-02-08T03:50:37.000Z",
+                    "rankOrder": 4,
+                    "onlineService": "sc",
+                    "isGamertagHidden": false,
+                    "gamertag": "",
+                    "primaryClan": {
+                        "id": 18007126,
+                        "name": "Clan Orb",
+                        "tag": "orbs",
+                        "isOpenClan": false,
+                        "isSystemClan": false,
+                        "isPrivateClan": true,
+                        "isFounderClan": false,
+                        "color": "#07001599",
+                        "rankOrder": 4
+                    }
+                }
+            ]
+        }
+    ],
+    "crewId": 18007126,
+    "status": true
+}
