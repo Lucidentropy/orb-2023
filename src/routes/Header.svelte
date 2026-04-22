@@ -24,6 +24,7 @@
 		text: 'The Community',
 		subItems: [
 			{ text: 'About Orb', url: '/about' },
+			{ text: 'Image Gallery', url: '/gallery' },
 			{ text: 'Joining Orb', url: '/join'},
 			{ text: 'Links', url: '/links' },
 			{ text: 'Steam', url: '/steam' },

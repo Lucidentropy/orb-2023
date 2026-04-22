@@ -2,7 +2,7 @@
     import github from '$lib/images/github.svg';
     import svelteLogo from '$lib/images/svelte-logo.svg';
     import winampIcon from '$lib/images/winamp-icon.svg';
-    import Webamp from './Webamp.svelte';
+    import Webamp from '$lib/components/Webamp.svelte';
     import { activeTheme } from '$lib/stores/themeStore';
 
 	let isWebampLoaded = false;
@@ -105,7 +105,7 @@
     </div>
 {/if}
 
-<footer class="mt-24 px-4 text-xs">
+<footer class="mt-24 px-4 text-xs z-100 text-shadow-xs">
 	<p class="tagline">
 		<span>Clan Orb, a gaming community founded in 2000.</span>
 	</p>

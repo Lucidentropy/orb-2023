@@ -1,3 +1,4 @@
+// routes/api/steam/+server.ts
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { STEAM } from '$env/static/private';

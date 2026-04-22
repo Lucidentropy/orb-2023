@@ -97,6 +97,7 @@
         
     body {
         @apply font-sans;
+        font-size:14px;
         min-height: 100vh;
         margin: 0;
 
@@ -133,7 +134,6 @@
     }
 
     p {
-        @apply mb-4;
         line-height: 1.5;
     }
 
