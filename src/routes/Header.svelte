@@ -83,9 +83,9 @@
 <header>
 	<div
 		class="w-screen h-[130px] flex justify-center items-center text-center bg-center bg-[length:auto_100%]"
-		style="background-image:url('/images/header.png')"
+		style="background-image:url('/images/layout/header.png')"
 	>
-		<a href="/"><img src="/images/neworbdemo.jpg" alt="Logo" class="max-h-[125px] mx-[30px] rounded-full shadow-[0_0_30px_10px_#000]" /></a>
+		<a href="/"><img src="/images/layout/neworbdemo.jpg" alt="Logo" class="max-h-[125px] mx-[30px] rounded-full shadow-[0_0_30px_10px_#000]" /></a>
 	</div>
 
 	<nav class="w-screen bg-black/40 border-t border-t-transparent border-b border-b-black shadow-[0_0_40px_#000] flex justify-center relative">

@@ -13,8 +13,8 @@
 	const wfRoster = [
 		{ name: 'orb.lux',          rank: 'Warlord',  mr: 36, displayName: 'Legendary Captain orb.lux', frames: ['Nidus'] },
 		{ name: 'LucidEntropy',    	rank: 'Leader',  mr: 30, frames: ['Octavia', 'Ivara', 'Equinox'] },
-		{ name: 'Flintok',          rank: 'Veteran',  mr: 23, },
-		{ name: 'Lefty_the_Dingo',  rank: 'Officer',  mr: 18, },
+		{ name: 'Flintok',          rank: 'Veteran',  mr: 23, frames: ['Frost','Ember','Valkyr']},
+		{ name: 'Lefty_the_Dingo',  rank: 'Officer',  mr: 18, frames: ['Zephyr','Styanax','Octavia'] },
 		{ name: '-Cosmic-Rift-',    rank: 'Veteran',  mr: 10, },
 		{ name: 'GracefulOnion',    rank: 'Soldier',  mr: 10, },
 		{ name: 'Murrdyn',          rank: 'General',  mr: 7, },

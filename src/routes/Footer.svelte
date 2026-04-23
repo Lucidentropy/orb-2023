@@ -1,7 +1,4 @@
 <script>
-    import github from '$lib/images/github.svg';
-    import svelteLogo from '$lib/images/svelte-logo.svg';
-    import winampIcon from '$lib/images/winamp-icon.svg';
     import Webamp from '$lib/components/Webamp.svelte';
     import { activeTheme } from '$lib/stores/themeStore';
 
@@ -111,18 +108,18 @@
 	</p>
 	<div class="drawer-row pb-4">
 		<a href="https://svelte.dev/" target="_blank" rel="noopener noreferrer">
-			<img src={svelteLogo} alt="" class="h-4 w-4 object-contain saturate-0" />
+			<img src="/images/layout/svelte-logo.svg" alt="" class="h-4 w-4 object-contain saturate-0" />
 			Powered by Svelte
 		</a>
 
 		<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" rel="noopener noreferrer">
-			<img src={github} alt="" class="h-4 w-4 object-contain invert" />
+			<img src="/images/layout/github.svg" alt="" class="h-4 w-4 object-contain invert" />
 			GitHub
 		</a>
 
 		{#if !isWebampLoaded}
 			<button class="btn-row" onclick={loadWebamp} title="A relic of an ancient time." style="gap:7px; display:inline-flex;">
-				<img src={winampIcon} alt="" class="h-4 w-4 object-contain saturate-50" />
+				<img src="/images/layout/winamp-icon.svg" alt="" class="h-4 w-4 object-contain saturate-50" />
 				Llama Time
 			</button>
 		{/if}

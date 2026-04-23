@@ -321,10 +321,10 @@
                                     </td>
                                     <td class="status">
                                         {#if server.server.needpass}
-                                            <img src="/images/tribes-server-locked.gif" alt="Server Locked" />
+                                            <img src="/images/tribes/tribes-server-locked.gif" alt="Server Locked" />
                                         {/if}
                                         {#if server.server.dedicated}
-                                            <img src="/images/tribes-server-dedicated.gif" alt="Dedicated Server" />
+                                            <img src="/images/tribes/tribes-server-dedicated.gif" alt="Dedicated Server" />
                                         {/if}
                                     </td>
                                     <td class="name block">{server.name}</td>
@@ -406,7 +406,7 @@
 
             <div class="self-start rounded border border-border-faint/60 bg-bg-deep/20 p-2 shadow-panel">
                 <img
-                    src="/images/titanshot6.jpg"
+                    src="/images/tribes/titanshot6.jpg"
                     alt="Clan Orb Heavy Skin for Tribes"
                     class="w-full rounded object-cover"
                 />
@@ -546,16 +546,16 @@
     padding:2px;
     z-index: 1;
 
-    cursor: url("/images/tribes-hand.cur"), default;
+    cursor: url("/images/tribes/tribes-hand.cur"), default;
 
     &.bg1 {
-        background-image:url('/images/tribesbg1.gif');
+        background-image:url('/images/tribes/tribesbg1.gif');
     }
     &.bg2 {
-        background-image:url('/images/tribesbg2.gif');
+        background-image:url('/images/tribes/tribesbg2.gif');
     }
     &.bg3 {
-        background-image:url('/images/tribesbg3.gif');
+        background-image:url('/images/tribes/tribesbg3.gif');
     }
 
     th {
@@ -616,7 +616,7 @@
     background-repeat:repeat;
     padding:20px;
     font-size:14px;
-    cursor: url("/images/tribes-arrow.cur"), default;
+    cursor: url("/images/tribes/tribes-arrow.cur"), default;
 
     width:600px;
     max-width:100%;
@@ -696,7 +696,7 @@
             margin-left:10px;
             padding-left:0;
 
-            cursor: url("/images/tribes-hand.cur"), default;
+            cursor: url("/images/tribes/tribes-hand.cur"), default;
             color:#000;
             text-shadow:
                 0 0 5px #fff,

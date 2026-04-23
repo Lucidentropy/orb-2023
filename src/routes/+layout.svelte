@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '$themes/ThemeSelector.css';
+	import '$lib/themes/ThemeSelector.css';
 	import { page } from '$app/stores';
 	import Header from './Header.svelte';
 	import Footer from './Footer.svelte';
