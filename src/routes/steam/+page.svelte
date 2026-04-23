@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { steam } from 'svelte-awesome/icons';
-	import trouble from '$lib/images/troubleshooting.jpg';
 	import Container from '$lib/ThemeHandler.svelte';
 
 	let steamData: any = null;
@@ -201,7 +200,7 @@
 			</p>
 
 			<img
-				src={trouble}
+				src="/images/layout/troubleshooting.jpg"
 				alt="Various dudes trying to figure this computer out."
 				class="w-full rounded-md border border-border-faint/60 bg-bg-deep/40 p-1.5 shadow-panel"
 			/>
