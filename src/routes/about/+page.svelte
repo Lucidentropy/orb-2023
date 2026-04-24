@@ -7,14 +7,15 @@
         We have a strong focus on a culture of having fun, not taking things too seriously, and having no tolerance for toxicity.
         We beleive that playing games with good people lead to good experiences and good stories.
         We feel that online friends should be held to the same standards as your real life friends.
-        Our only rules are - be a nice person and don't talk politics in any public chats.
+        Our only rules are be a nice person and don't talk politics.
     `;
     const ethos_list = `
     <ul class="space-y-2">
+        <li>Online friends should be held to the stand standards as IRL friends</li>
         <li>You should expect the best from your own community</li>
         <li>Completionists share their resources, not flex their wealth</li>
-        <li>If you're as good as you say you are, you wouldn't need to say it</li>
-        <li>Everyone was new at one point</li>
+        <li>Progresion in multiplayer games should be about being being more capable to help others</li>
+        <li>We're okay with players of all skill levels, everyone was new at one point</li>
         <li>Mistakes are always okay, just try to not repeat them</li>
         <li>Not everyone enjoys a challenge, play the difficulty you find most fun</li>
         <li>Take it only as serious as you need to not have to take it seriously</li>
@@ -35,14 +36,24 @@
 		'082210WoWGruul.jpg',
 		'082210WoWGuild_First_-_Hydross.jpg',
 		'FirstMoroes.jpg',
+        'ddddddd.jpg',
 		'FirstVoidReaver.jpg',
 		'WoWScrnShot_060308_025140.jpg',
 		'WoWScrnShot_061008_001757.jpg',
 		'WoWScrnShot_073108_203953.jpg',
+        'drg1.jpg',
 		'WoWScrnShot_081408_231149.jpg',
 		'wow_aq40.png',
 		'wow_orbzg.png',
-        '359320_screenshots_20210921223112_1.jpg'
+        '359320_screenshots_20210921223112_1.jpg',
+        'SyllaullahLegendary.png',
+        'darkmooon.png',
+        'HowOrbGetsDown.jpg',
+        'wow_hist_135.png',
+        'wow_hist_378.png',
+        'WoWScrnShot_021015_223507.jpg',
+        'WoWScrnShot_110914_124353.jpg'
+        
 	];
 
     const games = [
@@ -60,15 +71,76 @@
 		'Warframe'
 	];
 
+    let shuffledSlides: string[] = [];
 	let activeHistorySlide = 0;
 
+	function shuffle(arr: string[]) {
+		return [...arr]
+			.map((v) => ({ v, sort: Math.random() }))
+			.sort((a, b) => a.sort - b.sort)
+			.map(({ v }) => v);
+	}       
+
 	onMount(() => {
+        shuffledSlides = shuffle(historySlides);
+
 		const interval = window.setInterval(() => {
-			activeHistorySlide = (activeHistorySlide + 1) % historySlides.length;
+			activeHistorySlide = (activeHistorySlide + 1) % shuffledSlides.length;
 		}, 6000);
 
 		return () => window.clearInterval(interval);
 	});
+
+	type TimelineEntry = {
+		year: number;
+		label: string;
+	};
+
+	const timeline: TimelineEntry[] = [
+		{ year: 2000, label: 'Orb Founded' },
+		{ year: 2000, label: 'Tribes' },
+		{ year: 2001, label: 'Diablo II' },
+		{ year: 2003, label: 'Day of Defeat' },
+		{ year: 2004, label: 'World of Warcraft' },
+		{ year: 2005, label: 'Battlefield 2' },
+		{ year: 2005, label: 'Guild Wars' },
+		{ year: 2007, label: 'Dungeon Runners' },
+		{ year: 2007, label: 'Team Fortess 2' },
+		{ year: 2011, label: 'Minecraft' },
+		{ year: 2012, label: 'Diablo III' },
+		{ year: 2014, label: 'Firefall' },
+		{ year: 2014, label: 'Wildstar' },
+		{ year: 2015, label: 'GTA Online' },
+		{ year: 2016, label: 'Astroneer' },
+		{ year: 2018, label: 'Warframe' },
+		{ year: 2019, label: 'Fishing Planet' },
+		{ year: 2021, label: 'Elite Dangerous' },
+		{ year: 2021, label: 'Forza Horizon 5' },
+		{ year: 2022, label: 'Valheim' },
+		{ year: 2022, label: 'Deep Rock Galactic' },
+		{ year: 2024, label: 'Palia' },
+		{ year: 2024, label: 'Helldivers 2' },
+		{ year: 2025, label: 'Monster Hunter Wilds' },
+	];
+
+	const sortedTimeline = [...timeline].sort((a, b) => a.year - b.year);
+
+	const startYear = 2000;
+	const endYear = new Date().getFullYear()+ 1;
+	const range = endYear - startYear;
+
+	const width = 1200;
+	const height = 260;
+	const midY = height / 2;
+
+    function xForYear(year: number) {
+        return ((year - startYear) / range) * (width - 40) + 50;
+    }
+
+	function laneOffset(index: number) {
+		const pattern = [1,1,2.25,2.25];
+		return pattern[index % pattern.length];
+	}  
 </script>
 
 <svelte:head>
@@ -83,76 +155,158 @@
 
 <div class="space-y-8">
 
-<div class="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-	<section class="my-0">
-		<p class="text-base leading-relaxed">{intro_text1}</p>
-	</section>
+    <div class="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section class="my-0">
+            <p class="text-base leading-relaxed">{intro_text1}</p>
+        </section>
 
-	<section class="my-0">
-		<h2>Some online games you'll find us in:</h2>
+        <section class="my-0">
+            <h2>Some online games you'll find us in:</h2>
 
-		<div class="grid grid-cols-3 gap-1.5 uppercase tracking-wide mt-4 text-xs text-gray-400">
-            {#each games as game (game)}
-                <div class="panel bg-none flex items-center justify-center px-3 py-2">
-                    {game}
-                </div>
-            {/each}
-		</div>
-	</section>
-</div>
-
-	<div class="grid gap-6">
-		<section class="my-0 overflow-hidden">
-			<h2>A little of the past</h2>
-
-            <div class="relative h-[300px] overflow-hidden rounded border border-border-faint bg-black md:h-[400px]">
-                {#each historySlides as slide, index (slide)}
-                    <img
-                        src={`/images/history/${slide}`}
-                        alt="Orb history screenshot"
-                        class={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-                            index === activeHistorySlide
-                                ? 'opacity-100 animate-[kenburns_10s_ease-in]'
-                                : 'opacity-0'
-                        }`}
-                    />
+            <div class="grid grid-cols-3 gap-1.5 uppercase tracking-wide mt-4 text-xs text-gray-400">
+                {#each games as game (game)}
+                    <div class="bg-none flex items-center justify-center px-3 py-2">
+                        {game}
+                    </div>
                 {/each}
-
-                <div class="absolute inset-x-0 bottom-0 bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-widest text-orb-highlight/70">
-                    {activeHistorySlide + 1} / {historySlides.length}
-                </div>
             </div>
-		</section>
-	</div>
+        </section>
+    </div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
-		<section class="my-0">
-			<h2>The Orb Gaming Ethos</h2>
-			<div class="space-y-2">
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html ethos_list}
-			</div>
-		</section>
+    <section class="my-5">
+        <h2>Orb Games Timeline</h2>
 
-		<section class="my-0">
-			<h2>Mental health matters.</h2>
-			<p class="leading-relaxed">{mental_health}</p>
-		</section>
-	</div>
+        <svg
+            viewBox={`0 0 ${width} ${height}`}
+            class="w-full h-[260px] rounded border border-border-faint bg-gradient-to-b mb-1 from-bg-deep/60 via-bg-mid/40 to-black/60"
+        >
+            <!-- main line -->
+            <line
+                x1="10"
+                y1={midY}
+                x2={width}
+                y2={midY}
+                stroke="rgba(255,255,255,0.2)"
+                stroke-width="1"
+            />
 
-    
-    <div class="overflow-hidden rounded border border-border-faint bg-bg-deep/40 p-1 shadow-panel">
+            {#each sortedTimeline as item, index (item.year + '-' + item.label)}
+                {@const x = xForYear(item.year)}
+                {@const offset = laneOffset(index) * 22}
+                {@const connectorBase = 18}
+                {@const connectorLen = connectorBase + Math.abs(offset)}
+
+                <!-- dot -->
+                <circle cx={x} cy={midY} r="4" fill="var(--orb-highlight)" />
+
+                {#if index % 2 === 0}
+                    <!-- connector up -->
+                    <line
+                        x1={x}
+                        y1={midY}
+                        x2={x}
+                        y2={midY - connectorLen + 10}
+                        stroke="rgba(255,255,255,0.25)"
+                    />
+
+                    <!-- year -->
+                    <text
+                        x={x}
+                        y={midY - connectorLen - 10}
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="rgba(255,255,255,0.7)"
+                    >
+                        {item.year}
+                    </text>
+
+                    <!-- label -->
+                    <text
+                        x={x}
+                        y={midY - connectorLen + 4}
+                        text-anchor="middle"
+                        font-size="12"
+                        fill="white"
+                    >
+                        {item.label}
+                    </text>
+                {:else}
+                    <!-- connector down -->
+                    <line
+                        x1={x}
+                        y1={midY}
+                        x2={x}
+                        y2={midY + connectorLen - 10}
+                        stroke="rgba(255,255,255,0.25)"
+                    />
+
+                    <!-- year -->
+                    <text
+                        x={x}
+                        y={midY + connectorLen + 2}
+                        text-anchor="middle"
+                        font-size="10"
+                        fill="rgba(255,255,255,0.7)"
+                    >
+                        {item.year}
+                    </text>
+
+                    <!-- label -->
+                    <text
+                        x={x}
+                        y={midY + connectorLen + 16}
+                        text-anchor="middle"
+                        font-size="12"
+                        fill="white"
+                    >
+                        {item.label}
+                    </text>
+                {/if}
+            {/each}
+        </svg>
+
+        <div class="relative h-[300px] overflow-hidden rounded border border-border-faint bg-black md:h-[400px]">
+            {#each shuffledSlides as slide, index (slide)}
+                <img
+                    src={`/images/history/${slide}`}
+                    alt="Orb history screenshot"
+                    class={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+                        index === activeHistorySlide
+                            ? 'opacity-100 animate-[kenburns_15s_ease-in]'
+                            : 'opacity-0'
+                    }`}
+                />
+            {/each}
+
+            <div class="absolute inset-x-0 bottom-0 bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-widest text-orb-highlight/70">
+                {activeHistorySlide + 1} / {historySlides.length}
+            </div>
+        </div>
+    </section>
+
+
+    <div class="relative overflow-hidden rounded border border-border-faint ">
         <img
             src="./images/tribes/calvinhobbesctf.jpg"
             alt="Calvin and Hobbes stealing the flag."
-            class=" w-full object-cover"
+            class="absolute inset-0 h-full w-full object-cover"
         />
-    </div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
+
+        <div class="relative z-10 p-6">
+            <h2 class="mb-4">The Orb Gaming Ethos</h2>
+
+            <div class="space-y-2 text-sm">
+                {@html ethos_list}
+            </div>
+        </div>
+1    </div>
+
+ 	<div class="grid gap-6 lg:grid-cols-2">
         <section class="my-0">
             <h2>Origins</h2>
-            <div class="space-y-4">
+            <div class="space-y-4 px-2">
                 <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html origins}
             </div>
@@ -165,6 +319,9 @@
                 alt="Orb community photo"
                 class="max-h-[460px] w-full rounded border border-border-faint object-cover shadow-panel opacity-70"
             />
+
+            <h2>Mental health matters.</h2>
+			<p class="px-2">{mental_health}</p>
 
         </section>
     </div>
