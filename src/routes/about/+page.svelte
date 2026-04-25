@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Container from '$lib/ThemeHandler.svelte';
+    import { onMount } from 'svelte';
 
     const intro_text1 = `
         Orb is a constantly growing community of long term online friends, founded in the summer of 2000 who all share a interest in gaming.
@@ -30,8 +31,6 @@
         <p>In the late '90s, clan tags were filled with 3 letter acronyms, often resulting in some being, for lack of better words, lame things (i.e. x-=SPK=-x for Super Pro Killers). I wanted something that sounded cool, was short, and didn't have a 'l33t' meaning. While trying to buck the trend of silly acronym guild names, I also wanted something simple and symbolic, so I went with {-o-}. It looks a little cooler in the font used by Tribes. It eventually evolved into people calling us the Tie Fighter clan, due to the tag looking like an ASCII Tie Fighter (from Star Wars.)</p>
     `;
 
-    import { onMount } from 'svelte';
-
 	const historySlides = [
 		'082210WoWGruul.jpg',
 		'082210WoWGuild_First_-_Hydross.jpg',
@@ -40,10 +39,8 @@
 		'FirstVoidReaver.jpg',
 		'WoWScrnShot_060308_025140.jpg',
 		'WoWScrnShot_061008_001757.jpg',
-		'WoWScrnShot_073108_203953.jpg',
         'drg1.jpg',
 		'WoWScrnShot_081408_231149.jpg',
-		'wow_aq40.png',
 		'wow_orbzg.png',
         '359320_screenshots_20210921223112_1.jpg',
         'SyllaullahLegendary.png',
@@ -52,7 +49,20 @@
         'wow_hist_135.png',
         'wow_hist_378.png',
         'WoWScrnShot_021015_223507.jpg',
-        'WoWScrnShot_110914_124353.jpg'
+        'WoWScrnShot_110914_124353.jpg',
+        '092410WoWturkey.jpg',
+        'wow_hist_813.jpg',
+        'WoWScrnShot_011008_202101.jpg',
+        'WoWScrnShot_031308_000436.jpg',
+        'WoWScrnShot_032008_005144.jpg',
+        'WoWScrnShot_051109_221621.jpg',
+        'WoWScrnShot_053108_142223.jpg',
+        'WoWScrnShot_053108_143126.jpg',
+        'WoWScrnShot_060308_024337.jpg',
+        'WoWScrnShot_060308_025140.jpg',
+        'WoWScrnShot_080708_214841.jpg',
+        'WoWScrnShot_090508_005432.jpg',
+        'WoWScrnShot_110208_194338.jpg'
         
 	];
 
@@ -72,24 +82,29 @@
 	];
 
     let shuffledSlides: string[] = [];
-	let activeHistorySlide = 0;
+    let activeHistorySlide = 0;
 
-	function shuffle(arr: string[]) {
-		return [...arr]
-			.map((v) => ({ v, sort: Math.random() }))
-			.sort((a, b) => a.sort - b.sort)
-			.map(({ v }) => v);
-	}       
+    function unique(arr: string[]) {
+        return [...new Set(arr)];
+    }
 
-	onMount(() => {
-        shuffledSlides = shuffle(historySlides);
+    function shuffle(arr: string[]) {
+        return [...arr]
+            .map((v) => ({ v, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ v }) => v);
+    }
 
-		const interval = window.setInterval(() => {
-			activeHistorySlide = (activeHistorySlide + 1) % shuffledSlides.length;
-		}, 6000);
+    onMount(() => {
+        const uniqueSlides = unique(historySlides);
+        shuffledSlides = shuffle(uniqueSlides);
 
-		return () => window.clearInterval(interval);
-	});
+        const interval = window.setInterval(() => {
+            activeHistorySlide = (activeHistorySlide + 1) % shuffledSlides.length;
+        }, 6000);
+
+        return () => window.clearInterval(interval);
+    });
 
 	type TimelineEntry = {
 		year: number;
@@ -112,11 +127,15 @@
 		{ year: 2014, label: 'Wildstar' },
 		{ year: 2015, label: 'GTA Online' },
 		{ year: 2016, label: 'Astroneer' },
+		{ year: 2016, label: 'No Mans Sky' },
+		{ year: 2017, label: 'The Crew' },
 		{ year: 2018, label: 'Warframe' },
 		{ year: 2019, label: 'Fishing Planet' },
+		{ year: 2019, label: 'Lost Ark' },
 		{ year: 2021, label: 'Elite Dangerous' },
 		{ year: 2021, label: 'Forza Horizon 5' },
 		{ year: 2022, label: 'Valheim' },
+		{ year: 2023, label: 'Diablo IV' },
 		{ year: 2022, label: 'Deep Rock Galactic' },
 		{ year: 2024, label: 'Palia' },
 		{ year: 2024, label: 'Helldivers 2' },
@@ -140,7 +159,16 @@
 	function laneOffset(index: number) {
 		const pattern = [1,1,2.25,2.25];
 		return pattern[index % pattern.length];
-	}  
+	}
+
+    function nextSlide() {
+        activeHistorySlide = (activeHistorySlide + 1) % shuffledSlides.length;
+    }
+
+    function prevSlide() {
+        activeHistorySlide =
+            (activeHistorySlide - 1 + shuffledSlides.length) % shuffledSlides.length;
+    }    
 </script>
 
 <svelte:head>
@@ -175,7 +203,7 @@
 
     <section class="my-5">
         <h2>Orb Games Timeline</h2>
-
+        <p class="px-2 mb-2">A look back at some of the games and when we established a presence in those games as a group.</p>
         <svg
             viewBox={`0 0 ${width} ${height}`}
             class="w-full h-[260px] rounded border border-border-faint bg-gradient-to-b mb-1 from-bg-deep/60 via-bg-mid/40 to-black/60"
@@ -279,7 +307,29 @@
             {/each}
 
             <div class="absolute inset-x-0 bottom-0 bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-widest text-orb-highlight/70">
-                {activeHistorySlide + 1} / {historySlides.length}
+                <div class="flex items-center justify-center gap-4">
+
+                    <button
+                        class="hover:text-white btn-link uppercase text-xs opacity-50 disabled:opacity-30"
+                        on:click={prevSlide}
+                        disabled={activeHistorySlide === 0}
+                    >
+                        prev
+                    </button>
+
+                    <div class="min-w-[60px] text-center">
+                        {activeHistorySlide + 1} / {shuffledSlides.length}
+                    </div>
+
+                    <button
+                        class="hover:text-white btn-link uppercase text-xs opacity-50 disabled:opacity-30"
+                        on:click={nextSlide}
+                        disabled={activeHistorySlide === shuffledSlides.length - 1}
+                    >
+                        next
+                    </button>
+
+                </div>
             </div>
         </div>
     </section>
@@ -298,6 +348,7 @@
             <h2 class="mb-4">The Orb Gaming Ethos</h2>
 
             <div class="space-y-2 text-sm">
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                 {@html ethos_list}
             </div>
         </div>
@@ -316,7 +367,7 @@
 
             <img
                 src="/images/history/touch-da-butt.jpg"
-                alt="Orb community photo"
+                alt="A bunch of buffoons at an Orb wedding"
                 class="max-h-[460px] w-full rounded border border-border-faint object-cover shadow-panel opacity-70"
             />
 
