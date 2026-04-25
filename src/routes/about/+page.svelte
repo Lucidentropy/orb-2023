@@ -201,9 +201,10 @@
         </section>
     </div>
 
-    <section class="my-5">
+    <section class="my-5 relative">
         <h2>Orb Games Timeline</h2>
         <p class="px-2 mb-2">A look back at some of the games and when we established a presence in those games as a group.</p>
+        <img src="/images/history/raiding.png" class="z-1 absolute left-105 top-30" alt="Indicator for raiding"/>
         <svg
             viewBox={`0 0 ${width} ${height}`}
             class="w-full h-[260px] rounded border border-border-faint bg-gradient-to-b mb-1 from-bg-deep/60 via-bg-mid/40 to-black/60"
