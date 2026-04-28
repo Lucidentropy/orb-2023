@@ -52,6 +52,7 @@
 		devOnly: true,
 		subItems: [
 			{ text: 'Style Guide', url: '/styleguide' },
+			{ text: 'Misc', url: '/misc' },
 		],
 	}
 	];
@@ -76,11 +77,11 @@
 
 <svelte:head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Noto+Sans:wght@400;700&family=Ropa+Sans:ital@0;1&display=swap" rel="stylesheet">
 </svelte:head>
 
-<header>
+<header class="z-20">
 	<div
 		class="w-screen h-[130px] flex justify-center items-center text-center bg-center bg-[length:auto_100%]"
 		style="background-image:url('/images/layout/header.png')"

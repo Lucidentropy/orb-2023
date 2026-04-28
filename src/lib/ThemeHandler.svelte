@@ -9,31 +9,33 @@
 
 	const layoutClasses: Record<LayoutKey, { main: string; inner: string | null }> = {
 		classic: {
-			main: 'mx-auto mt-4 px-4 max-w-[1024px]',
+			main: 'mx-auto mt-2 px-2 sm:px-4 max-w-[1024px]',
 			inner: `
 				flex flex-[0.6] flex-col justify-center mx-auto relative
 				rounded-[4.5px]
-				p-[30px] max-w-[1024px] text-orb-highlight orb-theme-panel
+				p-3 sm:p-6 md:p-[30px]
+				max-w-[1024px] text-orb-highlight orb-theme-panel
 			`
 		},
 		wide: {
-			main: 'mx-auto mt-4 px-6 max-w-[1440px]',
+			main: 'mx-auto mt-2 px-2 sm:px-4 md:px-6 max-w-[1440px]',
 			inner: `
 				flex flex-col justify-center mx-auto relative
 				rounded-[4.5px]
-				p-[40px] max-w-[1440px] text-orb-highlight orb-theme-panel
+				p-3 sm:p-6 md:p-[40px]
+				max-w-[1440px] text-orb-highlight orb-theme-panel
 			`
 		},
 		centeredNarrow: {
-			main: 'mx-auto mt-4 px-4 max-w-[768px]',
+			main: 'mx-auto mt-2 px-2 sm:px-4 max-w-[768px]',
 			inner: null
 		},
 		centeredWide: {
-			main: 'mx-auto mt-4 px-6 max-w-[1200px]',
+			main: 'mx-auto mt-2 px-2 sm:px-4 md:px-6 max-w-[1200px]',
 			inner: null
 		},
 		fullWidth: {
-			main: 'w-full px-4',
+			main: 'w-full px-2 sm:px-4',
 			inner: null
 		}
 	};

@@ -191,11 +191,11 @@
         <section class="my-0">
             <h2>Some online games you'll find us in:</h2>
 
-            <div class="grid grid-cols-3 gap-1.5 uppercase tracking-wide mt-4 text-xs text-gray-400">
+            <div class="mt-4 flex flex-wrap gap-5 text-xs uppercase tracking-wide text-gray-400">
                 {#each games as game (game)}
-                    <div class="bg-none flex items-center justify-center px-3 py-2">
+                    <span class="whitespace-nowrap min-w-[140px]">
                         {game}
-                    </div>
+                    </span>
                 {/each}
             </div>
         </section>
@@ -203,96 +203,99 @@
 
     <section class="my-5 relative">
         <h2>Orb Games Timeline</h2>
-        <p class="px-2 mb-2">A look back at some of the games and when we established a presence in those games as a group.</p>
-        <img src="/images/history/raiding.png" class="z-1 absolute left-105 top-30" alt="Indicator for raiding"/>
-        <svg
-            viewBox={`0 0 ${width} ${height}`}
-            class="w-full h-[260px] rounded border border-border-faint bg-gradient-to-b mb-1 from-bg-deep/60 via-bg-mid/40 to-black/60"
-        >
-            <!-- main line -->
-            <line
-                x1="10"
-                y1={midY}
-                x2={width}
-                y2={midY}
-                stroke="rgba(255,255,255,0.2)"
-                stroke-width="1"
-            />
+        <p class="px-2 mb-2">A look back at some of the games and when we established a presence in those games as a group. Because this timeline only indicates when we started playing a game, we've added a helpful indicator to show the empty period where we were primarily raiding in WoW. Indicator graphic provided on liscence from Murrdyn.</p>
+        <div class="relative overflow-x-auto">
+            <img src="/images/history/raiding.png" class="absolute left-[350px] top-[30px] z-10 scale-80" alt="Indicator for raiding"/>
 
-            {#each sortedTimeline as item, index (item.year + '-' + item.label)}
-                {@const x = xForYear(item.year)}
-                {@const offset = laneOffset(index) * 22}
-                {@const connectorBase = 18}
-                {@const connectorLen = connectorBase + Math.abs(offset)}
+            <svg
+                viewBox={`0 0 ${width} ${height}`}
+                class="min-w-[900px] h-[260px] mx-auto rounded border border-border-faint bg-gradient-to-b mb-1 from-bg-deep/60 via-bg-mid/40 to-black/60"
+            >
+                <!-- main line -->
+                <line
+                    x1="10"
+                    y1={midY}
+                    x2={width}
+                    y2={midY}
+                    stroke="rgba(255,255,255,0.2)"
+                    stroke-width="1"
+                />
 
-                <!-- dot -->
-                <circle cx={x} cy={midY} r="4" fill="var(--orb-highlight)" />
+                {#each sortedTimeline as item, index (item.year + '-' + item.label)}
+                    {@const x = xForYear(item.year)}
+                    {@const offset = laneOffset(index) * 22}
+                    {@const connectorBase = 18}
+                    {@const connectorLen = connectorBase + Math.abs(offset)}
 
-                {#if index % 2 === 0}
-                    <!-- connector up -->
-                    <line
-                        x1={x}
-                        y1={midY}
-                        x2={x}
-                        y2={midY - connectorLen + 10}
-                        stroke="rgba(255,255,255,0.25)"
-                    />
+                    <!-- dot -->
+                    <circle cx={x} cy={midY} r="4" fill="var(--orb-highlight)" />
 
-                    <!-- year -->
-                    <text
-                        x={x}
-                        y={midY - connectorLen - 10}
-                        text-anchor="middle"
-                        font-size="10"
-                        fill="rgba(255,255,255,0.7)"
-                    >
-                        {item.year}
-                    </text>
+                    {#if index % 2 === 0}
+                        <!-- connector up -->
+                        <line
+                            x1={x}
+                            y1={midY}
+                            x2={x}
+                            y2={midY - connectorLen + 10}
+                            stroke="rgba(255,255,255,0.25)"
+                        />
 
-                    <!-- label -->
-                    <text
-                        x={x}
-                        y={midY - connectorLen + 4}
-                        text-anchor="middle"
-                        font-size="12"
-                        fill="white"
-                    >
-                        {item.label}
-                    </text>
-                {:else}
-                    <!-- connector down -->
-                    <line
-                        x1={x}
-                        y1={midY}
-                        x2={x}
-                        y2={midY + connectorLen - 10}
-                        stroke="rgba(255,255,255,0.25)"
-                    />
+                        <!-- year -->
+                        <text
+                            x={x}
+                            y={midY - connectorLen - 10}
+                            text-anchor="middle"
+                            font-size="10"
+                            fill="rgba(255,255,255,0.7)"
+                        >
+                            {item.year}
+                        </text>
 
-                    <!-- year -->
-                    <text
-                        x={x}
-                        y={midY + connectorLen + 2}
-                        text-anchor="middle"
-                        font-size="10"
-                        fill="rgba(255,255,255,0.7)"
-                    >
-                        {item.year}
-                    </text>
+                        <!-- label -->
+                        <text
+                            x={x}
+                            y={midY - connectorLen + 4}
+                            text-anchor="middle"
+                            font-size="12"
+                            fill="white"
+                        >
+                            {item.label}
+                        </text>
+                    {:else}
+                        <!-- connector down -->
+                        <line
+                            x1={x}
+                            y1={midY}
+                            x2={x}
+                            y2={midY + connectorLen - 10}
+                            stroke="rgba(255,255,255,0.25)"
+                        />
 
-                    <!-- label -->
-                    <text
-                        x={x}
-                        y={midY + connectorLen + 16}
-                        text-anchor="middle"
-                        font-size="12"
-                        fill="white"
-                    >
-                        {item.label}
-                    </text>
-                {/if}
-            {/each}
-        </svg>
+                        <!-- year -->
+                        <text
+                            x={x}
+                            y={midY + connectorLen + 2}
+                            text-anchor="middle"
+                            font-size="10"
+                            fill="rgba(255,255,255,0.7)"
+                        >
+                            {item.year}
+                        </text>
+
+                        <!-- label -->
+                        <text
+                            x={x}
+                            y={midY + connectorLen + 16}
+                            text-anchor="middle"
+                            font-size="12"
+                            fill="white"
+                        >
+                            {item.label}
+                        </text>
+                    {/if}
+                {/each}
+            </svg>
+        </div>
 
         <div class="relative h-[300px] overflow-hidden rounded border border-border-faint bg-black md:h-[400px]">
             {#each shuffledSlides as slide, index (slide)}
@@ -336,11 +339,11 @@
     </section>
 
 
-    <div class="relative overflow-hidden rounded border border-border-faint ">
+    <div class="relative overflow-hidden rounded border border-border-faint min-h-[240px] sm:min-h-[300px]">
         <img
             src="./images/tribes/calvinhobbesctf.jpg"
             alt="Calvin and Hobbes stealing the flag."
-            class="absolute inset-0 h-full w-full object-cover"
+            class="absolute inset-0 h-full w-full object-cover object-center z-0"
         />
 
         <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"></div>
@@ -353,7 +356,7 @@
                 {@html ethos_list}
             </div>
         </div>
-1    </div>
+    </div>
 
  	<div class="grid gap-6 lg:grid-cols-2">
         <section class="my-0">

@@ -4,13 +4,49 @@
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { play, pause, fastForward, fastBackward } from 'svelte-awesome/icons';
 
-	type VideoEntry = {
+	type MediaSource = {
 		game: string;
 		domain: string;
 		token: string;
-		uri: string;
+	};
+
+	type MediaResolved = {
+		game: string;
+		domain: string;
+		token: string;
+		uris: string[];
 		src: string;
 	};
+
+	const mediaResolvers: Record<string, (token: string) => { uris: string[]; src: string }> = {
+		reddit: (token) => ({
+			uris: [
+				`https://v.redd.it/${token}/DASH_720.mp4`,
+				`https://v.redd.it/${token}/CMAF_720.mp4`,
+				`https://v.redd.it/${token}/DASH_480.mp4`
+			],
+			src: `https://v.redd.it/${token}`
+		}),
+		imgur: (token) => ({
+			uris: [`https://i.imgur.com/${token}.mp4`],
+			src: `https://imgur.com/${token}`
+		})
+	};
+
+	function resolveMedia(item: MediaSource): MediaResolved | null {
+		const resolver = mediaResolvers[item.domain];
+		if (!resolver) return null;
+
+		const { uris, src } = resolver(item.token);
+
+		return {
+			...item,
+			uris,
+			src
+		};
+	}
+
+	type VideoEntry = MediaResolved;
 
 	let videoEl = $state<HTMLVideoElement | null>(null);
 	let playing = $state(true);
@@ -18,51 +54,69 @@
 	let errorCount = $state(0);
 	let videos = $state<VideoEntry[]>([]);
 	let videoIndex = 0;
-
 	const ERROR_TOLERANCE = 10;
 
 	function shuffle<T>(arr: T[]): T[] {
-		return [...arr].sort(() => Math.random() - 0.5);
+		const result = [...arr];
+		for (let i = result.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[result[i], result[j]] = [result[j], result[i]];
+		}
+		return result;
+	}	
+
+	async function loadVideo() {
+		if (!videoEl || filteredVideos.length === 0) return;
+
+		const entry = filteredVideos[videoIndex];
+		currentVideo = null;
+
+		for (const uri of entry.uris) {
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 6000);
+
+			try {
+				const res = await fetch(uri, { signal: controller.signal });
+				if (!res.ok) throw new Error('bad response');
+
+				const blob = await res.blob();
+				clearTimeout(timeout);
+
+				videoEl.src = URL.createObjectURL(blob);
+				videoEl.play();
+
+				currentVideo = entry;
+				activeToken = entry.token;
+				errorCount = 0;
+
+				return;
+			} catch {
+				clearTimeout(timeout);
+			}
+		}
+
+		console.error(`bad video: ${entry.token} (${entry.domain})`);
+
+		errorCount++;
+		if (errorCount < ERROR_TOLERANCE) nextVideo();
 	}
 
-    async function loadVideo() {
-        if (!videoEl || videos.length === 0) return;
-        const entry = videos[videoIndex];
-        currentVideo = null;
-
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-
-        try {
-            const res = await fetch(entry.uri, { signal: controller.signal });
-            if (!res.ok) throw new Error('bad response');
-            const blob = await res.blob();
-            clearTimeout(timeout);
-            videoEl.src = URL.createObjectURL(blob);
-            videoEl.play();
-            currentVideo = entry;
-            errorCount = 0;
-        } catch {
-            clearTimeout(timeout);
-            errorCount++;
-            if (errorCount < ERROR_TOLERANCE) nextVideo();
-        }
-    }
-
 	export function nextVideo() {
-		videoIndex = (videoIndex + 1) % videos.length;
+		videoIndex = (videoIndex + 1) % filteredVideos.length;
 		loadVideo();
 	}
 
 	export function prevVideo() {
-		videoIndex = (videoIndex - 1 + videos.length) % videos.length;
+		videoIndex = (videoIndex - 1 + filteredVideos.length) % filteredVideos.length;
 		loadVideo();
 	}
 
 	export function togglePlay() {
 		if (!videoEl) return;
-		playing ? videoEl.pause() : videoEl.play();
+		if (playing) videoEl.pause();
+		else videoEl.play();
 	}
+	
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'ArrowRight') nextVideo();
@@ -79,14 +133,54 @@
         }
     };
 
-    const onBlur = () => videoEl?.pause();
-    const onFocus = () => { if (playing) videoEl?.play(); };
 
+	let drawerOpen = $state(false);
+	let selectedGame = $state<string | null>(null);
+	let activeToken = $state<string | null>(null);
+		
+	const uniqueGames = $derived(
+		[...new Set(videos.map(v => v.game))].sort((a, b) => a.localeCompare(b))
+	);
+
+	const filteredVideos = $derived(
+		selectedGame ? videos.filter(v => v.game === selectedGame) : videos
+	);	
+
+
+	function getThumbnail(item: MediaSource): string | null {
+		switch (item.domain) {
+			case 'reddit':
+				return `https://v.redd.it/${item.token}/DASH_96.jpg`;
+			case 'imgur':
+				return `https://i.imgur.com/${item.token}s.jpg`;
+			default:
+				return null;
+		}
+	}
+
+	function handleThumbError(e: Event) {
+		const el = e.currentTarget as HTMLImageElement;
+		el.style.display = 'none';
+		const parent = el.parentElement;
+		if (!parent) return;
+
+		const fallback = document.createElement('div');
+		fallback.className = 'w-28 h-18 flex items-center justify-center text-[10px] text-white/30 bg-black/40 border border-border-faint';
+		fallback.textContent = 'Thumbnail Error';
+
+		parent.appendChild(fallback);
+	}	
 
 	onMount(async () => {
 		const mod = await import('$lib/data/videoPlayerDB.js');
-		const db: VideoEntry[] = mod.videoDB ?? mod.default ?? [];
-		videos = shuffle(db);
+		const data = mod as { videoDB?: MediaSource[]; default?: MediaSource[] };
+		const db: MediaSource[] = data.videoDB ?? data.default ?? [];
+
+		const resolved = db
+			.map(resolveMedia)
+			.filter((v): v is MediaResolved => v !== null);
+
+		videos = shuffle(resolved);
 
 		if (videoEl) {
 			videoEl.addEventListener('play', () => (playing = true));
@@ -118,7 +212,15 @@
 		<button type="button" class="btn-icon ctrl-btn" onclick={togglePlay} title={playing ? 'Pause' : 'Play'}>
 			<Icon data={playing ? pause : play} />
 		</button>
-		<span class="channel-label">{currentVideo?.game ?? 'Loading...'}</span>
+		<span class="channel-label">
+			<button
+				type="button"
+				class="btn-link z-20 text-xs uppercase tracking-widest text-white/70 hover:text-white"
+				onclick={() => (drawerOpen = !drawerOpen)}
+			>
+				{currentVideo?.game}
+			</button>
+		</span>
 		<button type="button" class="btn-icon ctrl-btn" onclick={nextVideo} title="Next">
 			<Icon data={fastForward} />
 		</button>
@@ -131,6 +233,87 @@
 		</p>
 	{/if}
 </div>
+
+{#if drawerOpen}
+	<div class="fixed inset-x-0 bottom-0 z-30 bg-black/90 border-t border-border-faint p-4 max-h-[60vh] overflow-y-auto">
+		
+		{#if !selectedGame}
+			<!-- GAME LIST -->
+			<div class="flex flex-wrap gap-4 justify-center">
+				{#each uniqueGames as game (game)}
+					<button
+						type="button"
+						class="btn-link text-xs uppercase tracking-wide px-2 py-1 border"
+						class:border-border-default={selectedGame === game}
+						class:text-white={selectedGame !== game}
+						onclick={() => (selectedGame = game)}
+					>
+						{game}
+					</button>
+				{/each}
+			</div>
+		{:else}
+			<!-- VIDEO THUMBNAILS -->
+			<div class="flex flex-wrap gap-3 justify-center">
+				{#each videos.filter(v => v.game === selectedGame) as v (v.token)}
+					<button
+						type="button"
+						class="btn-link block border"
+						class:border-border-default={activeToken === v.token}
+						class:border-border-faint={activeToken !== v.token}
+						onclick={() => {
+							videoIndex = filteredVideos.findIndex(x => x.token === v.token);
+							activeToken = v.token;
+							loadVideo();
+						}}
+					>
+						<img
+							src={getThumbnail(v)}
+							alt=""
+							class="w-28 h-18 object-cover"
+							onerror={handleThumbError}
+						/>
+					</button>
+				{/each}
+			</div>
+
+			<div class="mt-4 flex justify-center gap-4">
+				<button
+					type="button"
+					class="btn-link text-xs text-white/60 hover:text-white"
+					onclick={() => {
+						videoIndex = 0;
+						drawerOpen = false;
+						loadVideo();
+					}}
+				>
+					Play {selectedGame}
+				</button>
+
+				<button
+					type="button"
+					class="btn-link text-xs text-white/40 hover:text-white"
+					onclick={() => (selectedGame = null)}
+				>
+					Back
+				</button>
+			</div>
+		{/if}
+
+		<div class="mt-4 text-center">
+			<button
+				type="button"
+				class="btn-link text-xs text-white/40 hover:text-white"
+				onclick={() => {
+					selectedGame = null;
+					drawerOpen = false;
+				}}
+			>
+				Close
+			</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.pogotron {

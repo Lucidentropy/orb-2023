@@ -145,9 +145,9 @@
         @apply text-white underline;
     }
 
-    h1 {
+    main h1:first-of-type {
         @apply font-display text-[1.75rem] leading-tight font-bold text-white p-5 rounded-t-[10px] shadow-[inset_0_0_10px_#000] border-b;
-        margin: -40px -40px 20px;
+        @apply -mx-3 -mt-3 mb-4 sm:-mx-4 sm:-mt-4 md:-mx-6 md:-mt-6;
         text-shadow: 1px 1px 1px #000;
         border-bottom-color: #111;
         clear: both;
@@ -160,8 +160,7 @@
 
         background-blend-mode: color, luminosity, normal;
     }
-
-
+    
     h1 p {
         @apply text-[13px] uppercase font-normal;
         margin: 0;
@@ -195,7 +194,7 @@
     }
     
     section {
-        @apply space-y-6 rounded border border-border-faint/50 p-4 bg-bg-deep/30 my-2;
+        @apply space-y-6 rounded border border-border-faint/50 p-3 sm:p-4 bg-bg-deep/30 my-2;
     }
 
     input {
