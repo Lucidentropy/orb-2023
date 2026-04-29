@@ -84,7 +84,7 @@
 
 					<button
 						type="button"
-						class="btn-link text-[0.65rem] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 mt-4"
+						class="btn-link text-[0.65rem] uppercase tracking-[0.2em] opacity-30 hover:opacity-100 mt-16"
 						onclick={() => (cinemaMode = true)}
 					>
 						Toggle BG Video Mode
@@ -95,9 +95,9 @@
 				<!-- faint logo background -->
 				<div class="pointer-events-none absolute inset-0 flex items-center justify-center">
 					<img
-						src="/images/new_orb_transparent.png"
+						src="/images/neworbdemo.jpg"
 						alt=""
-						class="w-[98%] h-[98%] object-contain opacity-15"
+						class="w-[100%] h-[100%] object-contain opacity-15"
 					/>
 				</div>		
 			</div>

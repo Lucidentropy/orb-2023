@@ -1,199 +1,197 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { replaceState } from '$app/navigation';
-	import { blur } from 'svelte/transition';
+import { onMount } from 'svelte';
+import { blur } from 'svelte/transition';
 
-	import type { WowEnrichedMember, WowApiResponse } from '$lib/types/wow';
+import type { WowEnrichedMember, WowApiResponse } from '$lib/types/wow';
 
-	import Container from '$lib/ThemeHandler.svelte';
-	import { factionName, realmName } from "$lib/client/wowData";
+import Container from '$lib/ThemeHandler.svelte';
+import { factionName, realmName } from "$lib/client/wowData";
 
-	import Roster from './Roster.svelte';
-	import Character from './Character.svelte';
-	import Cache from './Cache.svelte';
-	import Activity from './Activity.svelte';
-	import Neighborhood from './Neighborhood.svelte';
-	import GuildStats from './GuildStats.svelte';
+import Roster from './Roster.svelte';
+import Character from './Character.svelte';
+import Cache from './Cache.svelte';
+import Activity from './Activity.svelte';
+import Neighborhood from './Neighborhood.svelte';
+import GuildStats from './GuildStats.svelte';
 
-	type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood' | 'guildstats';
-	type CharacterTab = 'gear' | 'alts';
+type PanelView = 'roster' | 'character' | 'cache' | 'neighborhood' | 'guildstats';
+type CharacterTab = 'gear' | 'alts';
 
-	const PANELS: { id: PanelView; name: string; url: string }[] = [
-		{ id: 'roster',       name: 'Roster',      url: '/wow' },
-		{ id: 'neighborhood', name: 'Neighborhood', url: '/wow/neighborhood' },
-		{ id: 'guildstats',   name: 'Guild Stats',  url: '/wow/guildstats' },
-		{ id: 'cache',        name: 'Cache',        url: '/wow/cache' },
-	];
+const PANELS: { id: PanelView; name: string; url: string }[] = [
+	{ id: 'roster',       name: 'Roster',      url: '/wow' },
+	{ id: 'neighborhood', name: 'Neighborhood', url: '/wow/neighborhood' },
+	{ id: 'guildstats',   name: 'Guild Stats',  url: '/wow/guildstats' },
+	{ id: 'cache',        name: 'Cache',        url: '/wow/cache' },
+];
 
-	const HIDDEN_PANELS = new Set<PanelView>(['character']);
+const HIDDEN_PANELS = new Set<PanelView>(['character']);
 
-	let wowData = $state<WowApiResponse | null>(null);
-	let loading = $state(true);
-	let error = $state('');
-	let currentCharTab = $state<CharacterTab>('gear');
-	let panelView = $state<PanelView>('roster');
-	let selectedMember = $state<WowEnrichedMember | null>(null);
+let wowData = $state<WowApiResponse | null>(null);
+let loading = $state(true);
+let error = $state('');
+let currentCharTab = $state<CharacterTab>('gear');
+let panelView = $state<PanelView>('roster');
+let selectedMember = $state<WowEnrichedMember | null>(null);
 
-	let neighborhoodData: { plots: unknown[] } | null = $state(null);
-	let neighborhoodLoading = $state(false);
-	let neighborhoodError = $state('');
+let neighborhoodData = $state<{ plots: unknown[] } | null>(null);
+let neighborhoodLoading = $state(false);
+let neighborhoodError = $state('');
 
-	onMount(() => {
-		const handler = (e: PromiseRejectionEvent) => { e.preventDefault(); };
-		window.addEventListener('unhandledrejection', handler);
-		return () => window.removeEventListener('unhandledrejection', handler);
-	});
+onMount(() => {
+	const handler = (e: PromiseRejectionEvent) => { e.preventDefault(); };
+	window.addEventListener('unhandledrejection', handler);
+	return () => window.removeEventListener('unhandledrejection', handler);
+});
 
+onMount(async () => {
+	const url = new URL(window.location.href);
+	const panel = url.searchParams.get('panel');
+	const char = url.searchParams.get('char');
+	if (char) {
+		const parts = char.split('/');
+		const realm = parts[0] ?? '';
+		const name = parts[1] ?? '';
+		const tab = parts[2] ?? 'gear';
+		if (realm && name) window.history.replaceState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+	} else if (panel) {
+		const panelMap: Record<string, string> = {
+			roster: '/wow',
+			neighborhood: '/wow/neighborhood',
+			guildstats: '/wow/guildstats',
+			cache: '/wow/cache',
+		};
+		const target = panelMap[panel];
+		if (target) window.history.replaceState({}, '', target);
+	}
 
-	onMount(async () => {
-		const url = new URL(window.location.href);
-		const panel = url.searchParams.get('panel');
-		const char = url.searchParams.get('char');
-		if (char) {
-			const parts = char.split('/');
-			const realm = parts[0] ?? '';
-			const name = parts[1] ?? '';
-			const tab = parts[2] ?? 'gear';
-			if (realm && name) window.history.replaceState({}, '', `/wow/char/${realm}/${name}/${tab}`);
-		} else if (panel) {
-			const panelMap: Record<string, string> = {
-				roster: '/wow',
-				neighborhood: '/wow/neighborhood',
-				guildstats: '/wow/guildstats',
-				cache: '/wow/cache',
-			};
-			const target = panelMap[panel];
-			if (target) window.history.replaceState({}, '', target);
-		}
+	if (!document.getElementById('wowhead-tooltip-script')) {
+		const script = document.createElement('script');
+		script.id = 'wowhead-tooltip-script';
+		script.src = 'https://wow.zamimg.com/js/tooltips.js';
+		script.async = true;
+		document.head.appendChild(script);
+	}
 
-		if (!document.getElementById('wowhead-tooltip-script')) {
-			const script = document.createElement('script');
-			script.id = 'wowhead-tooltip-script';
-			script.src = 'https://wow.zamimg.com/js/tooltips.js';
-			script.async = true;
-			document.head.appendChild(script);
-		}
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 5000);
 
+		let response: Response;
 		try {
-			const controller = new AbortController();
-			const timeout = setTimeout(() => controller.abort(), 5000);
-
-			let response: Response;
-			try {
-				response = await fetch('/api/wow', { signal: controller.signal });
-			} catch (err: unknown) {
-				if (err instanceof Error && err.name === 'AbortError') {
-					throw new Error('Request timed out after 5s — Battle.net may be unavailable');
-				}
-				throw new Error(`Network error: ${err instanceof Error ? err.message : 'Unknown'}`);
-			} finally {
-				clearTimeout(timeout);
-			}
-
-			let data: WowApiResponse;
-			try {
-				data = await response.json();
-			} catch {
-				throw new Error(`Server returned non-JSON response (status ${response.status})`);
-			}
-
-			if (!response.ok || data?.error) {
-				throw new Error(data?.message || `API error (${response.status})`);
-			}
-
-			wowData = data;
-			restoreFromUrl(data);
+			response = await fetch('/api/wow', { signal: controller.signal });
 		} catch (err: unknown) {
-			error = err instanceof Error ? err.message : 'Unknown error loading guild data';
-			console.error('[wow page]', err);
-		} finally {
-			loading = false;
-		}
-	});
-
-	async function openPanel(view: PanelView) {
-		panelView = view;
-
-		if (view === 'roster') {
-			selectedMember = null;
-			replaceState('/wow', {});
-			return;
-		}
-
-		const panel = PANELS.find(p => p.id === view);
-		if (panel) replaceState(panel.url, {});
-
-		if (view === 'neighborhood') {
-			if (neighborhoodData || neighborhoodLoading) return;
-			neighborhoodLoading = true;
-			try {
-				const response = await fetch('/api/wow/neighborhood');
-				const data = await response.json();
-				if (!response.ok || data?.error) throw new Error(data?.message || 'Failed to load neighborhood data');
-				neighborhoodData = data;
-			} catch (err: unknown) {
-				neighborhoodError = err instanceof Error ? err.message : 'Unknown error';
-			} finally {
-				neighborhoodLoading = false;
+			if (err instanceof Error && err.name === 'AbortError') {
+				throw new Error('Request timed out after 5s — Battle.net may be unavailable');
 			}
+			throw new Error(`Network error: ${err instanceof Error ? err.message : 'Unknown'}`);
+		} finally {
+			clearTimeout(timeout);
 		}
+
+		let data: WowApiResponse;
+		try {
+			data = await response.json();
+		} catch {
+			throw new Error(`Server returned non-JSON response (status ${response.status})`);
+		}
+
+		if (!response.ok || data?.error) {
+			throw new Error(data?.message || `API error (${response.status})`);
+		}
+
+		wowData = data;
+		restoreFromUrl(data);
+	} catch (err: unknown) {
+		error = err instanceof Error ? err.message : 'Unknown error loading guild data';
+		console.error('[wow page]', err);
+	} finally {
+		loading = false;
+	}
+});
+
+async function openPanel(view: PanelView) {
+	panelView = view;
+
+	if (view === 'roster') {
+		selectedMember = null;
+		window.history.replaceState({}, '', '/wow');
+		return;
 	}
 
-	function restoreFromUrl(data: WowApiResponse) {
-		const path = window.location.pathname;
+	const panel = PANELS.find(p => p.id === view);
+	if (panel) window.history.replaceState({}, '', panel.url);
 
-		if (path.startsWith('/wow/neighborhood')) { openPanel('neighborhood'); return; }
-		if (path.startsWith('/wow/guildstats')) { panelView = 'guildstats'; return; }
-		if (path.startsWith('/wow/cache')) { panelView = 'cache'; return; }
-
-		const pathMatch = path.match(/^\/wow\/char\/([^/]+)\/([^/]+)\/(gear|alts|cache)$/i);
-		if (!pathMatch) return;
-
-		const realm = decodeURIComponent(pathMatch[1]);
-		const name = decodeURIComponent(pathMatch[2]);
-		const tab = pathMatch[3].toLowerCase() as CharacterTab;
-
-		const found = (data?.roster?.members ?? []).find(
-			(m: WowEnrichedMember) =>
-				m.character?.realm?.slug?.toLowerCase() === realm.toLowerCase() &&
-				m.character?.name?.toLowerCase() === name.toLowerCase()
-		);
-
-		if (found) {
-			selectedMember = found as WowEnrichedMember;
-			panelView = 'character';
-			currentCharTab = tab;
+	if (view === 'neighborhood') {
+		if (neighborhoodData || neighborhoodLoading) return;
+		neighborhoodLoading = true;
+		try {
+			const response = await fetch('/api/wow/neighborhood');
+			const data = await response.json();
+			if (!response.ok || data?.error) throw new Error(data?.message || 'Failed to load neighborhood data');
+			neighborhoodData = data;
+		} catch (err: unknown) {
+			neighborhoodError = err instanceof Error ? err.message : 'Unknown error';
+		} finally {
+			neighborhoodLoading = false;
 		}
 	}
+}
 
-	function selectMember(member: WowEnrichedMember, tab: CharacterTab = 'gear') {
-		selectedMember = member;
-		panelView = 'character';
-		currentCharTab = tab;
-		const realm = member?.character?.realm?.slug;
-		const name = member?.character?.name;
-		if (realm && name) {
-			replaceState(`/wow/char/${realm}/${name}/${tab}`, {});
-		}
-	}
+function restoreFromUrl(data: WowApiResponse) {
+	const path = window.location.pathname;
 
-	const rosterMembers = $derived((wowData?.roster?.members ?? []) as WowEnrichedMember[]);
+	if (path.startsWith('/wow/neighborhood')) { openPanel('neighborhood'); return; }
+	if (path.startsWith('/wow/guildstats')) { panelView = 'guildstats'; return; }
+	if (path.startsWith('/wow/cache')) { panelView = 'cache'; return; }
 
-	const rosterMap = $derived(
-		Object.fromEntries(
-			rosterMembers.map((m) => {
-				const key = `${m.character?.name?.toLowerCase()}-${m.character?.realm?.slug}`;
-				return [key, { classId: m.character?.playable_class?.id }];
-			})
-		)
+	const pathMatch = path.match(/^\/wow\/char\/([^/]+)\/([^/]+)\/(gear|alts|cache)$/i);
+	if (!pathMatch) return;
+
+	const realm = decodeURIComponent(pathMatch[1]);
+	const name = decodeURIComponent(pathMatch[2]);
+	const tab = pathMatch[3].toLowerCase() as CharacterTab;
+
+	const found = (data?.roster?.members ?? []).find(
+		(m: WowEnrichedMember) =>
+			m.character?.realm?.slug?.toLowerCase() === realm.toLowerCase() &&
+			m.character?.name?.toLowerCase() === name.toLowerCase()
 	);
 
-	async function refreshRoster() {
-		const response = await fetch('/api/wow?bust=true');
-		const data = await response.json();
-		if (!response.ok || data?.error) throw new Error(data?.message || 'Refresh failed');
-		wowData = data;
+	if (found) {
+		selectedMember = found as WowEnrichedMember;
+		panelView = 'character';
+		currentCharTab = tab;
 	}
+}
+
+function selectMember(member: WowEnrichedMember, tab: CharacterTab = 'gear') {
+	selectedMember = member;
+	panelView = 'character';
+	currentCharTab = tab;
+	const realm = member?.character?.realm?.slug;
+	const name = member?.character?.name;
+	if (realm && name) {
+		window.history.replaceState({}, '', `/wow/char/${realm}/${name}/${tab}`);
+	}
+}
+
+const rosterMembers = $derived((wowData?.roster?.members ?? []) as WowEnrichedMember[]);
+
+const rosterMap = $derived(
+	Object.fromEntries(
+		rosterMembers.map((m) => {
+			const key = `${m.character?.name?.toLowerCase()}-${m.character?.realm?.slug}`;
+			return [key, { classId: m.character?.playable_class?.id }];
+		})
+	)
+);
+
+async function refreshRoster() {
+	const response = await fetch('/api/wow?bust=true');
+	const data = await response.json();
+	if (!response.ok || data?.error) throw new Error(data?.message || 'Refresh failed');
+	wowData = data;
+}
 </script>
 
 <svelte:head>

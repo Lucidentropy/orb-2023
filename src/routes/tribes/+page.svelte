@@ -3,8 +3,30 @@
     import { slide, fade } from 'svelte/transition';
 	import Container from '$lib/ThemeHandler.svelte';
     import VgsMenu from './vgsMenu.svelte';
+    
+    import Icon from 'svelte-awesome';
+    import { faArrowUpRightFromSquare, faBan } from '@fortawesome/free-solid-svg-icons';
+    
+    const links = [
+        { label: "Particle's Custom RPG", href: 'https://www.pcrpg.org/' },
+        { label: 'Annihilation Mod', href: 'https://www.annihilation.info/' },
+        { label: 'Starsiege: Tribes - TheExiled Library', href: 'https://library.theexiled.pwnageservers.com/category.php?id=167' },
+        { label: 'Tribes 1 Resource Thread - TribalWar', href: 'https://www.tribalwar.com/forums/showthread.php?t=607313' },
+        { label: 'Tribes 1 Links Thread - TribalWar', href: 'https://www.tribalwar.com/forums/showthread.php?t=225377' },
+        { label: 'Scripts for Tribes 1.40 - TribalWar', href: 'https://www.tribalwar.com/forums/showthread.php?t=607365' },
+        { label: 'playt1.com - How to Get Back In', href: 'https://playt1.com/' },
+        { label: 'Tribes 1 Demo Archive - twdemos', href: 'https://twdemos.iateyourbaby.com/' },
+        { label: 'Starsiege: Tribes - ModDB', href: 'https://www.moddb.com/games/tribes' },
+        { label: 'Starsiege: Tribes - PCGamingWiki', href: 'https://www.pcgamingwiki.com/wiki/Starsiege:_Tribes' },
+        { label: 'Starsiege: Tribes - Wikipedia', href: 'https://en.wikipedia.org/wiki/Starsiege:_Tribes' },
+        { label: 'tribes1game.com - Community Hub', href: 'http://www.tribes1game.com/', defunct: true },
+                { label: 'tribesmasterserver.com', href: 'https://www.tribesmasterserver.com/', defunct: true },
+        { label: 'Tribes 1 Master Server Query - maxogc.net', href: 'https://www.maxogc.net/tribes/master/index.php', defunct: true },
+        { label: 't1m1.pu.net', href: 'https://t1m1.pu.net/', defunct: true },
+    ];
+    
+    
     export const ssr = false;
-
     let masterServerQuery = [];
     let serverList = [];
     let sortKey = '';
@@ -25,17 +47,20 @@
             sortKey = column;
             sortDirection = 1;
         }
-
         serverList = serverList.sort((a, b) => {
-            const keys = sortKey.split('.');
-            let aValue = a;
-            let bValue = b;
-
-            for (let key of keys) {
-                aValue = aValue[key];
-                bValue = bValue[key];
+            let aValue, bValue;
+            if (column === 'mods') {
+                aValue = a.server?.mods?.trim() || 'base';
+                bValue = b.server?.mods?.trim() || 'base';
+            } else {
+                const keys = sortKey.split('.');
+                aValue = a;
+                bValue = b;
+                for (let key of keys) {
+                    aValue = aValue?.[key];
+                    bValue = bValue?.[key];
+                }
             }
-
             if (aValue < bValue) return -sortDirection;
             if (aValue > bValue) return sortDirection;
             return 0;
@@ -176,7 +201,7 @@
     </style>
 
     <p>Orb was founded in Tribes as well as contributed to several of the game's several widely used mods such as Annhilation, Tribes RPG, and Shifter. There is not a lot of servers still online, but the game is freeware and available to all to download and play.</p>
-    <section>
+    <section class="mt-4">
         <h2>Tribes 1 Realtime Master Server List</h2>
 
         <audio bind:this={button1Sound} src="/audio/Button1.wav" preload="auto"></audio>
@@ -209,7 +234,7 @@
                     </div>
 
                     <div class="details green-border">
-                        {#if serverData.game.game !== 'RPGMOD'}
+                        {#if serverData.game.game !== 'RPGMOD' && serverData.game.mods.toLowerCase() !== 'rpg base'}
                             <table>
                                 <thead>
                                     <tr>
@@ -304,7 +329,7 @@
                                 <th on:click={() => sort('server.game')}>Type</th>
                                 <th on:click={() => sort('map')}>Mission</th>
                                 <th on:click={() => sort('currentPlayers')}>Players</th>
-                                <th on:click={() => sort('server?.mods')}>Server Type/Mods</th>
+                                <th on:click={() => sort('mods')}>Server Type/Mods</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -419,79 +444,25 @@
         <p class="text-orb-highlight/75">
             Please note - Tribes is a game from 1998, many of these sites will fade away over time. I've attempted to keep as many links to old resources here as possible.
         </p>
-
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <a
-                href="https://library.theexiled.pwnageservers.com/category.php?id=167"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Starsiege: Tribes - TheExiled Library
-            </a>
-
-            <a
-                href="https://www.tribalwar.com/forums/showthread.php?t=607313"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Tribes 1 Resource Thread - TribalWar
-            </a>
-
-            <a
-                href="https://www.tribalwar.com/forums/showthread.php?t=225377"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Tribes 1 Links Thread - TribalWar
-            </a>
-
-            <a
-                href="https://www.annihilation.info/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Annihilation Mod
-            </a>
-
-            <a
-                href="https://www.tribesmasterserver.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                tribesmasterserver.com
-            </a>
-
-            <a
-                href="https://www.maxogc.net/tribes/master/index.php"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Tribes 1 Master Server Query
-            </a>
-
-            <a
-                href="https://t1m1.pu.net/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                t1m1.pu.net
-            </a>
-
-            <a
-                href="https://www.pcrpg.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
-            >
-                Particle's Custom RPG
-            </a>
+            {#each links as link (link.href)}
+                {#if link.defunct}
+                    <span class="flex items-center gap-3 rounded border border-border-faint/30 bg-bg-deep/10 px-4 py-3 text-orb-highlight/25 line-through cursor-not-allowed select-none">
+                        <Icon data={faBan} class="shrink-0 text-[0.8rem]" />
+                        {link.label}
+                    </span>
+                {:else}
+                    
+                    <a href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center gap-3 rounded border border-border-faint/60 bg-bg-deep/20 px-4 py-3 text-orb-link no-underline transition hover:border-border hover:text-white"
+                    >
+                        <Icon data={faArrowUpRightFromSquare} class="shrink-0 text-[0.8rem] opacity-50" />
+                        {link.label}
+                    </a>
+                {/if}
+            {/each}
         </div>
     </section>
 </Container>

@@ -252,11 +252,6 @@ const videoDB = [
     {
         "game": "Battlefield",
         "domain": "imgur",
-        "token": "Cn6IFnQ"
-    },
-    {
-        "game": "Battlefield",
-        "domain": "imgur",
         "token": "ia7spnz"
     },
     {
@@ -563,11 +558,6 @@ const videoDB = [
         "game": "Grand Theft Auto",
         "domain": "imgur",
         "token": "XEClLfV"
-    },
-    {
-        "game": "Grand Theft Auto",
-        "domain": "imgur",
-        "token": "0SxpxDf"
     },
     {
         "game": "Grand Theft Auto",
@@ -1168,6 +1158,81 @@ const videoDB = [
         "game": "Forza Horizon 6",
         "domain": "reddit",
         "token": "v56ob5v4o2jg1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "jijpdcaz3q0f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "ax4ap8ywrd1f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "3763kizqskze1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "ggzebuxjoz0f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "5jow8nes6k2f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "vi8v4pn2hc2f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "zhgqo0jv9aue1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "vy2mvzjupjue1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "argfxvx15wwe1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "bnkeqnh9aste1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "unv6d8p9ge2f1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "2bh5j86j4ite1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "zq81ymztlkue1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "x4gtalz2ceue1"
+    },
+    {
+        "game": "Grand Theft Auto",
+        "domain": "reddit",
+        "token": "lds7umgg8qte1"
     }
 ]
 export default videoDB;

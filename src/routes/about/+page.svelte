@@ -205,7 +205,7 @@
         <h2>Orb Games Timeline</h2>
         <p class="px-2 mb-2">A look back at some of the games and when we established a presence in those games as a group. Because this timeline only indicates when we started playing a game, we've added a helpful indicator to show the empty period where we were primarily raiding in WoW. Indicator graphic provided on liscence from Murrdyn.</p>
         <div class="relative overflow-x-auto">
-            <img src="/images/history/raiding.png" class="absolute left-[350px] top-[30px] z-10 scale-80" alt="Indicator for raiding"/>
+            <img src="/images/history/raiding.png" class="absolute left-[400px] top-[30px] z-10 scale-80" alt="Indicator for raiding"/>
 
             <svg
                 viewBox={`0 0 ${width} ${height}`}

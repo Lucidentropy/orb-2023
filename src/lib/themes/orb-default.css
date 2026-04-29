@@ -546,8 +546,9 @@
 
 
     .orb-theme-panel {
-        background-image: var(--orb-gradient-panel);
-        border: 1px solid var(--orb-border-strong);
+        /* background-image: var(--orb-gradient-panel); */
+        @apply bg-black/60;
+        border: 1px solid var(--orb-border-faint);
     }
 
     .orb-theme-panel > section {
