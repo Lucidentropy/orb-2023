@@ -21,7 +21,7 @@ const PANELS: { id: PanelView; name: string; url: string }[] = [
 	{ id: 'roster',       name: 'Roster',      url: '/wow' },
 	{ id: 'neighborhood', name: 'Neighborhood', url: '/wow/neighborhood' },
 	{ id: 'guildstats',   name: 'Guild Stats',  url: '/wow/guildstats' },
-	{ id: 'cache',        name: 'Cache',        url: '/wow/cache' },
+	// { id: 'cache',        name: 'Cache',        url: '/wow/cache' },
 ];
 
 const HIDDEN_PANELS = new Set<PanelView>(['character']);
@@ -256,65 +256,164 @@ async function refreshRoster() {
 
 	{:else if wowData}
 		<div class="space-y-8">
-			<header class="relative overflow-hidden rounded border border-border-faint/60 bg-bg-deep/30 shadow-panel mb-2">
-				<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,208,123,0.14),transparent_45%)]"></div>
+			<header class="relative mb-2 min-h-[260px] overflow-hidden rounded border border-border-faint/60 bg-bg-deep/50 shadow-panel">
+			{#each [
+				(() => {
+					const members = wowData?.roster?.members ?? [];
+					const sixMonthsMs = 6 * 30 * 24 * 60 * 60 * 1000;
+					const filteredMembers = members.filter((m) => {
+						if (m.active === false) return false;
 
-				<div class="relative grid grid-cols-1 gap-6 px-6 py-8 lg:grid-cols-[140px_minmax(0,1fr)]">
-					<div class="flex items-start justify-center lg:justify-start">
-						<div class="relative h-[118px] w-[118px]">
-							<div class="h-full w-full overflow-hidden rounded-full">
+						const ts = m.details?.last_login_timestamp;
+						if (ts == null) return false;
+
+						return Date.now() - ts <= sixMonthsMs;
+					});
+
+					const buckets = new Map<string, WowEnrichedMember[]>();
+
+					for (const member of filteredMembers) {
+						const toys = member.toys;
+						const pets = member.pets;
+						const canGroup = toys != null && pets != null && toys >= 5 && pets >= 5;
+						const key = canGroup ? `${toys}-${pets}` : `solo-${member.character?.id}`;
+
+						if (!buckets.has(key)) buckets.set(key, []);
+						buckets.get(key)?.push(member);
+					}
+
+					for (const group of buckets.values()) {
+						group.sort((a, b) => {
+							const levelDiff = (b.character?.level ?? 0) - (a.character?.level ?? 0);
+							if (levelDiff) return levelDiff;
+
+							const itemLevelDiff = (b._ilvl ?? b.details?.equipped_item_level ?? -1) - (a._ilvl ?? a.details?.equipped_item_level ?? -1);
+							if (itemLevelDiff) return itemLevelDiff;
+
+							return (b.achievementPoints ?? -1) - (a.achievementPoints ?? -1);
+						});
+					}
+
+					const mains = Array.from(buckets.values())
+						.map((group) => group[0])
+						.filter((member): member is WowEnrichedMember => member != null);
+
+					const level90Characters = filteredMembers.filter((m) => (m.character?.level ?? 0) >= 90);
+					const level90Mains = mains.filter((m) => (m.character?.level ?? 0) >= 90);
+					const level90MainIlvls = level90Mains
+						.map((m) => m._ilvl ?? m.details?.equipped_item_level ?? 0)
+						.filter((ilvl) => ilvl > 0);
+
+					const averageIlvl = level90MainIlvls.length
+						? Math.round((level90MainIlvls.reduce((sum, ilvl) => sum + ilvl, 0) / level90MainIlvls.length) * 10) / 10
+						: 0;
+
+					return {
+						total: wowData?.roster?.total ?? members.length,
+						activeMains: mains.length,
+						activeCharacters: filteredMembers.length,
+						level90s: level90Characters.length,
+						highestIlvl: level90MainIlvls.length ? Math.max(...level90MainIlvls) : 0,
+						averageIlvl
+					};
+				})()
+			] as guildHeaderStats (guildHeaderStats.total)}
+					<img
+						src={[
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(1).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(2).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(3).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(5).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(6).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(9).jpg',
+							'/images/wow/World_of_Warcraft_Midnight_Supremacy_(10).jpg'
+						][Math.floor(Math.random() * 7)]}
+						alt=""
+						aria-hidden="true"
+						class="pointer-events-none absolute inset-0 h-full w-full scale-105 object-cover object-center opacity-65 blur-[0.75px] brightness-[0.8] saturate-125"
+					/>
+
+					<div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(4,20,40,0.74)_42%,rgba(0,0,0,0.5)_100%)]"></div>
+					<div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_28%,rgba(102,204,255,0.16),transparent_34%),radial-gradient(circle_at_84%_16%,rgba(255,208,123,0.1),transparent_30%)]"></div>
+					<div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/85 to-transparent"></div>
+					<div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orb-highlight/70 to-transparent"></div>
+
+					<div class="relative grid min-h-[260px] grid-cols-1 gap-6 px-5 py-6 md:px-7 lg:grid-cols-[154px_minmax(0,1fr)_390px] lg:items-center">
+						<div class="flex justify-center lg:justify-start">
+							<div class="relative h-[132px] w-[132px] shrink-0">
+								<div class="absolute -inset-5 rounded-full bg-orb-highlight/10 blur-xl"></div>
+
+								<div class="relative h-full w-full overflow-hidden rounded-full border border-orb-highlight/30 bg-black/60 shadow-panel">
+									<img
+										src="/images/wow/orb-emblem.jpg"
+										alt="Guild Crest"
+										class="h-full w-full object-cover"
+									/>
+								</div>
+
 								<img
-									src="/images/wow/orb-emblem.jpg"
-									alt="Guild Crest"
-									class="h-full w-full scale-100 object-cover"
+									src="/images/wow/border_circle_118.png"
+									alt=""
+									class="pointer-events-none absolute inset-0 h-full w-full scale-125"
 								/>
 							</div>
-
-							<img
-								src="/images/wow/border_circle_118.png"
-								alt=""
-								class="pointer-events-none absolute inset-0 h-full w-full scale-120"
-							/>
 						</div>
-					</div>
 
-					<div class="space-y-4">
-						<p class="font-display text-4xl font-bold tracking-widest text-white uppercase">
-							World of Warcraft
-						</p>
+						<div class="space-y-4 text-center lg:text-left">
+							<div class="space-y-2">
+								<p class="mb-0 font-mono text-sm font-medium uppercase tracking-[0.32em] text-orb-highlight/75">
+									World of Warcraft Guild
+								</p>
 
-						<div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
-							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
-								<h2 class="!m-0 !rounded-none !border-0 !bg-transparent !p-0 !shadow-none">
+								<h2
+									class="bg-transparent p-0  text-5xl sm:text-6xl xl:text-7xl"
+									style="text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 0 18px rgba(102,204,255,0.18);"
+								>
 									{wowData.guild?.name || 'Orb'}
 								</h2>
-								<p class="mb-0 text-sm text-orb-highlight/65">
-									{factionName(wowData.guild?.faction)} · {wowData.meta?.region?.toUpperCase()}-{realmName(wowData.guild?.realm)}
-								</p>
 							</div>
 
-							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
-								<p class="field-label">Members</p>
-								<p class="mb-0 text-lg text-orb-highlight">{(wowData?.roster?.members || []).length}</p>
+							<div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm font-medium uppercase tracking-[0.16em] text-white/55 lg:justify-start">
+								<span>Founded Nov 2004</span>
+								<span class="text-orb-highlight/35">/</span>
+								<span>{factionName(wowData.guild?.faction)}</span>
+								<span class="text-orb-highlight/35">/</span>
+								<span>{realmName(wowData.guild?.realm)}</span>
+							</div>
+						</div>
+						<div class="grid grid-cols-2 gap-2 rounded border border-border-faint/60 bg-black/42 p-3 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-2">
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Members</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.total}</p>
 							</div>
 
-							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
-								<p class="field-label">Achievement Points</p>
-								<p class="mb-0 text-lg text-orb-highlight">{wowData?.guild?.achievement_points ?? 0}</p>
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Active Mains</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.activeMains}</p>
 							</div>
 
-							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
-								<p class="field-label">Faction</p>
-								<p class="mb-0 text-lg text-orb-highlight">{factionName(wowData.guild?.faction)}</p>
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Active Chars</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.activeCharacters}</p>
 							</div>
 
-							<div class="border-t border-border-faint pt-3 text-center sm:text-left">
-								<p class="field-label">Founded</p>
-								<p class="mb-0 text-lg text-orb-highlight">Nov 2004</p>
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Level 90s</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.level90s}</p>
+							</div>
+
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Highest iLvl</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.highestIlvl}</p>
+							</div>
+
+							<div class="rounded border border-border-faint/50 bg-bg-deep/40 px-3 py-2">
+								<p class="mb-1 font-mono text-sm font-medium uppercase tracking-widest text-orb-highlight/55">Avg Main iLvl</p>
+								<p class="mb-0 text-base font-normal text-white">{guildHeaderStats.averageIlvl}</p>
 							</div>
 						</div>
 					</div>
-				</div>
+				{/each}
 			</header>
 
 			<div class="flex flex-wrap gap-2 mb-0">
