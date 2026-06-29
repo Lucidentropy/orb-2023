@@ -74,14 +74,14 @@ onMount(async () => {
 
 	try {
 		const controller = new AbortController();
-		const timeout = setTimeout(() => controller.abort(), 5000);
+		const timeout = setTimeout(() => controller.abort(), 30000);
 
 		let response: Response;
 		try {
 			response = await fetch('/api/wow', { signal: controller.signal });
 		} catch (err: unknown) {
 			if (err instanceof Error && err.name === 'AbortError') {
-				throw new Error('Request timed out after 5s — Battle.net may be unavailable');
+				throw new Error('Request timed out — Battle.net may be unavailable');
 			}
 			throw new Error(`Network error: ${err instanceof Error ? err.message : 'Unknown'}`);
 		} finally {

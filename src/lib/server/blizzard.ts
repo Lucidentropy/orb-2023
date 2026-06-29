@@ -1,22 +1,15 @@
+// lib/server/blizzard.ts
 import {
     BLIZZARD_CLIENT_ID,
     BLIZZARD_CLIENT_SECRET,
 } from '$env/static/private';
 import { getCachedJson, setCachedJson } from '$lib/server/cacheHandler';
 
-import type { WowEnrichedMember } from '$lib/types/wow';
-
-
 export const region = 'us';
 export const locale = 'en_US';
 export const realmSlug = 'stormreaver';
 export const guildSlug = 'orb';
 
-export const INACTIVE_RANKS = new Set([4, 6]);
-export const MIN_LEVEL_ACTIVE = 40;
-export const MIN_LEVEL_MAIN = 80;
-export const MIN_COLLECTION_COUNT = 5;
-export const CHARACTER_BATCH_SIZE = 10;
 export const NEGATIVE_CACHE_TTL = 5 * 60 * 1000;
 
 export const TTL = {
@@ -141,63 +134,6 @@ export async function batchedMap<T, R>(
         results.push(...await Promise.all(items.slice(i, i + batchSize).map(fn)));
     }
     return results;
-}
-
-export function detectCollectionCandidates(members: WowEnrichedMember[]): Set<number> {
-    const byRealm = new Map<string, WowEnrichedMember[]>();
-    for (const m of members) {
-        if ((m.character?.level ?? 0) < MIN_LEVEL_MAIN) continue;
-        const key = m.character?.realm?.slug ?? 'unknown';
-        if (!byRealm.has(key)) byRealm.set(key, []);
-        byRealm.get(key)!.push(m);
-    }
-    const candidateIds = new Set<number>();
-    for (const group of byRealm.values()) {
-        group.sort((a, b) => {
-            const rankDiff = (a.rank ?? 99) - (b.rank ?? 99);
-            if (rankDiff !== 0) return rankDiff;
-            const lvlDiff = (b.character?.level ?? 0) - (a.character?.level ?? 0);
-            if (lvlDiff !== 0) return lvlDiff;
-            return (b.details?.equipped_item_level ?? -1) - (a.details?.equipped_item_level ?? -1);
-        });
-        const seenRanks = new Set<number>();
-        for (const m of group) {
-            const rank = m.rank ?? 99;
-            if (!seenRanks.has(rank)) {
-                seenRanks.add(rank);
-                const id = m.character?.id;
-                if (id != null) candidateIds.add(id);
-            }
-        }
-    }
-    return candidateIds;
-}
-
-export function detectMains(members: WowEnrichedMember[]): Set<number> {
-    const buckets = new Map<string, WowEnrichedMember[]>();
-    for (const m of members) {
-        const toys = m.toys, pets = m.pets;
-        const canGroup = toys != null && pets != null
-            && toys >= MIN_COLLECTION_COUNT
-            && pets >= MIN_COLLECTION_COUNT;
-        const key = canGroup ? `${toys}-${pets}` : `solo-${m.character?.id}`;
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key)!.push(m);
-    }
-    const mainIds = new Set<number>();
-    for (const group of buckets.values()) {
-        group.sort((a, b) => {
-            const lvl = (b.character?.level ?? 0) - (a.character?.level ?? 0);
-            if (lvl) return lvl;
-            const ilvl = (b._ilvl ?? b.details?.equipped_item_level ?? -1)
-                - (a._ilvl ?? a.details?.equipped_item_level ?? -1);
-            if (ilvl) return ilvl;
-            return (b.achievementPoints ?? -1) - (a.achievementPoints ?? -1);
-        });
-        const id = group[0].character?.id;
-        if (id != null) mainIds.add(id);
-    }
-    return mainIds;
 }
 
 export const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));

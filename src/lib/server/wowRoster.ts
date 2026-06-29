@@ -1,17 +1,14 @@
-// wow roster helpers
+// lib/server/wowRoster.ts
+import postgres from 'postgres';
+import { DATABASE_URL } from '$env/static/private';
 import { WOW_REALM_SLUG, WOW_GUILD_SLUG } from '$lib/client/wowData';
 import {
     region,
     locale,
     TTL,
-    INACTIVE_RANKS,
-    MIN_LEVEL_ACTIVE,
-    CHARACTER_BATCH_SIZE,
     getAccessToken,
     cachedFetch,
     batchedMap,
-    detectCollectionCandidates,
-    detectMains,
     charBaseUrl,
     profileNs
 } from '$lib/server/blizzard';
@@ -23,11 +20,81 @@ import type {
     WowCharacter,
     WowGuildResponse,
     WowRosterResponse,
-    WowActivityResponse
+    WowActivityResponse,
+    WowApiResponse
 } from '$lib/types/wow';
+
+const sql = postgres(DATABASE_URL, { max: 10 });
 
 const realmSlug = WOW_REALM_SLUG || 'stormreaver';
 const guildSlug = WOW_GUILD_SLUG || 'orb';
+
+const INACTIVE_RANKS = new Set([4, 6]);
+const MIN_LEVEL_ACTIVE = 40;
+const MIN_LEVEL_MAIN = 80;
+const MIN_COLLECTION_COUNT = 5;
+const CHARACTER_BATCH_SIZE = 10;
+
+function todayStamp(): string {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+}
+
+function detectCollectionCandidates(members: WowEnrichedMember[]): Set<number> {
+    const byRealm = new Map<string, WowEnrichedMember[]>();
+    for (const m of members) {
+        if ((m.character?.level ?? 0) < MIN_LEVEL_MAIN) continue;
+        const key = m.character?.realm?.slug ?? 'unknown';
+        if (!byRealm.has(key)) byRealm.set(key, []);
+        byRealm.get(key)!.push(m);
+    }
+    const candidateIds = new Set<number>();
+    for (const group of byRealm.values()) {
+        group.sort((a, b) => {
+            const rankDiff = (a.rank ?? 99) - (b.rank ?? 99);
+            if (rankDiff !== 0) return rankDiff;
+            const lvlDiff = (b.character?.level ?? 0) - (a.character?.level ?? 0);
+            if (lvlDiff !== 0) return lvlDiff;
+            return (b.details?.equipped_item_level ?? -1) - (a.details?.equipped_item_level ?? -1);
+        });
+        const seenRanks = new Set<number>();
+        for (const m of group) {
+            const rank = m.rank ?? 99;
+            if (!seenRanks.has(rank)) {
+                seenRanks.add(rank);
+                const id = m.character?.id;
+                if (id != null) candidateIds.add(id);
+            }
+        }
+    }
+    return candidateIds;
+}
+
+function detectMains(members: WowEnrichedMember[]): Set<number> {
+    const buckets = new Map<string, WowEnrichedMember[]>();
+    for (const m of members) {
+        const toys = m.toys, pets = m.pets;
+        const canGroup = toys != null && pets != null
+            && toys >= MIN_COLLECTION_COUNT
+            && pets >= MIN_COLLECTION_COUNT;
+        const key = canGroup ? `${toys}-${pets}` : `solo-${m.character?.id}`;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key)!.push(m);
+    }
+    const mainIds = new Set<number>();
+    for (const group of buckets.values()) {
+        group.sort((a, b) => {
+            const lvl = (b.character?.level ?? 0) - (a.character?.level ?? 0);
+            if (lvl) return lvl;
+            const ilvl = (b._ilvl ?? b.details?.equipped_item_level ?? -1)
+                - (a._ilvl ?? a.details?.equipped_item_level ?? -1);
+            if (ilvl) return ilvl;
+            return (b.achievementPoints ?? -1) - (a.achievementPoints ?? -1);
+        });
+        const id = group[0].character?.id;
+        if (id != null) mainIds.add(id);
+    }
+    return mainIds;
+}
 
 export async function fetchGuildBase(bust = false) {
     const accessToken = await getAccessToken();
@@ -164,4 +231,52 @@ export async function enrichRosterMembers(allMembers: WowRosterMember[], accessT
         members: processed,
         allMembersWithDetails
     };
+}
+
+export async function getDailyRoster(bust = false): Promise<WowApiResponse> {
+    const today = todayStamp();
+
+    if (!bust) {
+        try {
+            const rows = await sql<{ data: WowApiResponse }[]>`
+                SELECT data FROM wow_roster_daily WHERE snapshot_date = ${today} LIMIT 1
+            `;
+            if (rows.length) return rows[0].data;
+        } catch (err) {
+            console.error('[wowRoster] daily read failed:', err);
+        }
+    }
+
+    const { accessToken, guild, roster, activity } = await fetchGuildBase(bust);
+    const { members } = await enrichRosterMembers(roster.members ?? [], accessToken, bust);
+
+    const result: WowApiResponse = {
+        guild,
+        activity,
+        roster: {
+            total: (roster.members ?? []).length,
+            eligible: members.length,
+            members
+        },
+        meta: {
+            region,
+            realm: realmSlug,
+            guild: guildSlug,
+            locale,
+            fetchedAt: new Date().toISOString()
+        }
+    };
+
+    try {
+        await sql`
+            INSERT INTO wow_roster_daily (snapshot_date, data)
+            VALUES (${today}, ${sql.json(result)})
+            ON CONFLICT (snapshot_date)
+            DO UPDATE SET data = EXCLUDED.data, created_at = now()
+        `;
+    } catch (err) {
+        console.error('[wowRoster] daily write failed:', err);
+    }
+
+    return result;
 }
