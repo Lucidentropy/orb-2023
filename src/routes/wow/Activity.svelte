@@ -147,7 +147,7 @@
 			</div>
 		</div>
 
-		<div class="space-y-2 px-4 py-3" onwheel={onWheel}>
+		<div class="space-y-2 px-4 py-3">
 			{#if allActivities.length}
 				{#each pagedActivities as item, i (i)}
 					<div class="rounded border border-border-faint/40 bg-bg-deep/20 px-4 py-3">

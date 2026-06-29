@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { gsap } from 'gsap';
 
 	const TRI = 10;
@@ -16,11 +17,13 @@
 	const TEXT_OUT   = 1.7;
 	const CONTENT_IN = 2.4;
 
+	const INTRO_SESSION_KEY = 'elite-orbital-intro-seen';
+
 	interface Tri { x: number; y: number; up: boolean; dist: number; }
 
 	let overlay: HTMLDivElement;
 	let canvas: HTMLCanvasElement;
-	let visible = $state(true);
+	let visible = $state(browser ? sessionStorage.getItem(INTRO_SESSION_KEY) !== 'true' : false);
 
 	let { onDone }: { onDone?: () => void } = $props();
 
@@ -84,6 +87,13 @@
 	}
 
 	onMount(() => {
+		if (!visible) {
+			onDone?.();
+			return;
+		}
+
+		sessionStorage.setItem(INTRO_SESSION_KEY, 'true');
+
 		const w = window.innerWidth;
 		const h = window.innerHeight;
 		canvas.width  = w;

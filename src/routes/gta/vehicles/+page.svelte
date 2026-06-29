@@ -212,6 +212,8 @@
 <div>
 	<h3>Vehicle Collection</h3>
 
+	<p class="my-3 text-muted">This collection is out of date, I'm working on making this an interactive checklist generator, when this releases, this page will be up to date again.</p>
+
 	<p class="body-secondary mb-1">
 		{counts.total} total &mdash;
 		{counts.cars} cars,
@@ -251,9 +253,13 @@
 				<ul class="columns-1 sm:columns-2 md:columns-3 gap-4 list-none pl-0" style="column-fill: balance;">
 					{#each list as vehicle (vehicle.label)}
 						<li
-							class="break-inside-avoid mb-1 text-sm whitespace-nowrap flex items-center gap-2"
+							class="grid grid-cols-[5rem_1.5rem_minmax(0,1fr)] items-center gap-2 break-inside-avoid mb-1 text-sm whitespace-nowrap text-left"
 							class:text-orange-400={vehicle.removed}
 						>
+							<span class="w-20 text-right text-xs text-orb-highlight/30">
+								{vehicle.manufacturer ?? ''}
+							</span>
+
 							{#if vehicle.radar_icon}
 								<img
 									src={`/images/gta/blips/${vehicle.radar_icon}`}
@@ -272,10 +278,10 @@
 									{/each}
 								</span>
 							{/if}
-							<span class:text-xs={vehicle.label.length > 30}>{vehicle.label}{vehicle.hsw ? ' (HSW)' : ''}</span>
-							{#if vehicle.manufacturer}
-								<span class="text-xs text-orb-highlight/30 ml-auto">{vehicle.manufacturer}</span>
-							{/if}
+
+							<span class="min-w-0 overflow-hidden text-ellipsis" class:text-xs={vehicle.label.length > 30}>
+								{vehicle.label}{vehicle.hsw ? ' (HSW)' : ''}
+							</span>
 						</li>
 					{/each}
 				</ul>

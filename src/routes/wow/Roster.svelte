@@ -231,7 +231,7 @@
 		<p class="section-label mb-0 flex-1">Roster</p>
 	</div>
 
-	<div class="overflow-hidden rounded border border-border-faint/60 bg-bg-deep/20 flex-1 flex flex-col" onwheel={onWheel}>
+	<div class="overflow-hidden rounded border border-border-faint/60 bg-bg-deep/20 flex-1 flex flex-col" >
 
 		<div class="flex items-center justify-between gap-3 border-b border-border-faint px-4 py-3">
 			<div class="relative flex items-center">
