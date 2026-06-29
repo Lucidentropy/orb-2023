@@ -1,16 +1,21 @@
 // routes/api/wow/+server.ts
 import { json } from '@sveltejs/kit';
-import { getDailyRoster } from '$lib/server/wowRoster';
 import type { RequestHandler } from './$types';
+import { getDailyRoster } from '$lib/server/wowRoster';
+import { refreshAndGetActivity } from '$lib/server/wowActivity';
 
 export const GET: RequestHandler = async ({ url }) => {
-    const bust = url.searchParams.get('bust') === 'true';
     try {
-        const data = await getDailyRoster(bust);
+        const bust = url.searchParams.get('bust') === 'true';
+        const [data, activities] = await Promise.all([
+            getDailyRoster(bust),
+            refreshAndGetActivity(bust)
+        ]);
+        data.activity = { activities };
         return json(data);
-    } catch (err) {
+    } catch (error: unknown) {
         return json(
-            { error: true, message: err instanceof Error ? err.message : 'Unknown error' },
+            { error: true, message: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
     }

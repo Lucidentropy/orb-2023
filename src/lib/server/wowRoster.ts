@@ -12,6 +12,7 @@ import {
     charBaseUrl,
     profileNs
 } from '$lib/server/blizzard';
+
 import type {
     WowRosterMember,
     WowEnrichedMember,
@@ -247,16 +248,16 @@ export async function getDailyRoster(bust = false): Promise<WowApiResponse> {
         }
     }
 
-    const { accessToken, guild, roster, activity } = await fetchGuildBase(bust);
-    const { members } = await enrichRosterMembers(roster.members ?? [], accessToken, bust);
+    const { accessToken, guild, roster } = await fetchGuildBase(bust);
+    const { members, allMembersWithDetails } = await enrichRosterMembers(roster.members ?? [], accessToken, bust);
 
     const result: WowApiResponse = {
         guild,
-        activity,
+        activity: { activities: [] },
         roster: {
             total: (roster.members ?? []).length,
             eligible: members.length,
-            members
+            members: allMembersWithDetails
         },
         meta: {
             region,
