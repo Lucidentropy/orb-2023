@@ -1,5 +1,43 @@
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import Nav from './Nav.svelte';
+
+	declare global {
+		interface Window {
+			goatcounter?: {
+				count?: (vars?: {
+					path?: string;
+					title?: string;
+					referrer?: string;
+					event?: boolean;
+				}) => void;
+			};
+		}
+	}
+
+	function countGoatCounterPageview(path: string, attempt = 0) {
+		if (!browser) return;
+
+		if (window.goatcounter?.count) {
+			window.goatcounter.count({
+				path,
+				title: document.title
+			});
+			return;
+		}
+
+		if (attempt < 20) {
+			window.setTimeout(() => countGoatCounterPageview(path, attempt + 1), 150);
+		}
+	}
+
+	afterNavigate(({ to }) => {
+		if (!to?.url) return;
+
+		const path = `${to.url.pathname}${to.url.search}`;
+		countGoatCounterPageview(path);
+	});
 </script>
 
 <svelte:head>
@@ -10,7 +48,13 @@
 		href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Noto+Sans:wght@400;700&family=Ropa+Sans:ital@0;1&display=swap"
 		rel="stylesheet"
 	/>
-	<script data-goatcounter="https://clanorb.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+	<script>
+		window.goatcounter = {
+			no_onload: true,
+			endpoint: 'https://clanorb.goatcounter.com/count'
+		};
+	</script>
+	<script async src="https://gc.zgo.at/count.js"></script>
 </svelte:head>
 
 <header class="relative z-20">
