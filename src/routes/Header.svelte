@@ -85,7 +85,7 @@
 			<img
 				src="/images/layout/neworbdemo.jpg"
 				alt="Clan Orb"
-				class="mx-6 max-h-[110px] rounded-full shadow-[0_0_30px_10px_#000] md:mx-8 md:max-h-[150px]"
+				class="m-0 mt-4 max-h-[120px] rounded-full shadow-[0_0_30px_10px_#000] md:mx-8 md:max-h-[170px]"
 			/>
 		</a>
 	</div>
