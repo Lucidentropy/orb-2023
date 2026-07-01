@@ -659,13 +659,13 @@
 </svelte:head>
 
 {#if !shot}
-	<div class="p-8">
+	<orb-viewer-missing class="block p-8">
 		<p class="body-secondary">Screenshot not found. <a href="/gallery">Back to gallery.</a></p>
-	</div>
+	</orb-viewer-missing>
 {:else}
-	<div class="flex flex-col">
-		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
-			<div bind:this={imageStage}
+	<orb-viewer class="flex flex-col">
+		<orb-viewer-stage-shell class="block min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
+			<orb-viewer-stage bind:this={imageStage}
 				class="viewer-stage group viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-50 lg:min-h-[460px]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
@@ -707,14 +707,14 @@
 				</button>
 
 				{#if !imageLoaded && !imageLoadFailed}
-					<div class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
+					<orb-viewer-loading class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
 						<div class="viewer-loader" aria-label="Loading image"></div>
-					</div>
+					</orb-viewer-loading>
 				{/if}
 
 				{#if imageLoadFailed}
-					<div class="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-4 text-center">
-						<div class="max-w-sm rounded border border-border-faint bg-bg-deep/90 px-5 py-4 shadow-panel">
+					<orb-viewer-error class="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-4 text-center">
+						<orb-viewer-error-panel class="block max-w-sm rounded border border-border-faint bg-bg-deep/90 px-5 py-4 shadow-panel">
 							<p class="mb-3 font-mono text-xs uppercase tracking-wider text-orb-highlight/70">
 								Image failed to load
 							</p>
@@ -725,8 +725,8 @@
 							>
 								Try again
 							</button>
-						</div>
-					</div>
+						</orb-viewer-error-panel>
+					</orb-viewer-error>
 				{/if}				
 
 				<img bind:this={imageEl}
@@ -741,27 +741,27 @@
 				/>
 
 				{#if slideshowActive}
-					<div class="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-[2px] bg-white/10">
+					<orb-slideshow-progress-track class="pointer-events-none absolute right-0 bottom-0 left-0 z-20 block h-[2px] bg-white/10">
 						{#key slideshowProgressKey}
-							<div
-								class="viewer-slideshow-progress h-full bg-white/45"
+							<orb-slideshow-progress
+								class="viewer-slideshow-progress block h-full bg-white/45"
 								style="animation-duration: {slideshowInterval}s;"
-							></div>
+							></orb-slideshow-progress>
 						{/key}
-					</div>
+					</orb-slideshow-progress-track>
 				{/if}
-			</div>
-		</div>
+			</orb-viewer-stage>
+		</orb-viewer-stage-shell>
 
-		<div class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/70 px-3 py-1 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-			<div class="flex flex-wrap items-center justify-center gap-2 xl:justify-start">
+		<orb-viewer-toolbar class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/70 px-3 py-1 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+			<orb-viewer-toolbar-left class="flex flex-wrap items-center justify-center gap-2 xl:justify-start">
 				<a href={backUrl}
 					class="inline-flex items-center rounded border border-border-faint bg-black/25 px-3 py-3 font-mono uppercase tracking-wider text-orb-highlight/70 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 				>
 					← Back to Gallery
 				</a>
 				
-				<div class="inline-flex items-center gap-2 rounded border border-border-faint/60 bg-black/20 px-3 py-3 leading-none">
+				<orb-viewer-image-links class="inline-flex items-center gap-2 rounded border border-border-faint/60 bg-black/20 px-3 py-3 leading-none">
 					<p class="m-0 mr-3 inline-flex items-center font-medium uppercase tracking-wider text-orb-highlight/30">
 						Image
 					</p>
@@ -803,9 +803,9 @@
 							{/if}
 						</button>
 					{/if}
-				</div>
+				</orb-viewer-image-links>
 
-				<div class="inline-flex items-center gap-3 rounded border border-border-faint bg-black/25 px-3 py-3 font-mono uppercase tracking-wider text-orb-highlight/70 transition">
+				<orb-viewer-browse-options class="inline-flex items-center gap-3 rounded border border-border-faint bg-black/25 px-3 py-3 font-mono uppercase tracking-wider text-orb-highlight/70 transition">
 					{#if playlistIndex && playlistTotal}
 						{playlistIndex} of {playlistTotal}
 					{:else}
@@ -823,11 +823,11 @@
 						/>
 						<span>Random</span>
 					</label>
-				</div>
-			</div>
+				</orb-viewer-browse-options>
+			</orb-viewer-toolbar-left>
 
-			<div class="flex min-w-0 items-center justify-center overflow-hidden text-center">
-				<div class="flex min-w-0 max-w-full items-center gap-2 px-4 py-1.5">
+			<orb-viewer-meta class="flex min-w-0 items-center justify-center overflow-hidden text-center">
+				<orb-viewer-meta-inner class="flex min-w-0 max-w-full items-center gap-2 px-4 py-1.5">
 					{#if shot.app_name}
 						<a href={shotGameUrl}
 							class="truncate whitespace-nowrap text-sm font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70 sm:text-base"
@@ -843,16 +843,15 @@
 
 					{#if shotDate}
 						<span class="hidden text-orb-highlight/20 sm:inline">·</span>
-						<time class="hidden whitespace-nowrap  text-orb-highlight/45 sm:inline">
+						<time class="hidden whitespace-nowrap text-orb-highlight/45 sm:inline">
 							{shotDate.date}
 						</time>
 					{/if}
-				</div>
-			</div>
+				</orb-viewer-meta-inner>
+			</orb-viewer-meta>
 
-			<div class="flex flex-wrap items-center justify-center gap-2 xl:justify-end">
-			
-				<div class="flex items-center gap-2 rounded border border-border-faint/70 bg-black/25 px-3 py-3 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
+			<orb-viewer-toolbar-right class="flex flex-wrap items-center justify-center gap-2 xl:justify-end">
+				<orb-viewer-zoom-controls class="flex items-center gap-2 rounded border border-border-faint/70 bg-black/25 px-3 py-3 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
 					<button type="button"
 						class="btn-link viewer-action-link"
 						onclick={zoomToActualSize}
@@ -888,9 +887,9 @@
 						/>
 						<span>Contain</span>
 					</label>
-				</div>
+				</orb-viewer-zoom-controls>
 
-				<div class="inline-flex items-center gap-3 rounded border border-border-faint/70 bg-black/25 px-4 py-0 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
+				<orb-viewer-slideshow-controls class="inline-flex items-center gap-3 rounded border border-border-faint/70 bg-black/25 px-4 py-0 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
 					<button type="button"
 						class="btn-link viewer-action-link {slideshowActive ? 'active' : ''}"
 						onclick={toggleSlideshow}
@@ -930,10 +929,10 @@
 						/>
 						<span>Transitions</span>
 					</label>
-				</div>
-			</div>
-		</div>
-	</div>
+				</orb-viewer-slideshow-controls>
+			</orb-viewer-toolbar-right>
+		</orb-viewer-toolbar>
+	</orb-viewer>
 {/if}
 
 <style>

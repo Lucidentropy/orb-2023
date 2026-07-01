@@ -480,49 +480,51 @@
 
 {#snippet pagination()}
 	{#if totalPages > 1}
-		<nav class="flex flex-wrap items-center justify-center gap-1" aria-label="Gallery pages">
-			{#if currentPage > 1}
-				<a href={buildUrl(selectedGame, selectedMember, currentPage - 1)}
-					class="pagination-btn"
-					onclick={jump(currentPage - 1)}
-					aria-label="Previous page"
-				>
-					←
-				</a>
-			{/if}
-
-			{#each pageNumbers as p, i (i)}
-				{#if p === '...'}
-					<span class="px-1 text-sm text-orb-highlight/30">…</span>
-				{:else}
-					<a href={buildUrl(selectedGame, selectedMember, p)}
-						class="pagination-btn {p === currentPage ? 'active' : ''}"
-						onclick={jump(p)}
-						aria-current={p === currentPage ? 'page' : undefined}
+		<orb-pagination class="block">
+			<nav class="flex flex-wrap items-center justify-center gap-1" aria-label="Gallery pages">
+				{#if currentPage > 1}
+					<a href={buildUrl(selectedGame, selectedMember, currentPage - 1)}
+						class="pagination-btn"
+						onclick={jump(currentPage - 1)}
+						aria-label="Previous page"
 					>
-						{p}
+						←
 					</a>
 				{/if}
-			{/each}
 
-			{#if currentPage < totalPages}
-				<a href={buildUrl(selectedGame, selectedMember, currentPage + 1)}
-					class="pagination-btn"
-					onclick={jump(currentPage + 1)}
-					aria-label="Next page"
-				>
-					→
-				</a>
-			{/if}
-		</nav>
+				{#each pageNumbers as p, i (i)}
+					{#if p === '...'}
+						<span class="px-1 text-sm text-orb-highlight/30">…</span>
+					{:else}
+						<a href={buildUrl(selectedGame, selectedMember, p)}
+							class="pagination-btn {p === currentPage ? 'active' : ''}"
+							onclick={jump(p)}
+							aria-current={p === currentPage ? 'page' : undefined}
+						>
+							{p}
+						</a>
+					{/if}
+				{/each}
+
+				{#if currentPage < totalPages}
+					<a href={buildUrl(selectedGame, selectedMember, currentPage + 1)}
+						class="pagination-btn"
+						onclick={jump(currentPage + 1)}
+						aria-label="Next page"
+					>
+						→
+					</a>
+				{/if}
+			</nav>
+		</orb-pagination>
 	{/if}
 {/snippet}
 
 <Container>
-	<div class="relative mb-4 sm:mb-5">
+	<orb-gallery-header class="relative mb-4 block sm:mb-5">
 		<h1 class="flex w-full items-center gap-3 pr-36">
 			<svg class="h-6 w-6 shrink-0 fill-current sm:h-7 sm:w-7 steam-title-icon" viewBox="0 0 24 24" aria-hidden="true">
-				<path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.064 0 .127.002.19.006l2.861-4.142v-.058c0-2.5 2.033-4.533 4.533-4.533s4.533 2.033 4.533 4.533-2.033 4.533-4.533 4.533h-.105l-4.08 2.913c0 .052.002.105.002.158 0 1.875-1.526 3.4-3.401 3.4-1.646 0-3.021-1.176-3.332-2.735L.436 15.27C1.862 20.307 6.486 24 11.979 24 18.617 24 24 18.627 24 12S18.617 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.324.005-1.956s-.75-1.124-1.377-1.385c-.624-.26-1.29-.25-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.455 1.021zm8.41-6.784c-1.385 0-2.513-1.127-2.513-2.513s1.128-2.513 2.513-2.513 2.513 1.127 2.513 2.513-1.128 2.513-2.513 2.513zm0-.62c1.044 0 1.893-.849 1.893-1.893s-.849-1.893-1.893-1.893-1.893.849-1.893 1.893.849 1.893 1.893 1.893z" />
+				<path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.064 0 .127.002.19.006l2.861-4.142v-.058c0-2.5 2.033-4.533 4.533-4.533s4.533 2.033 4.533 4.533-2.033 4.533-4.533 4.533h-.105l-4.08 2.913c0 .052.002.105.002.158 0 1.875-1.526 3.4-3.401 3.4-1.646 0-3.021-1.176-3.332-2.735L.436 15.27C1.862 20.307 6.486 24 11.979 24 18.617 24 24 18.627 24 12S18.617 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.324.005-1.956s-.75-1.124-1.377-1.385c-.624-.260-1.290-.250-1.878-.030l1.523.630c.956.400 1.409 1.500 1.009 2.455-.397.957-1.497 1.410-2.455 1.021zm8.410-6.784c-1.385 0-2.513-1.127-2.513-2.513s1.128-2.513 2.513-2.513 2.513 1.127 2.513 2.513-1.128 2.513-2.513 2.513zm0-.620c1.044 0 1.893-.849 1.893-1.893s-.849-1.893-1.893-1.893-1.893.849-1.893 1.893.849 1.893 1.893 1.893z" />
 			</svg>
 			<span>Steam Image Gallery</span>
 		</h1>
@@ -534,12 +536,12 @@
 				+ Add Screenshots
 			</a>
 		{/if}
-	</div>
+	</orb-gallery-header>
 
-	<div class="flex flex-col gap-5 lg:flex-row lg:items-start">
-		<aside class="filter-sidebar flex shrink-0 flex-col gap-5 rounded border border-border-faint/70 bg-black/20 p-3 sm:p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:w-64 lg:overflow-y-auto" aria-label="Gallery filters">
-			<div class="game-menu-wrap relative">
-				<div class="mb-1 flex items-center justify-between gap-3">
+	<orb-gallery-layout class="flex flex-col gap-5 lg:flex-row lg:items-start">
+		<orb-filter-sidebar class="filter-sidebar flex shrink-0 flex-col gap-5 rounded border border-border-faint/70 bg-black/20 p-3 sm:p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:w-64 lg:overflow-y-auto" role="complementary" aria-label="Gallery filters">
+			<orb-game-menu class="game-menu-wrap relative block">
+				<orb-filter-heading class="mb-1 flex items-center justify-between gap-3">
 					<span class="field-label mb-0">Select Game</span>
 					{#if selectedGame}
 						<a href={buildUrl('', selectedMember, 1)}
@@ -549,9 +551,9 @@
 							× clear
 						</a>
 					{/if}
-				</div>
+				</orb-filter-heading>
 				
-				<div class="flex h-12 w-full items-center justify-center gap-2">
+				<orb-game-picker class="flex h-12 w-full items-center justify-center gap-2">
 					{#if selectedGame}
 						<button
 							type="button"
@@ -611,10 +613,10 @@
 							›
 						</button>
 					{/if}
-				</div>
+				</orb-game-picker>
 
 				{#if gameMenuOpen}
-					<div class="game-menu absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 flex max-h-96 flex-col overflow-y-auto border border-border-default shadow-panel">
+					<orb-game-menu-list class="game-menu absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 flex max-h-96 flex-col overflow-y-auto border border-border-default shadow-panel">
 						<a href={buildUrl('', '', 1)}
 							class="menu-item {!selectedGame ? 'active' : ''}"
 							onclick={(e) => { filterTo(buildUrl('', '', 1))(e); gameMenuOpen = false; }}
@@ -638,13 +640,13 @@
 								</span>
 							</a>
 						{/each}					
-					</div>
+					</orb-game-menu-list>
 				{/if}
-			</div>
+			</orb-game-menu>
 
-			<div>
+			<orb-top-games class="block">
 				<span class="field-label">Top 20 Games</span>
-				<div class="orb-scrollbar flex max-h-[18.5rem] flex-col gap-0.5 overflow-y-auto pr-1">
+				<orb-top-game-list class="orb-scrollbar flex max-h-[18.5rem] flex-col gap-0.5 overflow-y-auto pr-1">
 					{#each topGames as g (g.name)}
 						{@const appId = appIdFor(g.name)}
 						<a href={buildUrl(selectedGame === g.name ? '' : g.name, '', 1)}
@@ -661,11 +663,11 @@
 							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{g.count}</span>
 						</a>
 					{/each}
-				</div>
-			</div>
+				</orb-top-game-list>
+			</orb-top-games>
 
-			<div class="min-h-0">
-				<div class="mb-1 flex items-center justify-between gap-3">
+			<orb-contributor-section class="block min-h-0">
+				<orb-filter-heading class="mb-1 flex items-center justify-between gap-3">
 					<span class="field-label mb-0">Orb Contributors</span>
 					{#if selectedMember}
 						<a href={buildUrl(selectedGame, '', 1)}
@@ -675,9 +677,9 @@
 							× clear
 						</a>
 					{/if}
-				</div>
+				</orb-filter-heading>
 
-				<div class="orb-scrollbar flex min-h-[15rem] max-h-[260px] flex-col gap-2 overflow-y-scroll pr-1" data-wheel-scroll>
+				<orb-contributor-list class="orb-scrollbar flex min-h-[15rem] max-h-[260px] flex-col gap-2 overflow-y-scroll pr-1" data-wheel-scroll>
 					<a href={buildUrl(selectedGame, '', 1)}
 						class="filter-item {!selectedMember ? 'active' : ''}"
 						onclick={filterTo(buildUrl(selectedGame, '', 1))}
@@ -704,13 +706,13 @@
 							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{m.count}</span>
 						</a>
 					{/each}
-				</div>
-			</div>
-		</aside>
+				</orb-contributor-list>
+			</orb-contributor-section>
+		</orb-filter-sidebar>
 
-		<div class="min-w-0 flex-1" use:wheelPager>
-			<div class="mb-4 flex flex-col gap-3 border-b border-border-faint pb-3 sm:flex-row sm:items-end sm:justify-between">
-				<div class="min-w-0">
+		<orb-gallery-main class="min-w-0 flex-1" use:wheelPager>
+			<orb-gallery-summary class="mb-4 flex flex-col gap-3 border-b border-border-faint pb-3 sm:flex-row sm:items-end sm:justify-between">
+				<orb-gallery-summary-text class="min-w-0 block">
 					{#if selectedGame}
 						<h3 class="m-0 truncate text-lg font-semibold leading-tight text-white sm:text-3xl">
 							{selectedGame}
@@ -740,19 +742,19 @@
 							</a>
 						{/if}
 					</p>
-				</div>
+				</orb-gallery-summary-text>
 
-				<div class="flex shrink-0 items-end justify-start sm:justify-end">
+				<orb-gallery-summary-pagination class="flex shrink-0 items-end justify-start sm:justify-end">
 					{@render pagination()}
-				</div>
-			</div>
+				</orb-gallery-summary-pagination>
+			</orb-gallery-summary>
 
 			{#if paged.length === 0}
-				<div class="rounded border border-border-faint/70 bg-black/20 p-6 text-center text-sm text-orb-highlight/50">
+				<orb-gallery-empty class="block rounded border border-border-faint/70 bg-black/20 p-6 text-center text-sm text-orb-highlight/50">
 					<p>No screenshots found.</p>
-				</div>
+				</orb-gallery-empty>
 			{:else}
-				<div class="grid grid-cols-2 content-start gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 xl:grid-cols-5">
+				<orb-gallery-grid class="grid grid-cols-2 content-start gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 xl:grid-cols-5">
 					{#each paged as shot (shot.steam_file_id)}
 						<a href={galleryViewerUrl(shot)}
 							class="gallery-item group relative block aspect-video overflow-hidden bg-black no-underline transition hover:no-underline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-border-strong {focusedShotId === shot.steam_file_id ? 'gallery-item-focused' : ''}"
@@ -772,21 +774,25 @@
 					{#each Array.from({ length: PAGE_SIZE - paged.length }, (_, i) => i) as i (`filler-${currentPage}-${i}`)}
 						<span class="aspect-video invisible" aria-hidden="true"></span>
 					{/each}
-				</div>
+				</orb-gallery-grid>
 
-				<div class="mt-5 sm:mt-6">
+				<orb-gallery-pagination-bottom class="mt-5 block sm:mt-6">
 					{@render pagination()}
-				</div>
+				</orb-gallery-pagination-bottom>
 			{/if}
-		</div>
-	</div>
+		</orb-gallery-main>
+	</orb-gallery-layout>
 
-	<div class="mt-6 flex justify-center sm:mt-8">
-		<label class="inline-flex cursor-pointer select-none items-center gap-2 font-mono text-xs uppercase tracking-widest text-orb-highlight/55 transition hover:text-orb-highlight">
-			<input type="checkbox" bind:checked={wheelEnabled} class="h-4 w-4 cursor-pointer accent-orb-highlight" />
+	<orb-gallery-options class="mt-6 flex justify-center sm:mt-8">
+		<label class="gallery-check-label">
+			<input
+				type="checkbox"
+				bind:checked={wheelEnabled}
+				class="gallery-check-input"
+			/>
 			<span>Enable mousewheel pages</span>
 		</label>
-	</div>
+	</orb-gallery-options>
 </Container>
 
 <style>
@@ -966,6 +972,78 @@
 		opacity: 0;
 		animation: gallery-focus-sweep 1.25s ease-out 1;
 	}
+
+	.gallery-check-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		cursor: pointer;
+		user-select: none;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: color-mix(in srgb, var(--orb-highlight) 70%, white);
+		transition: color 0.15s ease;
+	}
+
+	.gallery-check-label:hover {
+		color: #fff;
+	}
+
+	.gallery-check-input {
+		appearance: none;
+		width: 0.875rem;
+		height: 0.875rem;
+		display: inline-grid;
+		place-content: center;
+		cursor: pointer;
+		border: 1px solid color-mix(in srgb, var(--orb-highlight) 35%, var(--orb-border));
+		border-radius: 0.15rem;
+		background:
+			linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--orb-bg-deep) 75%, black),
+				color-mix(in srgb, var(--orb-bg-base) 88%, black)
+			);
+		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.gallery-check-input::before {
+		content: '';
+		width: 0.45rem;
+		height: 0.45rem;
+		transform: scale(0);
+		background: var(--orb-highlight);
+		box-shadow: 0 0 8px color-mix(in srgb, var(--orb-highlight) 60%, transparent);
+		transition: transform 0.12s ease;
+	}
+
+	.gallery-check-input:checked {
+		border-color: color-mix(in srgb, var(--orb-highlight) 80%, white);
+		background:
+			linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--orb-highlight) 24%, var(--orb-bg-deep)),
+				color-mix(in srgb, var(--orb-accent) 28%, var(--orb-bg-base))
+			);
+		box-shadow:
+			inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+			0 0 10px color-mix(in srgb, var(--orb-highlight) 22%, transparent);
+	}
+
+	.gallery-check-input:checked::before {
+		transform: scale(1);
+	}
+
+	.gallery-check-input:focus-visible {
+		outline: 1px solid color-mix(in srgb, var(--orb-highlight) 85%, white);
+		outline-offset: 2px;
+	}	
 
 	@keyframes gallery-focus-sweep {
 		0% {
