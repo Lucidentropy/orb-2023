@@ -133,8 +133,6 @@
 			u.set('p', pageParam);
 		}
 
-		u.set('focus', id);
-
 		return `/gallery/viewer?${u.toString()}`;
 	}
 
@@ -487,46 +485,6 @@
 	</div>
 {:else}
 	<div class="flex flex-col">
-		<div class="flex shrink-0 items-center gap-3 border-b border-border-faint/50 bg-bg-deep/60 px-3 py-2 text-xs sm:px-6">
-			<a href={backUrl}
-				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/65 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
-			>
-				← Back to Gallery
-			</a>
-
-			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
-				{#if shot.app_name}
-					<a href={shotGameUrl}
-						class="truncate whitespace-nowrap font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70"
-					>
-						{shot.app_name}
-					</a>
-				{/if}
-
-				{#if shot.steam_name}
-					<span class="text-orb-highlight/20">·</span>
-					<span class="truncate whitespace-nowrap text-orb-highlight/60">{shot.steam_name}</span>
-				{/if}
-
-				{#if shotDate}
-					<span class="hidden text-orb-highlight/20 sm:inline">·</span>
-					<time datetime={shot.file_created_at ?? undefined}
-						class="hidden whitespace-nowrap font-mono text-orb-highlight/40 sm:inline"
-					>
-						{shotDate.date} · {shotDate.time}
-					</time>
-				{/if}
-			</div>
-
-			<a href={steamUrl}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
-			>
-				View on Steam ↗
-			</a>
-		</div>
-
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
 			<div bind:this={imageStage}
 				class="viewer-stage viewer-stage-large relative flex h-[72vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[78vh] sm:min-h-[460px] xl:h-[min(82vh,960px)]"
@@ -577,6 +535,46 @@
 					style="transform: translate3d({panX}px, {panY}px, 0) scale({zoom}); cursor: {zoom > 1 ? (dragState ? 'grabbing' : 'grab') : 'zoom-in'};"
 				/>
 			</div>
+		</div>
+
+		<div class="flex shrink-0 items-center gap-3 border-b border-border-faint/50 bg-bg-deep/60 px-3 py-2 text-xs sm:px-6">
+			<a href={backUrl}
+				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/65 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
+			>
+				← Back to Gallery
+			</a>
+
+			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
+				{#if shot.app_name}
+					<a href={shotGameUrl}
+						class="truncate whitespace-nowrap font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70"
+					>
+						{shot.app_name}
+					</a>
+				{/if}
+
+				{#if shot.steam_name}
+					<span class="text-orb-highlight/20">·</span>
+					<span class="truncate whitespace-nowrap text-orb-highlight/60">{shot.steam_name}</span>
+				{/if}
+
+				{#if shotDate}
+					<span class="hidden text-orb-highlight/20 sm:inline">·</span>
+					<time datetime={shot.file_created_at ?? undefined}
+						class="hidden whitespace-nowrap font-mono text-orb-highlight/40 sm:inline"
+					>
+						{shotDate.date} · {shotDate.time}
+					</time>
+				{/if}
+			</div>
+
+			<a href={steamUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
+			>
+				View on Steam ↗
+			</a>
 		</div>
 
 		<div class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/60 px-3 py-3 sm:px-6 lg:grid-cols-[1fr_auto_1fr]">
