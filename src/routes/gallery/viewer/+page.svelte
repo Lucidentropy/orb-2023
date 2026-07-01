@@ -47,6 +47,28 @@
 		return `/gallery${qs ? '?' + qs : ''}`;
 	});
 
+	const prevShot = $derived(data.prevShot);
+	const nextShot = $derived(data.nextShot);	
+
+	const preloadedImages = new Set<string>();
+
+	function preloadImage(url: string | null | undefined) {
+		if (!browser || !url || preloadedImages.has(url)) return;
+
+		preloadedImages.add(url);
+
+		const img = new Image();
+		img.decoding = 'async';
+		img.src = url;
+	}
+
+	$effect(() => {
+		if (!browser || !shot?.steam_file_id) return;
+
+		preloadImage(prevShot?.image_url ?? prevShot?.preview_url);
+		preloadImage(nextShot?.image_url ?? nextShot?.preview_url);
+	});
+
 	const shotDate = $derived.by(() => {
 		if (!shot?.file_created_at) return null;
 
@@ -313,12 +335,12 @@
 	<div class="flex flex-col">
 		<div class="flex shrink-0 items-center gap-3 border-b border-border-faint/50 bg-bg-deep/60 px-3 py-2 text-xs sm:px-6">
 			<a href={backUrl}
-				class="mr-auto whitespace-nowrap text-orb-highlight/50 no-underline transition-colors hover:text-orb-highlight hover:no-underline"
+				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/65 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 			>
 				← Gallery
 			</a>
 
-			<div class="flex min-w-0 items-center gap-2 overflow-hidden">
+			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
 				{#if shot.app_name}
 					<a href="/gallery?game={encodeURIComponent(shot.app_name)}"
 						class="truncate whitespace-nowrap font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70"
@@ -331,38 +353,29 @@
 					<span class="text-orb-highlight/20">·</span>
 					<span class="truncate whitespace-nowrap text-orb-highlight/60">{shot.steam_name}</span>
 				{/if}
+
+				{#if shotDate}
+					<span class="hidden text-orb-highlight/20 sm:inline">·</span>
+					<time datetime={shot.file_created_at ?? undefined}
+						class="hidden whitespace-nowrap font-mono text-orb-highlight/40 sm:inline"
+					>
+						{shotDate.date} · {shotDate.time}
+					</time>
+				{/if}
 			</div>
 
 			<a href="https://steamcommunity.com/sharedfiles/filedetails/?id={shot.steam_file_id}"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="ml-auto whitespace-nowrap text-orb-highlight/40 no-underline transition-colors hover:text-orb-highlight/80 hover:no-underline"
+				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 			>
 				Steam ↗
 			</a>
 		</div>
 
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
-			<div class="flex min-h-10 flex-wrap items-center gap-3 border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-deep)_80%,black)] px-3 py-2 font-mono text-xs uppercase tracking-wider text-orb-highlight/55 sm:gap-4">
-				<button type="button" class="btn-link" onclick={resetImageView}>
-					Fit
-				</button>
-				<button type="button" class="btn-link" onclick={zoomToActualSize}>
-					Actual size
-				</button>
-				<span class="text-orb-highlight/45">{renderedZoomPercent}%</span>
-
-				<a href={shot.image_url ?? shot.preview_url}
-					target="_blank"
-					rel="noreferrer"
-					class="ml-auto whitespace-nowrap text-xs no-underline hover:no-underline"
-				>
-					Open full size
-				</a>
-			</div>
-
 			<div bind:this={imageStage}
-				class="viewer-stage relative flex h-[68vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[74vh] sm:min-h-[420px] xl:h-[min(78vh,900px)]"
+				class="viewer-stage relative flex h-[72vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[78vh] sm:min-h-[460px] xl:h-[min(82vh,960px)]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -391,61 +404,51 @@
 					Next →
 				</button>
 
-				<img 
-					bind:this={imageEl}
-					onwheel={handleImageWheel}
-					onload={resetImageView}
+				<img bind:this={imageEl}
 					src={shot.image_url ?? shot.preview_url}
 					alt={shot.title ?? 'Screenshot'}
 					class="block max-h-full max-w-full select-none object-contain transition-transform duration-75 ease-out will-change-transform"
 					draggable="false"
+					onwheel={handleImageWheel}
+					onload={resetImageView}
 					style="transform: translate3d({panX}px, {panY}px, 0) scale({zoom}); cursor: {zoom > 1 ? (dragState ? 'grabbing' : 'grab') : 'zoom-in'};"
 				/>
-			</div>
-
-			<div class="flex flex-col gap-2 border-t border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-deep)_82%,black)] px-3 py-2 font-mono text-[0.72rem] text-orb-highlight/60 sm:flex-row sm:items-center sm:justify-between">
-				<div class="flex min-w-0 flex-wrap items-center gap-2">
-					{#if shot.steam_name}
-						<span class="inline-flex max-w-full items-center gap-1 rounded-full border border-border-faint bg-orb-highlight/5 px-2 py-0.5 whitespace-nowrap">
-							<span class="uppercase tracking-wider text-orb-highlight/35">By</span>
-							<span class="truncate">{shot.steam_name}</span>
-						</span>
-					{/if}
-
-					{#if shot.app_name}
-						<span class="inline-flex max-w-full items-center gap-1 rounded-full border border-border-faint bg-orb-highlight/5 px-2 py-0.5 whitespace-nowrap">
-							<span class="uppercase tracking-wider text-orb-highlight/35">Game</span>
-							<span class="truncate">{shot.app_name}</span>
-						</span>
-					{/if}
-				</div>
-
-				<div class="flex min-w-0 flex-wrap items-center gap-2 sm:ml-auto sm:justify-end sm:text-right">
-					{#if shotDate}
-						<time datetime={shot.file_created_at} class="whitespace-nowrap">
-							{shotDate.date} · {shotDate.time}
-						</time>
-					{/if}
-
-					<a href={shot.image_url ?? shot.preview_url}
-						target="_blank"
-						rel="noreferrer"
-						class="whitespace-nowrap text-[0.72rem] no-underline hover:no-underline"
-					>
-						Full-size image
-					</a>
-				</div>
 			</div>
 		</div>
 
 		<div class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/60 px-3 py-3 sm:px-6 lg:grid-cols-[1fr_auto_1fr]">
-			<div class="flex items-center justify-center gap-2 lg:justify-start">
-				<button type="button" class="btn-link viewer-action-link" onclick={resetImageView} disabled={zoom === 1} aria-label="Reset image view">
+			<div class="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+				<a href={shot.image_url ?? shot.preview_url}
+					target="_blank"
+					rel="noreferrer"
+					class="font-mono text-xs uppercase tracking-wider no-underline hover:no-underline"
+				>
+					Original
+				</a>
+
+				<button type="button"
+					class="btn-link viewer-action-link"
+					onclick={resetImageView}
+					disabled={zoom === 1}
+					aria-label="Reset image view"
+				>
 					Reset View
 				</button>
+
+				<button type="button"
+					class="btn-link viewer-action-link"
+					onclick={zoomToActualSize}
+					aria-label="Show actual image size"
+				>
+					Actual Size
+				</button>
+
+				<span class="font-mono text-xs uppercase tracking-wider text-orb-highlight/45">
+					{renderedZoomPercent}%
+				</span>
 			</div>
 
-			<div class="flex items-center justify-center gap-2">
+			<div class="flex items-center justify-center">
 				<button type="button"
 					class="btn-link viewer-action-link {slideshowActive ? 'active' : ''}"
 					onclick={toggleSlideshow}
