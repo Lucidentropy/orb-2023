@@ -17,6 +17,12 @@ type ScreenshotRow = {
     title?: string | null;
 };
 
+type ViewerPlaylistRow = ScreenshotRow & {
+    slot: 'current' | 'prev' | 'next';
+    playlist_index: number | null;
+    playlist_total: number | null;
+};
+
 function normalizeShot(row: ScreenshotRow | undefined): ScreenshotRow | null {
     if (!row) return null;
 
@@ -33,10 +39,15 @@ function normalizeNumericParam(value: string | null): string {
     return /^\d+$/.test(value) ? value : '';
 }
 
-export const load: PageServerLoad = async ({ url }) => {
+function readBooleanCookie(value: string | undefined): boolean {
+    return value === '1' || value === 'true';
+}
+
+export const load: PageServerLoad = async ({ url, cookies }) => {
     const id = url.searchParams.get('id');
     const app = normalizeNumericParam(url.searchParams.get('app'));
     const member = url.searchParams.get('member') ?? '';
+    const randomBrowse = readBooleanCookie(cookies.get('gallery_viewer_random'));
 
     if (!id) {
         return {
@@ -46,12 +57,23 @@ export const load: PageServerLoad = async ({ url }) => {
             prevShot: null,
             nextShot: null,
             app,
-            member
+            member,
+            playlistIndex: null,
+            playlistTotal: null
         };
     }
 
     const shotRows = await sql<ScreenshotRow[]>`
-		SELECT *
+		SELECT
+			steam_file_id,
+			preview_url,
+			image_url,
+			app_name,
+			app_id,
+			steam_name,
+			steam_id,
+			file_created_at,
+			title
 		FROM steam_screenshots
 		WHERE steam_file_id = ${id}
 		LIMIT 1
@@ -65,110 +87,138 @@ export const load: PageServerLoad = async ({ url }) => {
             prevShot: null,
             nextShot: null,
             app,
-            member
+            member,
+            playlistIndex: null,
+            playlistTotal: null
         };
     }
 
     const shot = normalizeShot(shotRows[0]);
-    const createdAt = shot?.file_created_at ?? null;
-
-    if (!createdAt) {
-        return {
-            shot,
-            prevId: null,
-            nextId: null,
-            prevShot: null,
-            nextShot: null,
-            app,
-            member
-        };
-    }
-
     const appId = app ? Number(app) : null;
+    const appFilter = appId ? sql`AND app_id = ${appId}` : sql``;
+    const memberFilter = member ? sql`AND steam_id = ${member}` : sql``;
 
-    const [prevRows, nextRows] = await Promise.all([
-        appId && member
-            ? sql<ScreenshotRow[]>`
-				SELECT *
+    const playlistRows = randomBrowse
+        ? await sql<ViewerPlaylistRow[]>`
+			WITH filtered AS (
+				SELECT
+					steam_file_id,
+					preview_url,
+					image_url,
+					app_name,
+					app_id,
+					steam_name,
+					steam_id,
+					file_created_at,
+					title,
+					(ROW_NUMBER() OVER (
+						ORDER BY file_created_at DESC NULLS LAST, steam_file_id DESC
+					))::int AS playlist_index,
+					(COUNT(*) OVER ())::int AS playlist_total
 				FROM steam_screenshots
 				WHERE preview_url IS NOT NULL
-					AND file_created_at < ${createdAt}
-					AND app_id = ${appId}
-					AND steam_id = ${member}
-				ORDER BY file_created_at DESC NULLS LAST
-				LIMIT 1
-			`
-            : appId
-                ? sql<ScreenshotRow[]>`
-					SELECT *
-					FROM steam_screenshots
-					WHERE preview_url IS NOT NULL
-						AND file_created_at < ${createdAt}
-						AND app_id = ${appId}
-					ORDER BY file_created_at DESC NULLS LAST
-					LIMIT 1
-				`
-                : member
-                    ? sql<ScreenshotRow[]>`
-						SELECT *
-						FROM steam_screenshots
-						WHERE preview_url IS NOT NULL
-							AND file_created_at < ${createdAt}
-							AND steam_id = ${member}
-						ORDER BY file_created_at DESC NULLS LAST
-						LIMIT 1
-					`
-                    : sql<ScreenshotRow[]>`
-						SELECT *
-						FROM steam_screenshots
-						WHERE preview_url IS NOT NULL
-							AND file_created_at < ${createdAt}
-						ORDER BY file_created_at DESC NULLS LAST
-						LIMIT 1
-					`,
-        appId && member
-            ? sql<ScreenshotRow[]>`
-				SELECT *
+					${appFilter}
+					${memberFilter}
+			),
+			random_items AS (
+				SELECT
+					*,
+					(ROW_NUMBER() OVER (ORDER BY random()))::int AS random_rank
+				FROM filtered
+				WHERE steam_file_id <> ${id}
+				ORDER BY random_rank
+				LIMIT 2
+			)
+			SELECT
+				'current'::text AS slot,
+				steam_file_id,
+				preview_url,
+				image_url,
+				app_name,
+				app_id,
+				steam_name,
+				steam_id,
+				file_created_at,
+				title,
+				playlist_index,
+				playlist_total
+			FROM filtered
+			WHERE steam_file_id = ${id}
+
+			UNION ALL
+
+			SELECT
+				CASE WHEN random_rank = 1 THEN 'prev' ELSE 'next' END::text AS slot,
+				steam_file_id,
+				preview_url,
+				image_url,
+				app_name,
+				app_id,
+				steam_name,
+				steam_id,
+				file_created_at,
+				title,
+				playlist_index,
+				playlist_total
+			FROM random_items
+		`
+        : await sql<ViewerPlaylistRow[]>`
+			WITH filtered AS (
+				SELECT
+					steam_file_id,
+					preview_url,
+					image_url,
+					app_name,
+					app_id,
+					steam_name,
+					steam_id,
+					file_created_at,
+					title,
+					(ROW_NUMBER() OVER (
+						ORDER BY file_created_at DESC NULLS LAST, steam_file_id DESC
+					))::int AS playlist_index,
+					(COUNT(*) OVER ())::int AS playlist_total
 				FROM steam_screenshots
 				WHERE preview_url IS NOT NULL
-					AND file_created_at > ${createdAt}
-					AND app_id = ${appId}
-					AND steam_id = ${member}
-				ORDER BY file_created_at ASC NULLS LAST
+					${appFilter}
+					${memberFilter}
+			),
+			current_shot AS (
+				SELECT playlist_index
+				FROM filtered
+				WHERE steam_file_id = ${id}
 				LIMIT 1
-			`
-            : appId
-                ? sql<ScreenshotRow[]>`
-					SELECT *
-					FROM steam_screenshots
-					WHERE preview_url IS NOT NULL
-						AND file_created_at > ${createdAt}
-						AND app_id = ${appId}
-					ORDER BY file_created_at ASC NULLS LAST
-					LIMIT 1
-				`
-                : member
-                    ? sql<ScreenshotRow[]>`
-						SELECT *
-						FROM steam_screenshots
-						WHERE preview_url IS NOT NULL
-							AND file_created_at > ${createdAt}
-							AND steam_id = ${member}
-						ORDER BY file_created_at ASC NULLS LAST
-						LIMIT 1
-					`
-                    : sql<ScreenshotRow[]>`
-						SELECT *
-						FROM steam_screenshots
-						WHERE preview_url IS NOT NULL
-							AND file_created_at > ${createdAt}
-						ORDER BY file_created_at ASC NULLS LAST
-						LIMIT 1
-					`
-    ]);
+			)
+			SELECT
+				'current'::text AS slot,
+				filtered.*
+			FROM filtered
+			WHERE steam_file_id = ${id}
 
-    const prevShot = normalizeShot(prevRows[0]);
-    const nextShot = normalizeShot(nextRows[0]);
+			UNION ALL
+
+			SELECT
+				'prev'::text AS slot,
+				filtered.*
+			FROM filtered, current_shot
+			WHERE filtered.playlist_index = current_shot.playlist_index + 1
+
+			UNION ALL
+
+			SELECT
+				'next'::text AS slot,
+				filtered.*
+			FROM filtered, current_shot
+			WHERE filtered.playlist_index = current_shot.playlist_index - 1
+		`;
+
+    const currentRow = playlistRows.find(row => row.slot === 'current');
+    let prevShot = normalizeShot(playlistRows.find(row => row.slot === 'prev'));
+    let nextShot = normalizeShot(playlistRows.find(row => row.slot === 'next'));
+
+    if (randomBrowse && prevShot && !nextShot) {
+        nextShot = prevShot;
+    }
 
     return {
         shot,
@@ -177,6 +227,8 @@ export const load: PageServerLoad = async ({ url }) => {
         prevShot,
         nextShot,
         app,
-        member
+        member,
+        playlistIndex: currentRow?.playlist_index ?? null,
+        playlistTotal: currentRow?.playlist_total ?? null
     };
 };

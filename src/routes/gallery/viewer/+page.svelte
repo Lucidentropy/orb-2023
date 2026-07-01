@@ -30,6 +30,11 @@
 	const MIN_ZOOM = 1;
 	const MAX_ZOOM = 6;
 	const ZOOM_SENSITIVITY = 0.0015;
+	const IMAGE_LOAD_TIMEOUT_MS = 10_000;
+
+	let imageLoadTimer: ReturnType<typeof setTimeout> | null = null;
+	let imageLoadFailures = $state(0);
+	let imageLoadFailed = $state(false);
 
 	const shot = $derived(data.shot as ScreenshotShot | null);
 	const prevId = $derived(data.prevId as string | null);
@@ -38,6 +43,8 @@
 	const nextShot = $derived(data.nextShot as ScreenshotShot | null);
 	const app = $derived(String(data.app ?? ''));
 	const member = $derived(String(data.member ?? ''));
+	const playlistIndex = $derived(data.playlistIndex as number | null);
+	const playlistTotal = $derived(data.playlistTotal as number | null);	
 
 	const downloadUrl = $derived(
 		shot?.steam_file_id ? `/gallery/download?id=${encodeURIComponent(String(shot.steam_file_id))}` : ''
@@ -62,6 +69,7 @@
 	let nextImagePreloading = $state(false);
 	let imageTransitions = $state(true);
 	let slideshowProgressKey = $state(0);
+	let randomBrowse = $state(false);
 
 	const pageTitle = $derived.by(() => {
 		const author = shot?.steam_name ? ` by ${shot.steam_name}` : '';
@@ -86,6 +94,11 @@
 
 		return `Steam screenshot${author} from Clan Orb.`;
 	});
+
+	const playlistPositionLabel = $derived.by(() => {
+		if (!playlistIndex || !playlistTotal) return '';
+		return `${playlistIndex} of ${playlistTotal}`;
+	});	
 
 	const shareImageUrl = $derived(shot?.image_url ?? shot?.preview_url ?? '');	
 
@@ -127,6 +140,85 @@
 			? `https://steamcommunity.com/sharedfiles/filedetails/?id=${encodeURIComponent(String(shot.steam_file_id))}`
 			: 'https://steamcommunity.com/'
 	);
+
+	function clearImageLoadTimer() {
+		if (imageLoadTimer) {
+			clearTimeout(imageLoadTimer);
+			imageLoadTimer = null;
+		}
+	}
+
+	function startImageLoadTimer() {
+		clearImageLoadTimer();
+
+		imageLoadFailed = false;
+
+		imageLoadTimer = setTimeout(() => {
+			handleImageTimeout();
+		}, IMAGE_LOAD_TIMEOUT_MS);
+	}
+
+	function handleImageTimeout() {
+		clearImageLoadTimer();
+
+		imageLoadFailures++;
+
+		if (imageLoadFailures === 1 && prevId) {
+			goNext();
+			return;
+		}
+
+		imageLoadFailed = true;
+		imageLoaded = false;
+		stopSlideshow();
+	}
+
+	function retryImageLoad() {
+		imageLoadFailures = 0;
+		imageLoadFailed = false;
+		imageLoaded = false;
+
+		if (browser) {
+			window.location.reload();
+		}
+	}	
+
+	function handleRandomBrowseChange() {
+		writeRandomBrowseCookie();
+
+		imageLoadFailures = 0;
+		imageLoadFailed = false;
+		clearImageLoadTimer();
+
+		const targetId = prevId ?? nextId;
+
+		if (targetId) {
+			navigate(targetId);
+			return;
+		}
+
+		if (shot?.steam_file_id) {
+			void goto(buildViewerUrl(String(shot.steam_file_id)), {
+				noScroll: true,
+				keepFocus: true,
+				invalidateAll: true
+			});
+		}
+	}
+
+	function readRandomBrowseCookie(): boolean {
+		if (!browser) return false;
+
+		return document.cookie
+			.split('; ')
+			.some(cookie => cookie === 'gallery_viewer_random=1');
+	}
+
+	function writeRandomBrowseCookie() {
+		if (!browser) return;
+
+		document.cookie = `gallery_viewer_random=${randomBrowse ? '1' : '0'}; path=/gallery/viewer; SameSite=Lax; max-age=86400`;
+	}	
 
 	function downloadImage() {
 		if (!browser || !downloadUrl || downloadStarted) return;
@@ -249,7 +341,11 @@
 	function navigate(id: string | null) {
 		if (!id) return;
 
+		clearImageLoadTimer();
+		imageLoadFailures = 0;
+		imageLoadFailed = false;
 		resetImageView();
+
 		void goto(buildViewerUrl(id), {
 			noScroll: true,
 			keepFocus: true
@@ -371,9 +467,18 @@
 
 	// Image events
 	function handleImageLoad() {
+		clearImageLoadTimer();
+
+		imageLoadFailures = 0;
+		imageLoadFailed = false;
 		imageLoaded = true;
+
 		resetImageView();
 	}
+
+	function handleImageError() {
+		handleImageTimeout();
+	}	
 
 	function handleImageWheel(e: WheelEvent) {
 		if (!imageStage) return;
@@ -513,17 +618,21 @@
 
 		if (shot?.steam_file_id) {
 			imageLoaded = false;
+			imageLoadFailed = false;
 			downloadStarted = false;
 			resetImageView();
+			startImageLoadTimer();
 		}
 	});
 
 	onMount(() => {
+		randomBrowse = readRandomBrowseCookie();
 		window.addEventListener('keydown', handleKey);
 	});
 
 	onDestroy(() => {
 		stopSlideshow();
+		clearImageLoadTimer();
 
 		if (browser) {
 			window.removeEventListener('keydown', handleKey);
@@ -557,7 +666,7 @@
 	<div class="flex flex-col">
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
 			<div bind:this={imageStage}
-				class="viewer-stage viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-50 lg:min-h-[460px]"
+				class="viewer-stage group viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-50 lg:min-h-[460px]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -567,7 +676,7 @@
 				role="presentation"
 			>
 				<a href={backUrl}
-					class="btn-link absolute top-3 left-3 z-20 font-mono text-xs uppercase tracking-wider text-orb-highlight/70 opacity-30 transition hover:text-white hover:no-underline hover:opacity-100 focus-visible:opacity-100"
+					class="btn-link viewer-stage-control absolute top-3 left-3 z-20 font-mono text-xs uppercase tracking-wider text-orb-highlight/70 opacity-0 transition hover:text-white hover:no-underline hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-30 group-focus-within:opacity-30"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => e.stopPropagation()}
 				>
@@ -575,7 +684,7 @@
 				</a>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-prev viewer-text-shadow-strong absolute bottom-4 left-3 z-10 px-3 py-1 font-mono text-xs uppercase tracking-wider text-white/80 opacity-60 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-2"
+					class="btn-link viewer-stage-nav viewer-stage-nav-prev viewer-stage-control viewer-text-shadow-strong absolute bottom-4 left-3 z-10 px-3 py-1 font-mono text-xs uppercase tracking-wider text-white/80 opacity-0 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 group-hover:disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-2"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goPrev(); }}
 					disabled={!nextId}
@@ -585,7 +694,7 @@
 				</button>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-next viewer-text-shadow-strong absolute right-3 bottom-4 z-10 inline-flex items-center text-white/80 px-3 py-1 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-2"
+					class="btn-link viewer-stage-nav viewer-stage-nav-next viewer-stage-control viewer-text-shadow-strong absolute right-3 bottom-4 z-10 inline-flex items-center px-3 py-1 font-mono text-xs uppercase tracking-wider text-white/80 opacity-0 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-0 group-hover:opacity-50 group-focus-within:opacity-50 group-hover:disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-2"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goNext(); }}
 					disabled={!prevId}
@@ -597,11 +706,28 @@
 					<span>Next →</span>
 				</button>
 
-				{#if !imageLoaded && !imageTransitions}
+				{#if !imageLoaded && !imageLoadFailed}
 					<div class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
 						<div class="viewer-loader" aria-label="Loading image"></div>
 					</div>
 				{/if}
+
+				{#if imageLoadFailed}
+					<div class="absolute inset-0 z-30 flex items-center justify-center bg-black/70 px-4 text-center">
+						<div class="max-w-sm rounded border border-border-faint bg-bg-deep/90 px-5 py-4 shadow-panel">
+							<p class="mb-3 font-mono text-xs uppercase tracking-wider text-orb-highlight/70">
+								Image failed to load
+							</p>
+
+							<button type="button"
+								class="btn-link font-mono text-xs uppercase tracking-wider text-white hover:no-underline"
+								onclick={retryImageLoad}
+							>
+								Try again
+							</button>
+						</div>
+					</div>
+				{/if}				
 
 				<img bind:this={imageEl}
 					src={shot.image_url ?? shot.preview_url}
@@ -610,6 +736,7 @@
 					draggable="false"
 					onwheel={handleImageWheel}
 					onload={handleImageLoad}
+					onerror={handleImageError}
 					style="transform: translate3d({panX}px, {panY}px, 0) scale({zoom}); cursor: {zoom > 1 ? (dragState ? 'grabbing' : 'grab') : 'zoom-in'};"
 				/>
 
@@ -633,38 +760,69 @@
 				>
 					← Back to Gallery
 				</a>
-
 				
-				<div class="inline-flex items-center gap-2 rounded border border-border-faint/60 bg-black/20 px-3 py-3">
+				<div class="inline-flex items-center gap-2 rounded border border-border-faint/60 bg-black/20 px-3 py-3 leading-none">
+					<p class="m-0 mr-3 inline-flex items-center font-medium uppercase tracking-wider text-orb-highlight/30">
+						Image
+					</p>
+
 					<a href={steamUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center font-mono uppercase tracking-wider text-orb-highlight/60 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
+						class="inline-flex items-center gap-1 font-mono text-xs uppercase leading-none tracking-wider text-orb-highlight/60 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 					>
-						Steam Page ↗
+						<span>Steam</span>
+						<span class="translate-y-px">↗</span>
 					</a>
 
-					<span class="text-orb-highlight/20">·</span>
+					<span class="inline-flex items-center text-orb-highlight/20">·</span>
 
 					<a href={shot.image_url ?? shot.preview_url}
 						target="_blank"
 						rel="noreferrer"
-						class="font-mono text-xs uppercase tracking-wider text-orb-highlight/70 no-underline transition hover:text-white hover:no-underline"
+						class="inline-flex items-center gap-1 font-mono text-xs uppercase leading-none tracking-wider text-orb-highlight/70 no-underline transition hover:text-white hover:no-underline"
 					>
-						Source Image ↗
+						<span>Source</span>
+						<span class="translate-y-px">↗</span>
 					</a>
 
 					{#if downloadUrl}
-						<span class="text-orb-highlight/20">·</span>
+						<span class="inline-flex items-center text-orb-highlight/20">·</span>
+
 						<button type="button"
-							class="btn-link font-mono text-xs uppercase tracking-wider text-orb-highlight/70 transition hover:text-white hover:no-underline disabled:cursor-default disabled:opacity-35 disabled:hover:text-orb-highlight/70"
+							class="btn-link inline-flex items-center gap-1 font-mono text-xs uppercase leading-none tracking-wider text-orb-highlight/70 transition hover:text-white hover:no-underline disabled:cursor-default disabled:opacity-35 disabled:hover:text-orb-highlight/70"
 							aria-label="Download image"
 							onclick={downloadImage}
 							disabled={downloadStarted}
 						>
-							{downloadStarted ? 'Downloading…' : 'Download ↓'}
+							{#if downloadStarted}
+								<span>Downloading…</span>
+							{:else}
+								<span>Download</span>
+								<span class="translate-y-px">↓</span>
+							{/if}
 						</button>
 					{/if}
+				</div>
+
+				<div class="inline-flex items-center gap-3 rounded border border-border-faint bg-black/25 px-3 py-3 font-mono uppercase tracking-wider text-orb-highlight/70 transition">
+					{#if playlistIndex && playlistTotal}
+						{playlistIndex} of {playlistTotal}
+					{:else}
+						—
+					{/if}
+
+					<span class="text-orb-highlight/25">·</span>
+
+					<label class="viewer-check-label">
+						<input
+							type="checkbox"
+							bind:checked={randomBrowse}
+							class="viewer-check-input"
+							onchange={handleRandomBrowseChange}
+						/>
+						<span>Random</span>
+					</label>
 				</div>
 			</div>
 
@@ -722,11 +880,11 @@
 
 					<span class="text-orb-highlight/20">·</span>
 
-					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-orb-highlight/60 transition hover:text-orb-highlight">
+					<label class="viewer-check-label">
 						<input
 							type="checkbox"
 							bind:checked={containPan}
-							class="h-3.5 w-3.5 cursor-pointer accent-orb-highlight"
+							class="viewer-check-input"
 						/>
 						<span>Contain</span>
 					</label>
@@ -764,11 +922,11 @@
 
 					<span class="text-orb-highlight/25">·</span>
 
-					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-white/80 transition hover:text-white">
+					<label class="viewer-check-label">
 						<input
 							type="checkbox"
 							bind:checked={imageTransitions}
-							class="h-3.5 w-3.5 cursor-pointer accent-orb-highlight"
+							class="viewer-check-input"
 						/>
 						<span>Transitions</span>
 					</label>
@@ -844,11 +1002,10 @@
 		font-family: var(--font-mono);
 		font-size: 0.75rem;
 		font-weight: 600;
-		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		cursor: pointer;
 		outline: none;
-		padding-right:0;
+		padding:8px 2px;
 	}
 
 	.viewer-interval-select:hover,
@@ -877,6 +1034,85 @@
 		animation-timing-function: linear;
 		animation-fill-mode: forwards;
 	}
+
+	.viewer-check-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		cursor: pointer;
+		user-select: none;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: #444;
+		transition: color 0.15s ease;
+	}
+
+	.viewer-check-label:hover {
+		color: #fff;
+	}
+
+	.viewer-check-input {
+		appearance: none;
+		width: 0.875rem;
+		height: 0.875rem;
+		display: inline-grid;
+		place-content: center;
+		cursor: pointer;
+		border: 1px solid color-mix(in srgb, var(--orb-highlight) 35%, var(--orb-border));
+		border-radius: 0.15rem;
+		background:
+			linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--orb-bg-deep) 75%, black),
+				color-mix(in srgb, var(--orb-bg-base) 88%, black)
+			);
+		box-shadow:
+			inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+			0 0 0 0 color-mix(in srgb, var(--orb-highlight) 0%, transparent);
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.viewer-check-input::before {
+		content: '';
+		width: 0.45rem;
+		height: 0.45rem;
+		transform: scale(0);
+		background: var(--orb-highlight);
+		box-shadow: 0 0 8px color-mix(in srgb, var(--orb-highlight) 60%, transparent);
+		transition: transform 0.12s ease;
+	}
+
+	.viewer-check-input:checked {
+		border-color: color-mix(in srgb, var(--orb-highlight) 80%, white);
+		background:
+			linear-gradient(
+				to bottom,
+				color-mix(in srgb, var(--orb-highlight) 24%, var(--orb-bg-deep)),
+				color-mix(in srgb, var(--orb-accent) 28%, var(--orb-bg-base))
+			);
+		box-shadow:
+			inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+			0 0 10px color-mix(in srgb, var(--orb-highlight) 22%, transparent);
+	}
+
+	.viewer-check-input:checked::before {
+		transform: scale(1);
+	}
+
+	.viewer-check-input:focus-visible {
+		outline: 1px solid color-mix(in srgb, var(--orb-highlight) 85%, white);
+		outline-offset: 2px;
+	}
+
+	.viewer-check-input:disabled {
+		cursor: default;
+		opacity: 0.4;
+	}	
 
 	@keyframes viewer-slideshow-progress-fill {
 		from {
