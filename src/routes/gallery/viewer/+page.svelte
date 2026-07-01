@@ -44,8 +44,21 @@
 
 	const backUrl = $derived.by(() => {
 		const u = new URLSearchParams();
-		if (game) u.set('game', game);
-		if (member) u.set('member', member);
+
+		if (game) {
+			u.set('game', game);
+		}
+
+		if (member) {
+			u.set('member', member);
+		}
+
+		const pageParam = browser ? new URLSearchParams(window.location.search).get('p') : null;
+
+		if (pageParam) {
+			u.set('p', pageParam);
+		}
+
 		const qs = u.toString();
 		return `/gallery${qs ? '?' + qs : ''}`;
 	});
@@ -116,6 +129,12 @@
 
 		if (member) {
 			u.set('member', member);
+		}
+
+		const pageParam = browser ? new URLSearchParams(window.location.search).get('p') : null;
+
+		if (pageParam) {
+			u.set('p', pageParam);
 		}
 
 		return `/gallery/viewer?${u.toString()}`;

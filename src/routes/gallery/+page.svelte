@@ -1,7 +1,7 @@
 <script lang="ts">
 	// src/routes/gallery/+page.svelte
 	import { onMount } from 'svelte';
-	import { afterNavigate, replaceState } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
 
@@ -46,6 +46,8 @@
 	let currentPage = $state(init.page);
 
 	function syncStateFromUrl() {
+		if (!isGalleryRoute()) return;
+
 		const s = readUrl();
 
 		selectedGame = s.game;
@@ -88,7 +90,7 @@
 	});
 
 	afterNavigate((navigation) => {
-		if (navigation.type === 'popstate') {
+		if (navigation.type === 'popstate' && isGalleryRoute()) {
 			syncStateFromUrl();
 		}
 	});
@@ -112,11 +114,37 @@
 		return `/gallery${qs ? '?' + qs : ''}`;
 	}
 
+	function isGalleryRoute(): boolean {
+		return browser && window.location.pathname === '/gallery';
+	}
+
+	function replaceGalleryUrl(url: string) {
+		if (!browser || !isGalleryRoute()) return;
+
+		const next = new URL(url, window.location.origin);
+
+		if (next.pathname !== '/gallery') return;
+
+		window.history.replaceState(window.history.state, '', `${next.pathname}${next.search}`);
+	}	
+
 	function galleryViewerUrl(shot: Shot): string {
-		const u = new URLSearchParams({ id: shot.steam_file_id });
-		if (selectedGame) u.set('game', selectedGame);
-		if (selectedMember) u.set('member', selectedMember);
-		if (currentPage > 1) u.set('p', String(currentPage));
+		const u = new URLSearchParams();
+
+		u.set('id', shot.steam_file_id);
+
+		if (selectedGame) {
+			u.set('game', selectedGame);
+		}
+
+		if (selectedMember) {
+			u.set('member', selectedMember);
+		}
+
+		if (currentPage > 1) {
+			u.set('p', String(currentPage));
+		}
+
 		return `/gallery/viewer?${u.toString()}`;
 	}
 
@@ -190,20 +218,25 @@
 	function filterTo(url: string) {
 		return (e: MouseEvent) => {
 			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
 			e.preventDefault();
-			const params = new URL(url, location.origin).searchParams;
-			selectedGame = params.get('game') ?? '';
-			selectedMember = params.get('member') ?? '';
-			currentPage = 1;
-			replaceState(url, {});
+
+			const next = new URL(url, window.location.origin);
+
+			selectedGame = next.searchParams.get('game') ?? '';
+			selectedMember = next.searchParams.get('member') ?? '';
+			currentPage = Math.max(1, parseInt(next.searchParams.get('p') ?? '1'));
+
+			replaceGalleryUrl(`${next.pathname}${next.search}`);
 		};
 	}
 
 	function setPage(p: number) {
 		const clamped = Math.min(Math.max(1, p), Math.max(1, totalPages));
 		if (clamped === currentPage) return;
+
 		currentPage = clamped;
-		replaceState(buildUrl(selectedGame, selectedMember, clamped), {});
+		replaceGalleryUrl(buildUrl(selectedGame, selectedMember, clamped));
 	}
 
 	function jump(p: number) {
