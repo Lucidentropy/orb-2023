@@ -18,6 +18,7 @@
 	let panX = $state(0);
 	let panY = $state(0);
 	let imageStage: HTMLDivElement | undefined = $state();
+	let imageEl: HTMLImageElement | undefined = $state();
 
 	type DragState = {
 		pointerId: number;
@@ -27,6 +28,8 @@
 		baseY: number;
 		moved: boolean;
 	};
+
+	let suppressNextClick = $state(false);
 
 	let dragState = $state<DragState | null>(null);
 
@@ -132,23 +135,50 @@
 		dragState = null;
 	}
 
+	function getFitScale(): number {
+		if (!imageStage || !imageEl || !imageEl.naturalWidth || !imageEl.naturalHeight) {
+			return 1;
+		}
+
+		const stageWidth = imageStage.clientWidth;
+		const stageHeight = imageStage.clientHeight;
+		const widthScale = stageWidth / imageEl.naturalWidth;
+		const heightScale = stageHeight / imageEl.naturalHeight;
+
+		return Math.min(widthScale, heightScale, 1);
+	}
+
+	function getActualZoom(): number {
+		return clamp(1 / getFitScale(), MIN_ZOOM, MAX_ZOOM);
+	}
+
+	const renderedZoomPercent = $derived.by(() => {
+		const fitScale = getFitScale();
+		return Math.round(fitScale * zoom * 100);
+	});
+
 	function zoomToActualSize() {
-		zoom = 2;
+		zoom = getActualZoom();
 		panX = 0;
 		panY = 0;
+		constrainPan();
 	}
 
 	function handleImageWheel(e: WheelEvent) {
 		if (!imageStage) return;
+
+		const oldZoom = zoom;
+		const nextZoom = clamp(oldZoom * Math.exp(-e.deltaY * ZOOM_SENSITIVITY), MIN_ZOOM, MAX_ZOOM);
+
+		if (oldZoom <= 1 && nextZoom <= 1 && e.deltaY > 0) {
+			return;
+		}
 
 		e.preventDefault();
 
 		const rect = imageStage.getBoundingClientRect();
 		const stageX = e.clientX - rect.left - rect.width / 2;
 		const stageY = e.clientY - rect.top - rect.height / 2;
-
-		const oldZoom = zoom;
-		const nextZoom = clamp(oldZoom * Math.exp(-e.deltaY * ZOOM_SENSITIVITY), MIN_ZOOM, MAX_ZOOM);
 
 		if (nextZoom === oldZoom) return;
 
@@ -163,7 +193,11 @@
 	}
 
 	function handleImageClick(e: MouseEvent) {
-		if (dragState?.moved) return;
+		if (suppressNextClick) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 
 		const target = e.target as HTMLElement;
 
@@ -211,6 +245,14 @@
 
 	function handleImagePointerUp(e: PointerEvent) {
 		if (!dragState || dragState.pointerId !== e.pointerId) return;
+
+		if (dragState.moved) {
+			suppressNextClick = true;
+
+			setTimeout(() => {
+				suppressNextClick = false;
+			}, 0);
+		}
 
 		(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
 		dragState = null;
@@ -268,7 +310,7 @@
 		<p class="body-secondary">Screenshot not found. <a href="/gallery">Back to gallery.</a></p>
 	</div>
 {:else}
-	<div class="flex min-h-[calc(100vh-1px)] flex-col">
+	<div class="flex flex-col">
 		<div class="flex shrink-0 items-center gap-3 border-b border-border-faint/50 bg-bg-deep/60 px-3 py-2 text-xs sm:px-6">
 			<a href={backUrl}
 				class="mr-auto whitespace-nowrap text-orb-highlight/50 no-underline transition-colors hover:text-orb-highlight hover:no-underline"
@@ -308,7 +350,7 @@
 				<button type="button" class="btn-link" onclick={zoomToActualSize}>
 					Actual size
 				</button>
-				<span class="text-orb-highlight/45">{Math.round(zoom * 100)}%</span>
+				<span class="text-orb-highlight/45">{renderedZoomPercent}%</span>
 
 				<a href={shot.image_url ?? shot.preview_url}
 					target="_blank"
@@ -321,7 +363,6 @@
 
 			<div bind:this={imageStage}
 				class="viewer-stage relative flex h-[68vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[74vh] sm:min-h-[420px] xl:h-[min(78vh,900px)]"
-				onwheel={handleImageWheel}
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -350,7 +391,11 @@
 					Next →
 				</button>
 
-				<img src={shot.image_url ?? shot.preview_url}
+				<img 
+					bind:this={imageEl}
+					onwheel={handleImageWheel}
+					onload={resetImageView}
+					src={shot.image_url ?? shot.preview_url}
 					alt={shot.title ?? 'Screenshot'}
 					class="block max-h-full max-w-full select-none object-contain transition-transform duration-75 ease-out will-change-transform"
 					draggable="false"
