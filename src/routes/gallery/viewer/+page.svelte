@@ -17,6 +17,8 @@
 	let zoom = $state(1);
 	let panX = $state(0);
 	let panY = $state(0);
+	let containPan = $state(true);	
+	
 	let imageStage: HTMLDivElement | undefined = $state();
 	let imageEl: HTMLImageElement | undefined = $state();
 	let imageLoaded = $state(false);
@@ -169,18 +171,34 @@
 	}
 
 	function constrainPan() {
-		if (!imageStage || zoom <= 1) {
-			panX = 0;
-			panY = 0;
+		if (!imageStage || !imageEl || zoom <= 1) {
+			if (zoom <= 1) {
+				panX = 0;
+				panY = 0;
+			}
 			return;
 		}
 
-		const maxX = imageStage.clientWidth * (zoom - 1) * 0.5;
-		const maxY = imageStage.clientHeight * (zoom - 1) * 0.5;
+		if (!containPan) return;
+
+		const stageWidth = imageStage.clientWidth;
+		const stageHeight = imageStage.clientHeight;
+
+		const renderedWidth = imageEl.clientWidth * zoom;
+		const renderedHeight = imageEl.clientHeight * zoom;
+
+		const maxX = Math.max(0, (renderedWidth - stageWidth) / 2);
+		const maxY = Math.max(0, (renderedHeight - stageHeight) / 2);
 
 		panX = clamp(panX, -maxX, maxX);
 		panY = clamp(panY, -maxY, maxY);
 	}
+
+	$effect(() => {
+		if (containPan) {
+			constrainPan();
+		}
+	});	
 
 	function resetImageView() {
 		zoom = 1;
@@ -462,29 +480,40 @@
 					rel="noreferrer"
 					class="font-mono text-xs uppercase tracking-wider no-underline hover:no-underline"
 				>
-					Original
+					Original ↗
 				</a>
 
-				<button type="button"
-					class="btn-link viewer-action-link"
-					onclick={resetImageView}
-					disabled={zoom === 1}
-					aria-label="Reset image view"
-				>
-					Reset View
-				</button>
+				<div class="flex flex-wrap items-center justify-center gap-3 rounded border border-border-faint/70 bg-black/20 px-3 py-1.5 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
+					<button type="button"
+						class="btn-link viewer-action-link"
+						onclick={zoomToActualSize}
+						aria-label="Show actual image size"
+					>
+						Actual Size
+					</button>
 
-				<button type="button"
-					class="btn-link viewer-action-link"
-					onclick={zoomToActualSize}
-					aria-label="Show actual image size"
-				>
-					Actual Size
-				</button>
+					<span class="font-mono text-xs uppercase tracking-wider text-orb-highlight/45">
+						Zoom {renderedZoomPercent}%
+					</span>
 
-				<span class="font-mono text-xs uppercase tracking-wider text-orb-highlight/45">
-					{renderedZoomPercent}%
-				</span>
+					<button type="button"
+						class="btn-link viewer-action-link"
+						onclick={resetImageView}
+						disabled={zoom === 1}
+						aria-label="Reset image view"
+					>
+						Reset View
+					</button>
+
+					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-orb-highlight/55 transition hover:text-orb-highlight">
+						<input
+							type="checkbox"
+							bind:checked={containPan}
+							class="h-3.5 w-3.5 cursor-pointer accent-orb-highlight"
+						/>
+						<span>Contain</span>
+					</label>
+				</div>
 			</div>
 
 			<div class="flex items-center justify-center">
