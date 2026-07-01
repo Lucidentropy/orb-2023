@@ -39,6 +39,10 @@
 	const app = $derived(String(data.app ?? ''));
 	const member = $derived(String(data.member ?? ''));
 
+	const downloadUrl = $derived(
+		shot?.steam_file_id ? `/gallery/download?id=${encodeURIComponent(String(shot.steam_file_id))}` : ''
+	);
+
 	let slideshowActive = $state(false);
 	let slideshowInterval = $state(5);
 	let slideshowTimer: ReturnType<typeof setInterval> | null = null;
@@ -53,10 +57,11 @@
 	let imageLoaded = $state(false);
 	let dragState = $state<DragState | null>(null);
 	let suppressNextClick = $state(false);
-
+	let downloadStarted = $state(false);
 	const preloadedImages = new Set<string>();
 	let nextImagePreloading = $state(false);
-
+	let imageTransitions = $state(true);
+	
 	// URL builders
 	const backUrl = $derived.by(() => {
 		const u = new URLSearchParams();
@@ -95,6 +100,24 @@
 			? `https://steamcommunity.com/sharedfiles/filedetails/?id=${encodeURIComponent(String(shot.steam_file_id))}`
 			: 'https://steamcommunity.com/'
 	);
+
+	function downloadImage() {
+		if (!browser || !downloadUrl || downloadStarted) return;
+
+		downloadStarted = true;
+
+		const iframe = document.createElement('iframe');
+
+		iframe.src = downloadUrl;
+		iframe.style.display = 'none';
+		iframe.setAttribute('aria-hidden', 'true');
+
+		document.body.appendChild(iframe);
+
+		setTimeout(() => {
+			iframe.remove();
+		}, 60_000);
+	}
 
 	const shotDate = $derived.by(() => {
 		if (!shot?.file_created_at) return null;
@@ -189,6 +212,8 @@
 			app,
 			member
 		});
+
+		downloadStarted = false;
 
 		rememberViewedShot();
 	});
@@ -457,6 +482,7 @@
 
 		if (shot?.steam_file_id) {
 			imageLoaded = false;
+			downloadStarted = false;
 			resetImageView();
 		}
 	});
@@ -487,7 +513,7 @@
 	<div class="flex flex-col">
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
 			<div bind:this={imageStage}
-				class="viewer-stage viewer-stage-large relative flex h-[72vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[78vh] sm:min-h-[460px] xl:h-[min(82vh,960px)]"
+				class="viewer-stage viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-80 lg:min-h-[460px]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -496,8 +522,16 @@
 				onclick={handleImageClick}
 				role="presentation"
 			>
+				<a href={backUrl}
+					class="btn-link absolute top-3 left-3 z-20 rounded bg-black/45 px-3 py-2 font-mono text-xs uppercase tracking-wider text-orb-highlight/70 opacity-30 backdrop-blur transition hover:text-white hover:no-underline hover:opacity-100 focus-visible:opacity-100"
+					onpointerdown={(e) => e.stopPropagation()}
+					onclick={(e) => e.stopPropagation()}
+				>
+					← Back
+				</a>
+
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-prev absolute bottom-4 left-3 z-10 rounded-full border border-border-faint bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:bg-bg-deep/90 hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-3"
+					class="btn-link viewer-stage-nav viewer-stage-nav-prev viewer-text-shadow-strong absolute bottom-4 left-3 z-10 px-3 py-2 font-mono text-xs uppercase tracking-wider text-white/80 opacity-60 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-3"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goPrev(); }}
 					disabled={!nextId}
@@ -507,7 +541,7 @@
 				</button>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-next absolute right-3 bottom-4 z-10 inline-flex items-center rounded-full border border-border-faint bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:bg-bg-deep/90 hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-3"
+					class="btn-link viewer-stage-nav viewer-stage-nav-next viewer-text-shadow-strong absolute right-3 bottom-4 z-10 inline-flex items-center text-white/80 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-3"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goNext(); }}
 					disabled={!prevId}
@@ -519,7 +553,7 @@
 					<span>Next →</span>
 				</button>
 
-				{#if !imageLoaded}
+				{#if !imageLoaded && !imageTransitions}
 					<div class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
 						<div class="viewer-loader" aria-label="Loading image"></div>
 					</div>
@@ -528,7 +562,7 @@
 				<img bind:this={imageEl}
 					src={shot.image_url ?? shot.preview_url}
 					alt={shot.title ?? 'Screenshot'}
-					class="block max-h-full max-w-full select-none object-contain transition-transform duration-75 ease-out will-change-transform"
+					class="block max-h-full max-w-full select-none object-contain will-change-transform {imageTransitions ? 'transition-[opacity,transform,filter] duration-150 ease-out' : ''} {imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'}"
 					draggable="false"
 					onwheel={handleImageWheel}
 					onload={handleImageLoad}
@@ -537,57 +571,75 @@
 			</div>
 		</div>
 
-		<div class="flex shrink-0 items-center gap-3 border-b border-border-faint/50 bg-bg-deep/60 px-3 py-2 text-xs sm:px-6">
-			<a href={backUrl}
-				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/65 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
-			>
-				← Back to Gallery
-			</a>
-
-			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
-				{#if shot.app_name}
-					<a href={shotGameUrl}
-						class="truncate whitespace-nowrap font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70"
-					>
-						{shot.app_name}
-					</a>
-				{/if}
-
-				{#if shot.steam_name}
-					<span class="text-orb-highlight/20">·</span>
-					<span class="truncate whitespace-nowrap text-orb-highlight/60">{shot.steam_name}</span>
-				{/if}
-
-				{#if shotDate}
-					<span class="hidden text-orb-highlight/20 sm:inline">·</span>
-					<time datetime={shot.file_created_at ?? undefined}
-						class="hidden whitespace-nowrap font-mono text-orb-highlight/40 sm:inline"
-					>
-						{shotDate.date} · {shotDate.time}
-					</time>
-				{/if}
-			</div>
-
-			<a href={steamUrl}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
-			>
-				View on Steam ↗
-			</a>
-		</div>
-
-		<div class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/60 px-3 py-3 sm:px-6 lg:grid-cols-[1fr_auto_1fr]">
-			<div class="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-				<a href={shot.image_url ?? shot.preview_url}
-					target="_blank"
-					rel="noreferrer"
-					class="font-mono text-xs uppercase tracking-wider no-underline hover:no-underline"
+		<div class="grid shrink-0 grid-cols-1 items-center gap-3 border-t border-border-faint/50 bg-bg-deep/70 px-3 py-1 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] sm:px-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+			<div class="flex flex-wrap items-center justify-center gap-2 xl:justify-start">
+				<a href={backUrl}
+					class="inline-flex items-center rounded border border-border-faint bg-black/25 px-3 py-3 font-mono uppercase tracking-wider text-orb-highlight/70 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 				>
-					Original ↗
+					← Back to Gallery
 				</a>
 
-				<div class="flex flex-wrap items-center justify-center gap-3 rounded border border-border-faint/70 bg-black/20 px-3 py-1.5 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
+				
+				<div class="inline-flex items-center gap-2 rounded border border-border-faint/60 bg-black/20 px-3 py-3">
+					<a href={steamUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center font-mono uppercase tracking-wider text-orb-highlight/60 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
+					>
+						Steam Page ↗
+					</a>
+
+					<span class="text-orb-highlight/20">·</span>
+
+					<a href={shot.image_url ?? shot.preview_url}
+						target="_blank"
+						rel="noreferrer"
+						class="font-mono text-xs uppercase tracking-wider text-orb-highlight/70 no-underline transition hover:text-white hover:no-underline"
+					>
+						Source Image ↗
+					</a>
+
+					{#if downloadUrl}
+						<span class="text-orb-highlight/20">·</span>
+						<button type="button"
+							class="btn-link font-mono text-xs uppercase tracking-wider text-orb-highlight/70 transition hover:text-white hover:no-underline disabled:cursor-default disabled:opacity-35 disabled:hover:text-orb-highlight/70"
+							aria-label="Download image"
+							onclick={downloadImage}
+							disabled={downloadStarted}
+						>
+							{downloadStarted ? 'Downloading…' : 'Download ↓'}
+						</button>
+					{/if}
+				</div>
+			</div>
+
+			<div class="flex min-w-0 items-center justify-center overflow-hidden text-center">
+				<div class="flex min-w-0 max-w-full items-center gap-2 px-4 py-1.5">
+					{#if shot.app_name}
+						<a href={shotGameUrl}
+							class="truncate whitespace-nowrap text-sm font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70 sm:text-base"
+						>
+							{shot.app_name}
+						</a>
+					{/if}
+
+					{#if shot.steam_name}
+						<span class="text-orb-highlight/20">·</span>
+						<span class="truncate whitespace-nowrap text-orb-highlight/65">{shot.steam_name}</span>
+					{/if}
+
+					{#if shotDate}
+						<span class="hidden text-orb-highlight/20 sm:inline">·</span>
+						<time class="hidden whitespace-nowrap  text-orb-highlight/45 sm:inline">
+							{shotDate.date}
+						</time>
+					{/if}
+				</div>
+			</div>
+
+			<div class="flex flex-wrap items-center justify-center gap-2 xl:justify-end">
+			
+				<div class="flex items-center gap-2 rounded border border-border-faint/70 bg-black/25 px-3 py-3 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
 					<button type="button"
 						class="btn-link viewer-action-link"
 						onclick={zoomToActualSize}
@@ -596,9 +648,13 @@
 						Actual Size
 					</button>
 
-					<span class="font-mono text-xs uppercase tracking-wider text-orb-highlight/45">
-						Zoom {renderedZoomPercent}%
+					<span class="text-orb-highlight/20">·</span>
+
+					<span class="font-mono text-xs uppercase tracking-wider text-orb-highlight/50">
+						{renderedZoomPercent}%
 					</span>
+
+					<span class="text-orb-highlight/20">·</span>
 
 					<button type="button"
 						class="btn-link viewer-action-link"
@@ -606,10 +662,12 @@
 						disabled={zoom === 1}
 						aria-label="Reset image view"
 					>
-						Reset View
+						Reset
 					</button>
 
-					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-orb-highlight/55 transition hover:text-orb-highlight">
+					<span class="text-orb-highlight/20">·</span>
+
+					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-orb-highlight/60 transition hover:text-orb-highlight">
 						<input
 							type="checkbox"
 							bind:checked={containPan}
@@ -618,25 +676,23 @@
 						<span>Contain</span>
 					</label>
 				</div>
-			</div>
 
-			<div class="flex items-center justify-center">
-				<button type="button"
-					class="btn-link viewer-action-link {slideshowActive ? 'active' : ''}"
-					onclick={toggleSlideshow}
-					disabled={!prevId}
-					aria-label="Toggle slideshow"
-				>
-					{slideshowActive ? '⏸ Pause' : '▶ Play'}
-				</button>
-			</div>
+				<div class="inline-flex items-center gap-3 rounded border border-border-faint/70 bg-black/25 px-4 py-0 shadow-[inset_0_0_10px_rgba(0,0,0,0.25)]">
+					<button type="button"
+						class="btn-link viewer-action-link {slideshowActive ? 'active' : ''}"
+						onclick={toggleSlideshow}
+						disabled={!prevId}
+						aria-label="Toggle slideshow"
+					>
+						{slideshowActive ? '⏸ Pause' : '▶ Play'}
+					</button>
 
-			<div class="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
-				<label class="flex items-center gap-1.5 text-xs text-orb-highlight/60">
-					Interval
+					<span class="text-orb-highlight/25">·</span>
+
 					<select
 						bind:value={slideshowInterval}
-						class="rounded border border-border-faint bg-bg-800 px-1.5 py-0.5 font-sans text-xs text-orb-highlight"
+						class="viewer-interval-select"
+						aria-label="Slideshow interval"
 						onchange={() => { if (slideshowActive) { stopSlideshow(); startSlideshow(); } }}
 					>
 						<option value={3}>3s</option>
@@ -645,8 +701,18 @@
 						<option value={15}>15s</option>
 						<option value={30}>30s</option>
 					</select>
-				</label>
-				<span class="hidden text-xs text-orb-highlight/40 lg:block">← → · Wheel · Drag · Space · Z · Esc</span>
+
+					<span class="text-orb-highlight/25">·</span>
+
+					<label class="inline-flex cursor-pointer select-none items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-white/80 transition hover:text-white">
+						<input
+							type="checkbox"
+							bind:checked={imageTransitions}
+							class="h-3.5 w-3.5 cursor-pointer accent-orb-highlight"
+						/>
+						<span>Transitions</span>
+					</label>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -709,6 +775,40 @@
 		border-top-color: color-mix(in srgb, var(--orb-highlight) 90%, white);
 		border-radius: 9999px;
 		animation: viewer-next-spinner-spin 0.7s linear infinite;
+	}
+
+	.viewer-interval-select {
+		border: 0;
+		background: transparent;
+		color: #fff;
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		cursor: pointer;
+		outline: none;
+		padding-right:0;
+	}
+
+	.viewer-interval-select:hover,
+	.viewer-interval-select:focus-visible {
+		color: var(--orb-highlight);
+	}
+
+	.viewer-interval-select option {
+		background: var(--orb-bg-deep);
+		color: #fff;
+	}	
+
+	.viewer-text-shadow-strong {
+		text-shadow:
+			-1px -1px 0 #000,
+			1px -1px 0 #000,
+			-1px 1px 0 #000,
+			1px 1px 0 #000,
+			0 2px 0 #000,
+			0 0 8px rgba(0, 0, 0, 0.9);
 	}
 
 	@keyframes viewer-next-spinner-spin {

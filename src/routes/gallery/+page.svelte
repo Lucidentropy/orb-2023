@@ -36,12 +36,11 @@
 	let selectedMember = $state('');
 	let focusedShotId = $state('');
 	let currentPage = $state(1);
-
+	let shouldRestoreFocusedShot = $state(false);
 	let gameMenuOpen = $state(false);
 	let wheelEnabled = $state(true);
 	let showAllGames = $state(false);
 	let isDev = $state(false);
-	let galleryEl: HTMLDivElement | undefined = $state();
 
 	let wheelCooldown = false;
 
@@ -93,7 +92,10 @@
 		selectedMember = s.member;
 		currentPage = s.page;
 
-		restoreFocusFromSharedState();
+		if (shouldRestoreFocusedShot) {
+			restoreFocusFromSharedState();
+			shouldRestoreFocusedShot = false;
+		}
 	}
 
 	function buildUrl(appOrName: string, memberOrName: string, p: number) {
@@ -305,6 +307,9 @@
 		const clamped = Math.min(Math.max(1, p), Math.max(1, totalPages));
 		if (clamped === currentPage) return;
 
+		focusedShotId = '';
+		shouldRestoreFocusedShot = false;
+
 		void goto(buildUrl(selectedApp, selectedMember, clamped), {
 			noScroll: true,
 			keepFocus: true
@@ -324,23 +329,43 @@
 	function handleWheel(e: WheelEvent) {
 		if (!wheelEnabled) return;
 
+		const target = e.target as HTMLElement;
+		const isGalleryItem = Boolean(target.closest('.gallery-item'));
+
+		if (
+			!isGalleryItem &&
+			(
+				target.closest('button, a, select, input, textarea, .game-menu-wrap') ||
+				target.closest('[data-wheel-scroll]')
+			)
+		) {
+			return;
+		}
+
+		if (Math.abs(e.deltaY) < 8) return;
+
+		if (
+			(e.deltaY > 0 && currentPage >= totalPages) ||
+			(e.deltaY < 0 && currentPage <= 1)
+		) {
+			return;
+		}
+
 		e.preventDefault();
 
 		if (wheelCooldown) return;
 
-		if (e.deltaY > 0 && currentPage < totalPages) {
-			wheelCooldown = true;
+		wheelCooldown = true;
+
+		if (e.deltaY > 0) {
 			setPage(currentPage + 1);
-		} else if (e.deltaY < 0 && currentPage > 1) {
-			wheelCooldown = true;
+		} else {
 			setPage(currentPage - 1);
 		}
 
-		if (wheelCooldown) {
-			setTimeout(() => {
-				wheelCooldown = false;
-			}, WHEEL_COOLDOWN_MS);
-		}
+		setTimeout(() => {
+			wheelCooldown = false;
+		}, WHEEL_COOLDOWN_MS);
 	}
 
 	// Lifecycle
@@ -364,6 +389,7 @@
 				| undefined;
 
 			if (event.persisted || navEntry?.type === 'back_forward') {
+				shouldRestoreFocusedShot = true;
 				syncStateFromUrl();
 			}
 		};
@@ -387,17 +413,15 @@
 		}
 	});
 
-	$effect(() => {
-		if (!browser || !galleryEl) return;
+	function wheelPager(node: HTMLElement) {
+		node.addEventListener('wheel', handleWheel, { passive: false });
 
-		const el = galleryEl;
-
-		el.addEventListener('wheel', handleWheel, { passive: false });
-
-		return () => {
-			el.removeEventListener('wheel', handleWheel);
+		return {
+			destroy() {
+				node.removeEventListener('wheel', handleWheel);
+			}
 		};
-	});
+	}
 </script>
 
 <svelte:head>
@@ -607,24 +631,43 @@
 			</div>
 		</aside>
 
-		<div class="min-w-0 flex-1" bind:this={galleryEl}>
-			<div class="mb-4 flex flex-col gap-3 border-b border-border-faint pb-3 sm:flex-row sm:items-center sm:justify-between">
-				<p class="m-0 shrink-0 font-mono text-xs uppercase tracking-wider text-orb-highlight/40">
-					{filtered.length} screenshot{filtered.length === 1 ? '' : 's'}
-					{#if totalPages > 1}
-						· page {currentPage} of {totalPages}
+		<div class="min-w-0 flex-1" use:wheelPager>
+			<div class="mb-4 flex flex-col gap-3 border-b border-border-faint pb-3 sm:flex-row sm:items-end sm:justify-between">
+				<div class="min-w-0">
+					{#if selectedGame}
+						<h3 class="m-0 truncate text-lg font-semibold leading-tight text-white sm:text-3xl">
+							{selectedGame}
+						</h3>
+					{:else}
+						<h3 class="m-0 truncate text-lg font-semibold leading-tight text-white sm:text-3xl">
+							All Games
+						</h3>
 					{/if}
-					{#if selectedGame || selectedMember || currentPage > 1}
-						·
-						<a href="/gallery"
-							class="text-orb-link/70 no-underline transition hover:text-white hover:no-underline"
-							onclick={filterTo('/gallery')}
-						>
-							Reset All Filters
-						</a>
-					{/if}
-				</p>
-				{@render pagination()}
+
+					<p class="m-0 mt-1 shrink-0 font-mono text-xs uppercase tracking-wider text-orb-highlight/40">
+						{filtered.length} screenshot{filtered.length === 1 ? '' : 's'}
+						{#if selectedMember}
+							· {members.find(m => m.id === selectedMember)?.name ?? ''}
+						{/if}						
+						{#if totalPages > 1}
+							· page {currentPage} of {totalPages}
+						{/if}
+
+						{#if selectedApp || selectedMember || currentPage > 1}
+							·
+							<a href="/gallery"
+								class="text-orb-link/70 no-underline transition hover:text-white hover:no-underline"
+								onclick={filterTo('/gallery')}
+							>
+								Reset All Filters
+							</a>
+						{/if}
+					</p>
+				</div>
+
+				<div class="flex shrink-0 items-end justify-start sm:justify-end">
+					{@render pagination()}
+				</div>
 			</div>
 
 			{#if paged.length === 0}
