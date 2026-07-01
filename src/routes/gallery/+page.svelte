@@ -1,7 +1,8 @@
 <script lang="ts">
 	// src/routes/gallery/+page.svelte
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { afterNavigate, replaceState } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
 
 	let { data } = $props();
@@ -17,16 +18,79 @@
 		file_created_at: string | null;
 	};
 
-    const PAGE_SIZE = 48;
+	const PAGE_SIZE = 30;
+	const WHEEL_COOLDOWN_MS = 150;
+
+	const shots = $derived(data.screenshots as unknown as Shot[]);
 	let steamMembers = $derived(data.steamMembers);
 	let gameMenuOpen = $state(false);
+	let wheelEnabled = $state(true);
+	let isDev = $state(false);
+	let galleryEl: HTMLDivElement | undefined = $state();
+	let wheelCooldown = false;
 
-	onMount(async () => {
+	function readUrl() {
+		const search = browser ? window.location.search : '';
+		const p = new URLSearchParams(search);
+
+		return {
+			game: p.get('game') ?? '',
+			member: p.get('member') ?? '',
+			page: Math.max(1, parseInt(p.get('p') ?? '1'))
+		};
+	}
+
+	const init = readUrl();
+	let selectedGame = $state(init.game);
+	let selectedMember = $state(init.member);
+	let currentPage = $state(init.page);
+
+	function syncStateFromUrl() {
+		const s = readUrl();
+
+		selectedGame = s.game;
+		selectedMember = s.member;
+		currentPage = s.page;
+	}
+
+	onMount(() => {
+		isDev = window.location.hostname === 'localhost';
+
 		const closeMenu = (e: MouseEvent) => {
 			if (!(e.target as Element).closest('.game-menu-wrap')) gameMenuOpen = false;
 		};
+
+		const onPop = () => {
+			syncStateFromUrl();
+		};
+
+		const onPageShow = (event: PageTransitionEvent) => {
+			const navEntry = performance.getEntriesByType('navigation')[0] as
+				| PerformanceNavigationTiming
+				| undefined;
+
+			if (event.persisted || navEntry?.type === 'back_forward') {
+				syncStateFromUrl();
+			}
+		};
+
 		document.addEventListener('click', closeMenu);
-		return () => document.removeEventListener('click', closeMenu);
+		window.addEventListener('popstate', onPop);
+		window.addEventListener('pageshow', onPageShow);
+
+		syncStateFromUrl();
+
+		return () => {
+			document.removeEventListener('click', closeMenu);
+			window.removeEventListener('popstate', onPop);
+			window.removeEventListener('pageshow', onPageShow);
+		};
+	});
+
+	afterNavigate((navigation) => {
+		if (navigation.type === 'popstate') {
+			syncStateFromUrl();
+		}
 	});
 
 	function avatarFor(steam_id: string | null): string | null {
@@ -34,14 +98,8 @@
 		return steamMembers.find(m => m.steamid === String(steam_id))?.avatarfull ?? null;
 	}
 
-	function normalizeGame(name: string | null): string {
-		if (!name) return '';
-		if (/grand theft auto v/i.test(name)) return 'Grand Theft Auto V';
-		return name;
-	}
-
 	function appIdFor(gameName: string): number | null {
-		const shot = (data.screenshots as Shot[]).find(s => normalizeGame(s.app_name) === gameName && s.app_id);
+		const shot = shots.find(s => s.app_name === gameName && s.app_id);
 		return shot?.app_id ?? null;
 	}
 
@@ -54,24 +112,50 @@
 		return `/gallery${qs ? '?' + qs : ''}`;
 	}
 
-	const selectedGame = $derived($page.url.searchParams.get('game') ?? '');
-	const selectedMember = $derived($page.url.searchParams.get('member') ?? '');
-	const currentPage = $derived(Math.max(1, parseInt($page.url.searchParams.get('p') ?? '1')));
+	function galleryViewerUrl(shot: Shot): string {
+		const u = new URLSearchParams({ id: shot.steam_file_id });
+		if (selectedGame) u.set('game', selectedGame);
+		if (selectedMember) u.set('member', selectedMember);
+		if (currentPage > 1) u.set('p', String(currentPage));
+		return `/gallery/viewer?${u.toString()}`;
+	}
 
 	const games = $derived(
-		[...new Set((data.screenshots as Shot[]).map(s => normalizeGame(s.app_name)).filter(Boolean))].sort() as string[]
+		[...new Set(shots.map(s => s.app_name).filter(Boolean))].sort() as string[]
 	);
 
+	const gameCounts = $derived.by(() => {
+		const map = new Map<string, number>();
+		for (const s of shots) {
+			const g = s.app_name;
+			if (!g) continue;
+			map.set(g, (map.get(g) ?? 0) + 1);
+		}
+		return map;
+	});
+
+	const topGames = $derived.by(() =>
+		[...gameCounts.entries()]
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 10)
+			.map(([name, count]) => ({ name, count }))
+	);
+
+	const gameFiltered = $derived.by(() => {
+		let list = shots;
+		if (selectedGame) list = list.filter(s => s.app_name === selectedGame);
+		return list;
+	});
+
 	const filtered = $derived.by(() => {
-		let list = data.screenshots as Shot[];
-		if (selectedGame) list = list.filter(s => normalizeGame(s.app_name) === selectedGame);
+		let list = gameFiltered;
 		if (selectedMember) list = list.filter(s => s.steam_name === selectedMember);
 		return list;
 	});
 
 	const members = $derived.by(() => {
 		const totalMap = new Map<string, { name: string; steam_id: string | null; totalCount: number }>();
-		for (const s of data.screenshots as Shot[]) {
+		for (const s of shots) {
 			if (!s.steam_name) continue;
 			if (!totalMap.has(s.steam_name)) {
 				totalMap.set(s.steam_name, { name: s.steam_name, steam_id: s.steam_id, totalCount: 0 });
@@ -79,7 +163,7 @@
 			totalMap.get(s.steam_name)!.totalCount++;
 		}
 		const countMap = new Map<string, number>();
-		for (const s of filtered) {
+		for (const s of gameFiltered) {
 			if (!s.steam_name) continue;
 			countMap.set(s.steam_name, (countMap.get(s.steam_name) ?? 0) + 1);
 		}
@@ -102,217 +186,377 @@
 		}
 		return range;
 	});
+
+	function filterTo(url: string) {
+		return (e: MouseEvent) => {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+			e.preventDefault();
+			const params = new URL(url, location.origin).searchParams;
+			selectedGame = params.get('game') ?? '';
+			selectedMember = params.get('member') ?? '';
+			currentPage = 1;
+			replaceState(url, {});
+		};
+	}
+
+	function setPage(p: number) {
+		const clamped = Math.min(Math.max(1, p), Math.max(1, totalPages));
+		if (clamped === currentPage) return;
+		currentPage = clamped;
+		replaceState(buildUrl(selectedGame, selectedMember, clamped), {});
+	}
+
+	function jump(p: number) {
+		return (e: MouseEvent) => {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+			e.preventDefault();
+			setPage(p);
+		};
+	}
+
+	function handleWheel(e: WheelEvent) {
+		if (!wheelEnabled) return;
+		e.preventDefault();
+		if (wheelCooldown) return;
+		if (e.deltaY > 0 && currentPage < totalPages) {
+			wheelCooldown = true;
+			setPage(currentPage + 1);
+		} else if (e.deltaY < 0 && currentPage > 1) {
+			wheelCooldown = true;
+			setPage(currentPage - 1);
+		}
+		if (wheelCooldown) setTimeout(() => { wheelCooldown = false; }, WHEEL_COOLDOWN_MS);
+	}
+
+	$effect(() => {
+		if (!browser || !galleryEl) return;
+		const el = galleryEl;
+		el.addEventListener('wheel', handleWheel, { passive: false });
+		return () => el.removeEventListener('wheel', handleWheel);
+	});
 </script>
 
 <svelte:head>
-	<title>Orb - Screenshot Gallery</title>
+	<title>Orb - Steam Image Gallery</title>
 	<meta name="description" content="Community screenshot gallery" />
 </svelte:head>
 
+{#snippet pagination()}
+	{#if totalPages > 1}
+		<nav class="flex flex-wrap items-center justify-center gap-1" aria-label="Gallery pages">
+			{#if currentPage > 1}
+				<a href={buildUrl(selectedGame, selectedMember, currentPage - 1)}
+					class="pagination-btn"
+					onclick={jump(currentPage - 1)}
+					aria-label="Previous page"
+				>
+					←
+				</a>
+			{/if}
+
+			{#each pageNumbers as p, i (i)}
+				{#if p === '...'}
+					<span class="px-1 text-sm text-orb-highlight/30">…</span>
+				{:else}
+					<a href={buildUrl(selectedGame, selectedMember, p)}
+						class="pagination-btn {p === currentPage ? 'active' : ''}"
+						onclick={jump(p)}
+						aria-current={p === currentPage ? 'page' : undefined}
+					>
+						{p}
+					</a>
+				{/if}
+			{/each}
+
+			{#if currentPage < totalPages}
+				<a href={buildUrl(selectedGame, selectedMember, currentPage + 1)}
+					class="pagination-btn"
+					onclick={jump(currentPage + 1)}
+					aria-label="Next page"
+				>
+					→
+				</a>
+			{/if}
+		</nav>
+	{/if}
+{/snippet}
+
 <Container>
-	<div class="relative mb-4">
-		<h1>Screenshot Gallery</h1>
-		<a href="/gallery/update" class="absolute right-0 top-1/2 -translate-y-1/2 text-sm px-3 py-1 border border-current rounded opacity-50 hover:opacity-100 transition-opacity no-underline hover:no-underline">
-			+ Add Screenshots
-		</a>
+	<div class="relative mb-4 sm:mb-5">
+		<h1 class="flex w-full items-center gap-3 pr-36">
+			<svg class="h-6 w-6 shrink-0 fill-current sm:h-7 sm:w-7 steam-title-icon" viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.064 0 .127.002.19.006l2.861-4.142v-.058c0-2.5 2.033-4.533 4.533-4.533s4.533 2.033 4.533 4.533-2.033 4.533-4.533 4.533h-.105l-4.08 2.913c0 .052.002.105.002.158 0 1.875-1.526 3.4-3.401 3.4-1.646 0-3.021-1.176-3.332-2.735L.436 15.27C1.862 20.307 6.486 24 11.979 24 18.617 24 24 18.627 24 12S18.617 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.324.005-1.956s-.75-1.124-1.377-1.385c-.624-.26-1.29-.25-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.455 1.021zm8.41-6.784c-1.385 0-2.513-1.127-2.513-2.513s1.128-2.513 2.513-2.513 2.513 1.127 2.513 2.513-1.128 2.513-2.513 2.513zm0-.62c1.044 0 1.893-.849 1.893-1.893s-.849-1.893-1.893-1.893-1.893.849-1.893 1.893.849 1.893 1.893 1.893z" />
+			</svg>
+			<span>Steam Image Gallery</span>
+		</h1>
+
+		{#if isDev}
+			<a href="/gallery/update"
+				class="absolute right-4 top-2 -translate-y-1/2 rounded border border-current px-3 py-1 text-sm no-underline opacity-50 transition-opacity hover:no-underline hover:opacity-100"
+			>
+				+ Add Screenshots
+			</a>
+		{/if}
 	</div>
 
-<div class="gallery-header">
-    <div class="game-menu-wrap relative">
-        <button
-            type="button"
-            class="btn-ghost flex items-center gap-2 text-xs"
-            onclick={() => gameMenuOpen = !gameMenuOpen}
-        >
-            {#if selectedGame}
-                {@const appId = appIdFor(selectedGame)}
-                {#if appId}
-                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg" alt="" class="h-10 rounded-sm" />
-                {/if}
-                <span class="text-white">{selectedGame}</span>
-            {:else}
-                <span>All Games</span>
-            {/if}
-            {#if selectedGame}
-            <a href={buildUrl('', selectedMember, 1)}
-                class="text-xs text-orb-highlight/20 hover:text-orb-highlight/60 transition-colors no-underline hover:no-underline">
-                × clear
-            </a>
-        {/if}
-        </button>
-        {#if gameMenuOpen}
-            <div class="absolute top-[calc(100%+4px)] left-0 z-50 min-w-60 max-h-96 overflow-y-auto bg-bg-deep border border-border-default rounded shadow-panel flex flex-col">
-                <a href={buildUrl('', selectedMember, 1)}
-                    class="game-menu-item {!selectedGame ? 'active' : ''}"
-                    onclick={() => gameMenuOpen = false}
-                >
-                    <span class="truncate">All Games</span>
-                    <span class="ml-auto text-orb-highlight/40 text-[0.7rem] shrink-0">{data.screenshots.length}</span>
-                </a>
-                {#each games as g (g)}
-                    {@const appId = appIdFor(g)}
-                    <a href={buildUrl(selectedGame === g ? '' : g, selectedMember, 1)}
-                        class="game-menu-item {selectedGame === g ? 'active' : ''}"
-                        onclick={() => gameMenuOpen = false}
-                    >
-                        {#if appId}
-                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg" alt="" class="h-6 rounded-sm" />
-                        {/if}
-                        <span class="truncate">{g}</span>
-                        <span class="ml-auto text-orb-highlight/40 text-[0.7rem] shrink-0">
-                            {(data.screenshots as Shot[]).filter(s => normalizeGame(s.app_name) === g).length}
-                        </span>
-                    </a>
-                {/each}
-            </div>
-        {/if}
-    </div>
-
-    <div class="flex items-center justify-center gap-1.5 flex-wrap">
-        {#each members as m (m.name)}
-            {@const avatar = avatarFor(m.steam_id)}
-            <a href={buildUrl(selectedGame, selectedMember === m.name ? '' : m.name, 1)}
-                class="block rounded-full border-2 transition-all duration-150 no-underline {selectedMember === m.name ? 'border-border-strong opacity-100' : 'border-transparent opacity-45 hover:opacity-85'} {m.count === 0 ? '!opacity-15 pointer-events-none' : ''}"
-                title="{m.name} ({m.count})"
-            >
-                {#if avatar}
-                    <img src={avatar} alt={m.name} class="w-10 h-10 rounded-full block" />
-                {:else}
-                    <span class="w-7 h-7 rounded-full bg-bg-800 flex items-center justify-center text-[10px] text-orb-highlight/50">{m.name[0]}</span>
-                {/if}
-            </a>
-        {/each}
-        {#if selectedMember}
-            <a href={buildUrl(selectedGame, '', 1)}
-                class="text-xs text-orb-highlight/20 hover:text-orb-highlight/60 transition-colors no-underline hover:no-underline ml-1">
-                × clear
-            </a>
-        {/if}
-    </div>
-
-    <div class="flex items-center justify-end gap-2">
-        {#if totalPages > 1}
-            <div class="flex items-center gap-1">
-                {#if currentPage > 1}
-                    <a href={buildUrl(selectedGame, selectedMember, currentPage - 1)} class="pagination-btn">←</a>
-                {/if}
-                {#each pageNumbers as p, i (i)}
-                    {#if p === '...'}
-                        <span class="px-1 text-orb-highlight/30 text-sm">…</span>
-                    {:else}
-                        <a href={buildUrl(selectedGame, selectedMember, p)}
-                            class="pagination-btn {p === currentPage ? 'active' : ''}">
-                            {p}
-                        </a>
-                    {/if}
-                {/each}
-                {#if currentPage < totalPages}
-                    <a href={buildUrl(selectedGame, selectedMember, currentPage + 1)} class="pagination-btn">→</a>
-                {/if}
-            </div>
-        {/if}
-    </div>
-</div>
-
-	{#if paged.length === 0}
-		<p class="body-secondary">No screenshots found.</p>
-	{:else}
-		<div class="gallery-grid">
-			{#each paged as shot (shot.steam_file_id)}
-				<a href="/gallery/viewer?id={shot.steam_file_id}{selectedGame ? '&game=' + encodeURIComponent(selectedGame) : ''}{selectedMember ? '&member=' + encodeURIComponent(selectedMember) : ''}"
-                    class="gallery-item"
-                    onclick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-                >
-					<img src={shot.preview_url} alt={shot.title ?? 'Screenshot'} loading="lazy" />
-					{#if shot.app_name && !selectedGame}
-						<span class="game-label">{normalizeGame(shot.app_name)}</span>
+	<div class="flex flex-col gap-5 lg:flex-row lg:items-start">
+		<aside class="filter-sidebar flex shrink-0 flex-col gap-5 rounded border border-border-faint/70 bg-black/20 p-3 sm:p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:w-64 lg:overflow-y-auto" aria-label="Gallery filters">
+			<div class="game-menu-wrap relative">
+				<div class="mb-1 flex items-center justify-between gap-3">
+					<span class="field-label mb-0">Game</span>
+					{#if selectedGame}
+						<a href={buildUrl('', selectedMember, 1)}
+							class="text-xs text-orb-highlight/35 no-underline transition hover:text-orb-highlight hover:no-underline"
+							onclick={filterTo(buildUrl('', selectedMember, 1))}
+						>
+							× clear
+						</a>
 					{/if}
-				</a>
-			{/each}
-		</div>
+				</div>
 
-		<div class="mt-6">
-			{#if totalPages > 1}
-				<p class="text-center text-xs text-orb-highlight/30 mt-2">
-					Page {currentPage} of {totalPages} · {filtered.length} screenshot{filtered.length === 1 ? '' : 's'}
+				<button
+					type="button"
+					class="btn-ghost flex w-full items-center gap-2 text-left"
+					onclick={() => gameMenuOpen = !gameMenuOpen}
+				>
+					{#if selectedGame}
+						{@const appId = appIdFor(selectedGame)}
+						{#if appId}
+							<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
+								alt=""
+								class="shrink-0 mx-auto rounded-sm"
+							/>
+						{/if}
+						<!-- <span class="truncate text-white">{selectedGame}</span> -->
+					{:else}
+						<span>All Games</span>
+					{/if}
+					<span class="ml-auto shrink-0 text-orb-highlight/40" aria-hidden="true">▾</span>
+				</button>
+
+				{#if gameMenuOpen}
+					<div class="game-menu absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 flex max-h-96 flex-col overflow-y-auto border border-border-default shadow-panel">
+						<a href={buildUrl('', '', 1)}
+							class="menu-item {!selectedGame ? 'active' : ''}"
+							onclick={(e) => { filterTo(buildUrl('', '', 1))(e); gameMenuOpen = false; }}
+						>
+							<span class="truncate">All Games</span>
+							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{shots.length}</span>
+						</a>
+
+						{#each games as g (g)}
+							{@const appId = appIdFor(g)}
+							<a href={buildUrl(selectedGame === g ? '' : g, '', 1)}
+								class="menu-item {selectedGame === g ? 'active' : ''}"
+								onclick={(e) => { filterTo(buildUrl(selectedGame === g ? '' : g, '', 1))(e); gameMenuOpen = false; }}
+							>
+								{#if appId}
+									<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
+										alt=""
+										class="h-6 shrink-0 rounded-sm"
+									/>
+								{/if}
+								<span class="truncate">{g}</span>
+								<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">
+									{gameCounts.get(g) ?? 0}
+								</span>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+			<div>
+				<span class="field-label">Popular</span>
+				<div class="flex flex-col gap-0.5">
+					{#each topGames as g (g.name)}
+						{@const appId = appIdFor(g.name)}
+						<a href={buildUrl(selectedGame === g.name ? '' : g.name, '', 1)}
+							class="filter-item {selectedGame === g.name ? 'active' : ''}"
+							onclick={filterTo(buildUrl(selectedGame === g.name ? '' : g.name, '', 1))}
+						>
+							{#if appId}
+								<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
+									alt=""
+									class="h-5 shrink-0 rounded-sm"
+								/>
+							{/if}
+							<span class="truncate">{g.name}</span>
+							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{g.count}</span>
+						</a>
+					{/each}
+				</div>
+			</div>
+
+			<div class="min-h-0">
+				<div class="mb-1 flex items-center justify-between gap-3">
+					<span class="field-label mb-0">Orb Contributors</span>
+					{#if selectedMember}
+						<a href={buildUrl(selectedGame, '', 1)}
+							class="text-xs text-orb-highlight/35 no-underline transition hover:text-orb-highlight hover:no-underline"
+							onclick={filterTo(buildUrl(selectedGame, '', 1))}
+						>
+							× clear
+						</a>
+					{/if}
+				</div>
+
+				<div class="orb-scrollbar flex max-h-[18.5rem] flex-col gap-0.5 overflow-y-auto pr-1">
+					<a href={buildUrl(selectedGame, '', 1)}
+						class="filter-item {!selectedMember ? 'active' : ''}"
+						onclick={filterTo(buildUrl(selectedGame, '', 1))}
+					>
+						<span class="truncate">All Members</span>
+						<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{gameFiltered.length}</span>
+					</a>
+
+					{#each members as m (m.name)}
+						{@const avatar = avatarFor(m.steam_id)}
+						<a href={buildUrl(selectedGame, selectedMember === m.name ? '' : m.name, 1)}
+							class="filter-item {selectedMember === m.name ? 'active' : ''} {m.count === 0 ? 'is-empty' : ''}"
+							onclick={filterTo(buildUrl(selectedGame, selectedMember === m.name ? '' : m.name, 1))}
+						>
+							{#if avatar}
+								<img src={avatar} alt="" class="h-6 w-6 shrink-0 rounded-full object-cover" />
+							{:else}
+								<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bg-800 font-mono text-xs text-orb-highlight">
+									{m.name[0]}
+								</span>
+							{/if}
+							<span class="truncate">{m.name}</span>
+							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{m.count}</span>
+						</a>
+					{/each}
+				</div>
+			</div>
+		</aside>
+
+		<div class="min-w-0 flex-1" bind:this={galleryEl}>
+			<div class="mb-4 flex flex-col gap-3 border-b border-border-faint pb-3 sm:flex-row sm:items-center sm:justify-between">
+				<p class="m-0 shrink-0 font-mono text-xs uppercase tracking-wider text-orb-highlight/40">
+					{filtered.length} screenshot{filtered.length === 1 ? '' : 's'}
+					{#if totalPages > 1}
+						· page {currentPage} of {totalPages}
+					{/if}
+					{#if selectedGame || selectedMember || currentPage > 1}
+						·
+						<a href="/gallery"
+							class="text-orb-link/70 no-underline transition hover:text-white hover:no-underline"
+							onclick={filterTo('/gallery')}
+						>
+							Reset All Filters
+						</a>
+					{/if}
 				</p>
+				{@render pagination()}
+			</div>
+
+			{#if paged.length === 0}
+				<div class="rounded border border-border-faint/70 bg-black/20 p-6 text-center text-sm text-orb-highlight/50">
+					<p>No screenshots found.</p>
+				</div>
+			{:else}
+				<div class="grid grid-cols-2 content-start gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 xl:grid-cols-5">
+					{#each paged as shot (shot.steam_file_id)}
+						<a href={galleryViewerUrl(shot)}
+							class="gallery-item group relative block aspect-video overflow-hidden bg-black no-underline transition hover:no-underline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-border-strong"
+						>
+							<img src={shot.preview_url}
+								alt={shot.title ?? 'Screenshot'}
+								loading="lazy"
+								class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] group-focus-visible:scale-[1.04]"
+							/>
+							{#if shot.app_name && !selectedGame}
+								<span class="game-label pointer-events-none absolute bottom-1.5 left-1.5 right-1.5 z-10 translate-y-1.5 truncate px-2 py-1 text-xs text-white/70 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+									{shot.app_name}
+								</span>
+							{/if}
+						</a>
+					{/each}
+					{#each Array.from({ length: PAGE_SIZE - paged.length }, (_, i) => i) as i (`filler-${currentPage}-${i}`)}
+						<span class="aspect-video invisible" aria-hidden="true"></span>
+					{/each}
+				</div>
+
+				<div class="mt-5 sm:mt-6">
+					{@render pagination()}
+				</div>
 			{/if}
 		</div>
-	{/if}
+	</div>
+
+	<div class="mt-6 flex justify-center sm:mt-8">
+		<label class="inline-flex cursor-pointer select-none items-center gap-2 font-mono text-xs uppercase tracking-widest text-orb-highlight/55 transition hover:text-orb-highlight">
+			<input type="checkbox" bind:checked={wheelEnabled} class="h-4 w-4 cursor-pointer accent-orb-highlight" />
+			<span>Enable mousewheel pages</span>
+		</label>
+	</div>
 </Container>
 
 <style>
-	.game-menu-item {
+	:root {
+		--gallery-radius: 0.2rem;
+		--gallery-filter-hover: color-mix(in srgb, var(--orb-highlight) 7%, transparent);
+		--gallery-filter-active: color-mix(in srgb, var(--orb-highlight) 12%, transparent);
+		--gallery-menu-bg: color-mix(in srgb, var(--orb-bg-deep) 94%, black 6%);
+		--gallery-thumb-bg: color-mix(in srgb, var(--orb-bg-base) 88%, white 12%);
+	}
+
+	.steam-title-icon {
+		filter: drop-shadow(1px 1px 1px #000);
+	}
+
+	.game-menu {
+		background: var(--gallery-menu-bg);
+		border-radius: var(--gallery-radius);
+	}
+
+	.menu-item,
+	.filter-item {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.4rem 0.65rem;
-		font-size: 0.75rem;
+		border-radius: var(--gallery-radius);
+		padding: 0.375rem 0.5rem;
 		color: var(--orb-highlight);
-		opacity: 0.55;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 		text-decoration: none;
-		transition: opacity 0.1s, background 0.1s;
+		opacity: 0.6;
+		transition:
+			opacity 0.15s ease,
+			color 0.15s ease,
+			background 0.15s ease;
 	}
 
-	.game-menu-item:hover {
-		opacity: 1;
-		background: color-mix(in srgb, var(--orb-highlight) 5%, transparent);
-		text-decoration: none;
-	}
-
-	.game-menu-item.active {
-		opacity: 1;
+	.menu-item:hover,
+	.filter-item:hover {
 		color: #fff;
+		background: var(--gallery-filter-hover);
+		text-decoration: none;
+		opacity: 1;
 	}
 
-	.gallery-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		gap: 0.75rem;
+	.menu-item.active,
+	.filter-item.active {
+		color: #fff;
+		background: var(--gallery-filter-active);
+		opacity: 1;
+	}
+
+	.filter-item.is-empty {
+		pointer-events: none;
+		opacity: 0.25;
 	}
 
 	.gallery-item {
-		position: relative;
-		display: block;
-		overflow: hidden;
-		border-radius: 6px;
-		aspect-ratio: 16/9;
-		background: #111;
+		background: var(--gallery-thumb-bg);
+		border-radius: var(--gallery-radius);
 	}
-
-	.gallery-item img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transition: transform 0.3s ease;
-	}
-
-	.gallery-item:hover img {
-		transform: scale(1.04);
-	}
-
-    .gallery-header {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid var(--orb-border-faint);
-    }
 
 	.game-label {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		padding: 0.4rem 0.6rem;
-		font-size: 0.6rem;
-		background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
-		color: rgba(255, 255, 255, 0.45);
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.18));
+		border-radius: var(--gallery-radius);
 	}
 
 	.pagination-btn {
@@ -322,29 +566,66 @@
 		min-width: 2rem;
 		height: 2rem;
 		padding: 0 0.5rem;
-		border-radius: 4px;
 		border: 1px solid var(--orb-border-faint);
-		font-size: 0.8rem;
-		color: var(--orb-highlight);
-		background: none;
+		border-radius: var(--gallery-radius);
+		background: transparent;
 		box-shadow: none;
-		text-shadow: none;
+		color: var(--orb-highlight);
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 		text-decoration: none;
-		transition: border-color 0.15s, color 0.15s;
+		text-shadow: none;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease;
 	}
 
-	.pagination-btn::before { display: none; }
+	.pagination-btn::before {
+		display: none;
+	}
 
 	.pagination-btn:hover {
 		border-color: var(--orb-border);
-		color: #fff;
-		background: none;
+		background: transparent;
 		box-shadow: none;
+		color: #fff;
 		text-decoration: none;
 	}
 
 	.pagination-btn.active {
 		border-color: var(--orb-border-strong);
 		color: #fff;
+	}
+
+	.orb-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: color-mix(in srgb, var(--orb-highlight) 35%, var(--orb-bg-mid)) color-mix(in srgb, var(--orb-bg-deep) 80%, black);
+	}
+
+	.orb-scrollbar::-webkit-scrollbar {
+		width: 0.5rem;
+	}
+
+	.orb-scrollbar::-webkit-scrollbar-track {
+		background: color-mix(in srgb, var(--orb-bg-deep) 80%, black);
+		border-radius: var(--gallery-radius);
+	}
+
+	.orb-scrollbar::-webkit-scrollbar-thumb {
+		background: linear-gradient(
+			to bottom,
+			color-mix(in srgb, var(--orb-highlight) 30%, var(--orb-bg-mid)),
+			color-mix(in srgb, var(--orb-accent) 60%, var(--orb-bg-base))
+		);
+		border: 1px solid color-mix(in srgb, var(--orb-border) 60%, transparent);
+		border-radius: var(--gallery-radius);
+	}
+
+	.orb-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: linear-gradient(
+			to bottom,
+			color-mix(in srgb, var(--orb-highlight) 45%, var(--orb-bg-mid)),
+			color-mix(in srgb, var(--orb-accent) 75%, var(--orb-bg-base))
+		);
 	}
 </style>
