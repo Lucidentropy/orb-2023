@@ -6,22 +6,16 @@
 
 	let { data } = $props();
 
-	const MIN_ZOOM = 1;
-	const MAX_ZOOM = 6;
-	const ZOOM_SENSITIVITY = 0.0015;
-
-	let slideshowActive = $state(false);
-	let slideshowInterval = $state(5);
-	let slideshowTimer: ReturnType<typeof setInterval> | null = null;
-
-	let zoom = $state(1);
-	let panX = $state(0);
-	let panY = $state(0);
-	let containPan = $state(true);	
-	
-	let imageStage: HTMLDivElement | undefined = $state();
-	let imageEl: HTMLImageElement | undefined = $state();
-	let imageLoaded = $state(false);
+	type ScreenshotShot = {
+		steam_file_id: string;
+		preview_url: string | null;
+		image_url: string | null;
+		app_name: string | null;
+		app_id: number | string | null;
+		steam_name: string | null;
+		file_created_at: string | Date | null;
+		title?: string | null;
+	};
 
 	type DragState = {
 		pointerId: number;
@@ -32,21 +26,41 @@
 		moved: boolean;
 	};
 
+	const MIN_ZOOM = 1;
+	const MAX_ZOOM = 6;
+	const ZOOM_SENSITIVITY = 0.0015;
+
+	const shot = $derived(data.shot as ScreenshotShot | null);
+	const prevId = $derived(data.prevId as string | null);
+	const nextId = $derived(data.nextId as string | null);
+	const prevShot = $derived(data.prevShot as ScreenshotShot | null);
+	const nextShot = $derived(data.nextShot as ScreenshotShot | null);
+	const app = $derived(String(data.app ?? ''));
+	const member = $derived(String(data.member ?? ''));
+
+	let slideshowActive = $state(false);
+	let slideshowInterval = $state(5);
+	let slideshowTimer: ReturnType<typeof setInterval> | null = null;
+
+	let zoom = $state(1);
+	let panX = $state(0);
+	let panY = $state(0);
+	let containPan = $state(true);
+
+	let imageStage: HTMLDivElement | undefined = $state();
+	let imageEl: HTMLImageElement | undefined = $state();
+	let imageLoaded = $state(false);
+	let dragState = $state<DragState | null>(null);
 	let suppressNextClick = $state(false);
 
-	let dragState = $state<DragState | null>(null);
+	const preloadedImages = new Set<string>();
 
-	const shot = $derived(data.shot);
-	const prevId = $derived(data.prevId);
-	const nextId = $derived(data.nextId);
-	const game = $derived(data.game ?? '');
-	const member = $derived(data.member ?? '');
-
+	// URL builders
 	const backUrl = $derived.by(() => {
 		const u = new URLSearchParams();
 
-		if (game) {
-			u.set('game', game);
+		if (app) {
+			u.set('app', app);
 		}
 
 		if (member) {
@@ -66,8 +80,8 @@
 	const shotGameUrl = $derived.by(() => {
 		const u = new URLSearchParams();
 
-		if (shot?.app_name) {
-			u.set('game', shot.app_name);
+		if (shot?.app_id) {
+			u.set('app', String(shot.app_id));
 		}
 
 		const qs = u.toString();
@@ -80,11 +94,47 @@
 			: 'https://steamcommunity.com/'
 	);
 
-	const prevShot = $derived(data.prevShot);
-	const nextShot = $derived(data.nextShot);	
+	const shotDate = $derived.by(() => {
+		if (!shot?.file_created_at) return null;
 
-	const preloadedImages = new Set<string>();
+		const date = new Date(shot.file_created_at);
 
+		return {
+			date: date.toLocaleDateString('en-US', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric'
+			}),
+			time: date.toLocaleTimeString([], {
+				hour: 'numeric',
+				minute: '2-digit'
+			})
+		};
+	});
+
+	function buildViewerUrl(id: string) {
+		const u = new URLSearchParams();
+
+		u.set('id', id);
+
+		if (app) {
+			u.set('app', app);
+		}
+
+		if (member) {
+			u.set('member', member);
+		}
+
+		const pageParam = browser ? new URLSearchParams(window.location.search).get('p') : null;
+
+		if (pageParam) {
+			u.set('p', pageParam);
+		}
+
+		return `/gallery/viewer?${u.toString()}`;
+	}
+
+	// Image preloading
 	function preloadImage(url: string | null | undefined) {
 		if (!browser || !url || preloadedImages.has(url)) return;
 
@@ -102,48 +152,15 @@
 		preloadImage(nextShot?.image_url ?? nextShot?.preview_url);
 	});
 
-	const shotDate = $derived.by(() => {
-		if (!shot?.file_created_at) return null;
-
-		return {
-			date: new Date(shot.file_created_at).toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric'
-			}),
-			time: new Date(shot.file_created_at).toLocaleTimeString([], {
-				hour: 'numeric',
-				minute: '2-digit'
-			})
-		};
-	});
-
-	function buildViewerUrl(id: string) {
-		const u = new URLSearchParams();
-
-		u.set('id', id);
-
-		if (game) {
-			u.set('game', game);
-		}
-
-		if (member) {
-			u.set('member', member);
-		}
-
-		const pageParam = browser ? new URLSearchParams(window.location.search).get('p') : null;
-
-		if (pageParam) {
-			u.set('p', pageParam);
-		}
-
-		return `/gallery/viewer?${u.toString()}`;
-	}
-
+	// Navigation
 	function navigate(id: string | null) {
 		if (!id) return;
+
 		resetImageView();
-		goto(buildViewerUrl(id));
+		void goto(buildViewerUrl(id), {
+			noScroll: true,
+			keepFocus: true
+		});
 	}
 
 	function goPrev() {
@@ -154,18 +171,23 @@
 		navigate(prevId);
 	}
 
+	// Slideshow
 	function startSlideshow() {
 		if (!prevId) return;
 
 		slideshowActive = true;
 		slideshowTimer = setInterval(() => {
-			if (prevId) goNext();
-			else stopSlideshow();
+			if (prevId) {
+				goNext();
+			} else {
+				stopSlideshow();
+			}
 		}, slideshowInterval * 1000);
 	}
 
 	function stopSlideshow() {
 		slideshowActive = false;
+
 		if (slideshowTimer) {
 			clearInterval(slideshowTimer);
 			slideshowTimer = null;
@@ -180,50 +202,9 @@
 		}
 	}
 
-	function handleImageLoad() {
-		imageLoaded = true;
-		resetImageView();
-	}
-
+	// Zoom math
 	function clamp(n: number, min: number, max: number): number {
 		return Math.min(Math.max(n, min), max);
-	}
-
-	function constrainPan() {
-		if (!imageStage || !imageEl || zoom <= 1) {
-			if (zoom <= 1) {
-				panX = 0;
-				panY = 0;
-			}
-			return;
-		}
-
-		if (!containPan) return;
-
-		const stageWidth = imageStage.clientWidth;
-		const stageHeight = imageStage.clientHeight;
-
-		const renderedWidth = imageEl.clientWidth * zoom;
-		const renderedHeight = imageEl.clientHeight * zoom;
-
-		const maxX = Math.max(0, (renderedWidth - stageWidth) / 2);
-		const maxY = Math.max(0, (renderedHeight - stageHeight) / 2);
-
-		panX = clamp(panX, -maxX, maxX);
-		panY = clamp(panY, -maxY, maxY);
-	}
-
-	$effect(() => {
-		if (containPan) {
-			constrainPan();
-		}
-	});	
-
-	function resetImageView() {
-		zoom = 1;
-		panX = 0;
-		panY = 0;
-		dragState = null;
 	}
 
 	function getFitScale(): number {
@@ -248,11 +229,53 @@
 		return Math.round(fitScale * zoom * 100);
 	});
 
+	function constrainPan() {
+		if (!imageStage || !imageEl || zoom <= 1) {
+			if (zoom <= 1) {
+				panX = 0;
+				panY = 0;
+			}
+			return;
+		}
+
+		if (!containPan) return;
+
+		const stageWidth = imageStage.clientWidth;
+		const stageHeight = imageStage.clientHeight;
+		const renderedWidth = imageEl.clientWidth * zoom;
+		const renderedHeight = imageEl.clientHeight * zoom;
+
+		const maxX = Math.max(0, (renderedWidth - stageWidth) / 2);
+		const maxY = Math.max(0, (renderedHeight - stageHeight) / 2);
+
+		panX = clamp(panX, -maxX, maxX);
+		panY = clamp(panY, -maxY, maxY);
+	}
+
+	function resetImageView() {
+		zoom = 1;
+		panX = 0;
+		panY = 0;
+		dragState = null;
+	}
+
 	function zoomToActualSize() {
 		zoom = getActualZoom();
 		panX = 0;
 		panY = 0;
 		constrainPan();
+	}
+
+	$effect(() => {
+		if (containPan) {
+			constrainPan();
+		}
+	});
+
+	// Image events
+	function handleImageLoad() {
+		imageLoaded = true;
+		resetImageView();
 	}
 
 	function handleImageWheel(e: WheelEvent) {
@@ -301,6 +324,17 @@
 		}
 	}
 
+	function handleImageDoubleClick(e: MouseEvent) {
+		e.preventDefault();
+
+		if (zoom > 1) {
+			resetImageView();
+		} else {
+			zoomToActualSize();
+		}
+	}
+
+	// Drag pan
 	function handleImagePointerDown(e: PointerEvent) {
 		if (zoom <= 1) return;
 
@@ -349,33 +383,37 @@
 		dragState = null;
 	}
 
-	function handleImageDoubleClick(e: MouseEvent) {
-		e.preventDefault();
-
-		if (zoom > 1) {
-			resetImageView();
-		} else {
-			zoomToActualSize();
-		}
-	}
-
+	// Keyboard shortcuts
 	function handleKey(e: KeyboardEvent) {
-		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
-		else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goPrev();
-		else if (e.key === 'Escape') {
-			if (zoom > 1) resetImageView();
-			else goto(backUrl);
+		if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+			goNext();
+		} else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+			goPrev();
+		} else if (e.key === 'Escape') {
+			if (zoom > 1) {
+				resetImageView();
+			} else {
+				void goto(backUrl, {
+					noScroll: true,
+					keepFocus: true
+				});
+			}
 		} else if (e.key === ' ') {
 			e.preventDefault();
 			toggleSlideshow();
 		} else if (e.key === 'z' || e.key === 'Z') {
-			if (zoom > 1) resetImageView();
-			else zoomToActualSize();
+			if (zoom > 1) {
+				resetImageView();
+			} else {
+				zoomToActualSize();
+			}
 		}
 	}
 
+	// Lifecycle
 	$effect(() => {
 		if (!browser) return;
+
 		if (shot?.steam_file_id) {
 			imageLoaded = false;
 			resetImageView();
@@ -388,7 +426,10 @@
 
 	onDestroy(() => {
 		stopSlideshow();
-		if (browser) window.removeEventListener('keydown', handleKey);
+
+		if (browser) {
+			window.removeEventListener('keydown', handleKey);
+		}
 	});
 </script>
 

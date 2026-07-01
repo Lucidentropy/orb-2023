@@ -1,7 +1,7 @@
 <script lang="ts">
 	// src/routes/gallery/+page.svelte
 	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
 
@@ -18,48 +18,307 @@
 		file_created_at: string | null;
 	};
 
+	type GameFilter = {
+		app_id: string;
+		name: string;
+		count: number;
+	};
+
 	const PAGE_SIZE = 30;
 	const WHEEL_COOLDOWN_MS = 150;
+	const MIN_GAME_MENU_COUNT = 20;
 
 	const shots = $derived(data.screenshots as unknown as Shot[]);
 	let steamMembers = $derived(data.steamMembers);
+
+	let selectedApp = $state('');
+	let selectedMember = $state('');
+	let currentPage = $state(1);
+
 	let gameMenuOpen = $state(false);
 	let wheelEnabled = $state(true);
+	let showAllGames = $state(false);
 	let isDev = $state(false);
 	let galleryEl: HTMLDivElement | undefined = $state();
+
 	let wheelCooldown = false;
+
+	// URL state
+	function isGalleryRoute(): boolean {
+		return browser && window.location.pathname === '/gallery';
+	}
+
+	function normalizeAppParam(value: string | null): string {
+		if (!value) return '';
+
+		if (/^\d+$/.test(value)) {
+			return value;
+		}
+
+		const match = shots.find(s => s.app_name === value && s.app_id);
+		return match?.app_id ? String(match.app_id) : '';
+	}
 
 	function readUrl() {
 		const search = browser ? window.location.search : '';
 		const p = new URLSearchParams(search);
+		const app = normalizeAppParam(p.get('app') ?? p.get('game'));
 
 		return {
-			game: p.get('game') ?? '',
+			app,
 			member: p.get('member') ?? '',
-			page: Math.max(1, parseInt(p.get('p') ?? '1'))
+			page: Math.max(1, parseInt(p.get('p') ?? '1', 10))
 		};
 	}
-
-	const init = readUrl();
-	let selectedGame = $state(init.game);
-	let selectedMember = $state(init.member);
-	let currentPage = $state(init.page);
 
 	function syncStateFromUrl() {
 		if (!isGalleryRoute()) return;
 
 		const s = readUrl();
 
-		selectedGame = s.game;
+		selectedApp = s.app;
 		selectedMember = s.member;
 		currentPage = s.page;
 	}
 
+	function buildUrl(appOrName: string, member: string, p: number) {
+		const u = new URLSearchParams();
+		const app = normalizeAppParam(appOrName);
+
+		if (app) {
+			u.set('app', app);
+		}
+
+		if (member) {
+			u.set('member', member);
+		}
+
+		if (p > 1) {
+			u.set('p', String(p));
+		}
+
+		const qs = u.toString();
+		return `/gallery${qs ? '?' + qs : ''}`;
+	}
+
+	function galleryViewerUrl(shot: Shot): string {
+		const u = new URLSearchParams();
+
+		u.set('id', shot.steam_file_id);
+
+		if (selectedApp) {
+			u.set('app', selectedApp);
+		}
+
+		if (selectedMember) {
+			u.set('member', selectedMember);
+		}
+
+		if (currentPage > 1) {
+			u.set('p', String(currentPage));
+		}
+
+		return `/gallery/viewer?${u.toString()}`;
+	}
+
+	// Data helpers
+	const selectedGame = $derived.by(() => {
+		if (!selectedApp) return '';
+
+		const match = shots.find(s => String(s.app_id) === selectedApp);
+		return match?.app_name ?? '';
+	});
+
+	const games = $derived.by(() => {
+		const map = new Map<string, GameFilter>();
+
+		for (const s of shots) {
+			if (!s.app_id || !s.app_name) continue;
+
+			const key = String(s.app_id);
+			const existing = map.get(key);
+
+			if (existing) {
+				existing.count++;
+			} else {
+				map.set(key, {
+					app_id: key,
+					name: s.app_name,
+					count: 1
+				});
+			}
+		}
+
+		return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+	});
+
+	const visibleGames = $derived.by(() => {
+		if (showAllGames) return games;
+		return games.filter(g => g.count > MIN_GAME_MENU_COUNT);
+	});
+
+	const hiddenGameCount = $derived(games.length - visibleGames.length);	
+
+	const gameCounts = $derived.by(() => {
+		const map = new Map<string, number>();
+
+		for (const g of games) {
+			map.set(g.app_id, g.count);
+		}
+
+		return map;
+	});
+
+	const topGames = $derived.by(() =>
+		[...games]
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 10)
+	);
+
+	const gameFiltered = $derived.by(() => {
+		let list = shots;
+
+		if (selectedApp) {
+			list = list.filter(s => String(s.app_id) === selectedApp);
+		}
+
+		return list;
+	});
+
+	const filtered = $derived.by(() => {
+		let list = gameFiltered;
+
+		if (selectedMember) {
+			list = list.filter(s => s.steam_name === selectedMember);
+		}
+
+		return list;
+	});
+
+	const members = $derived.by(() => {
+		const totalMap = new Map<string, { name: string; steam_id: string | null; totalCount: number }>();
+
+		for (const s of shots) {
+			if (!s.steam_name) continue;
+
+			if (!totalMap.has(s.steam_name)) {
+				totalMap.set(s.steam_name, {
+					name: s.steam_name,
+					steam_id: s.steam_id,
+					totalCount: 0
+				});
+			}
+
+			totalMap.get(s.steam_name)!.totalCount++;
+		}
+
+		const countMap = new Map<string, number>();
+
+		for (const s of gameFiltered) {
+			if (!s.steam_name) continue;
+			countMap.set(s.steam_name, (countMap.get(s.steam_name) ?? 0) + 1);
+		}
+
+		return [...totalMap.values()]
+			.sort((a, b) => b.totalCount - a.totalCount)
+			.map(m => ({
+				...m,
+				count: countMap.get(m.name) ?? 0
+			}));
+	});
+
+	const totalPages = $derived(Math.ceil(filtered.length / PAGE_SIZE));
+	const paged = $derived(filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE));
+
+	const pageNumbers = $derived.by(() => {
+		const range: (number | '...')[] = [];
+
+		for (let i = 1; i <= totalPages; i++) {
+			if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+				range.push(i);
+			} else if (range[range.length - 1] !== '...') {
+				range.push('...');
+			}
+		}
+
+		return range;
+	});
+
+	function avatarFor(steam_id: string | null): string | null {
+		if (!steam_id) return null;
+		return steamMembers.find(m => m.steamid === String(steam_id))?.avatarfull ?? null;
+	}
+
+	function appIdFor(gameName: string): number | null {
+		const shot = shots.find(s => s.app_name === gameName && s.app_id);
+		return shot?.app_id ?? null;
+	}
+
+	// Navigation
+	function filterTo(url: string) {
+		return (e: MouseEvent) => {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+			e.preventDefault();
+
+			void goto(url, {
+				noScroll: true,
+				keepFocus: true
+			});
+		};
+	}
+
+	function setPage(p: number) {
+		const clamped = Math.min(Math.max(1, p), Math.max(1, totalPages));
+		if (clamped === currentPage) return;
+
+		void goto(buildUrl(selectedApp, selectedMember, clamped), {
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
+	function jump(p: number) {
+		return (e: MouseEvent) => {
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+			e.preventDefault();
+			setPage(p);
+		};
+	}
+
+	// Wheel paging
+	function handleWheel(e: WheelEvent) {
+		if (!wheelEnabled) return;
+
+		e.preventDefault();
+
+		if (wheelCooldown) return;
+
+		if (e.deltaY > 0 && currentPage < totalPages) {
+			wheelCooldown = true;
+			setPage(currentPage + 1);
+		} else if (e.deltaY < 0 && currentPage > 1) {
+			wheelCooldown = true;
+			setPage(currentPage - 1);
+		}
+
+		if (wheelCooldown) {
+			setTimeout(() => {
+				wheelCooldown = false;
+			}, WHEEL_COOLDOWN_MS);
+		}
+	}
+
+	// Lifecycle
 	onMount(() => {
 		isDev = window.location.hostname === 'localhost';
 
 		const closeMenu = (e: MouseEvent) => {
-			if (!(e.target as Element).closest('.game-menu-wrap')) gameMenuOpen = false;
+			if (!(e.target as Element).closest('.game-menu-wrap')) {
+				gameMenuOpen = false;
+				showAllGames = false;
+			}
 		};
 
 		const onPop = () => {
@@ -89,183 +348,22 @@
 		};
 	});
 
-	afterNavigate((navigation) => {
-		if (navigation.type === 'popstate' && isGalleryRoute()) {
+	afterNavigate(() => {
+		if (isGalleryRoute()) {
 			syncStateFromUrl();
 		}
 	});
 
-	function avatarFor(steam_id: string | null): string | null {
-		if (!steam_id) return null;
-		return steamMembers.find(m => m.steamid === String(steam_id))?.avatarfull ?? null;
-	}
-
-	function appIdFor(gameName: string): number | null {
-		const shot = shots.find(s => s.app_name === gameName && s.app_id);
-		return shot?.app_id ?? null;
-	}
-
-	function buildUrl(game: string, member: string, p: number) {
-		const u = new URLSearchParams();
-		if (game) u.set('game', game);
-		if (member) u.set('member', member);
-		if (p > 1) u.set('p', String(p));
-		const qs = u.toString();
-		return `/gallery${qs ? '?' + qs : ''}`;
-	}
-
-	function isGalleryRoute(): boolean {
-		return browser && window.location.pathname === '/gallery';
-	}
-
-	function replaceGalleryUrl(url: string) {
-		if (!browser || !isGalleryRoute()) return;
-
-		const next = new URL(url, window.location.origin);
-
-		if (next.pathname !== '/gallery') return;
-
-		window.history.replaceState(window.history.state, '', `${next.pathname}${next.search}`);
-	}	
-
-	function galleryViewerUrl(shot: Shot): string {
-		const u = new URLSearchParams();
-
-		u.set('id', shot.steam_file_id);
-
-		if (selectedGame) {
-			u.set('game', selectedGame);
-		}
-
-		if (selectedMember) {
-			u.set('member', selectedMember);
-		}
-
-		if (currentPage > 1) {
-			u.set('p', String(currentPage));
-		}
-
-		return `/gallery/viewer?${u.toString()}`;
-	}
-
-	const games = $derived(
-		[...new Set(shots.map(s => s.app_name).filter(Boolean))].sort() as string[]
-	);
-
-	const gameCounts = $derived.by(() => {
-		const map = new Map<string, number>();
-		for (const s of shots) {
-			const g = s.app_name;
-			if (!g) continue;
-			map.set(g, (map.get(g) ?? 0) + 1);
-		}
-		return map;
-	});
-
-	const topGames = $derived.by(() =>
-		[...gameCounts.entries()]
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 10)
-			.map(([name, count]) => ({ name, count }))
-	);
-
-	const gameFiltered = $derived.by(() => {
-		let list = shots;
-		if (selectedGame) list = list.filter(s => s.app_name === selectedGame);
-		return list;
-	});
-
-	const filtered = $derived.by(() => {
-		let list = gameFiltered;
-		if (selectedMember) list = list.filter(s => s.steam_name === selectedMember);
-		return list;
-	});
-
-	const members = $derived.by(() => {
-		const totalMap = new Map<string, { name: string; steam_id: string | null; totalCount: number }>();
-		for (const s of shots) {
-			if (!s.steam_name) continue;
-			if (!totalMap.has(s.steam_name)) {
-				totalMap.set(s.steam_name, { name: s.steam_name, steam_id: s.steam_id, totalCount: 0 });
-			}
-			totalMap.get(s.steam_name)!.totalCount++;
-		}
-		const countMap = new Map<string, number>();
-		for (const s of gameFiltered) {
-			if (!s.steam_name) continue;
-			countMap.set(s.steam_name, (countMap.get(s.steam_name) ?? 0) + 1);
-		}
-		return [...totalMap.values()]
-			.sort((a, b) => b.totalCount - a.totalCount)
-			.map(m => ({ ...m, count: countMap.get(m.name) ?? 0 }));
-	});
-
-	const totalPages = $derived(Math.ceil(filtered.length / PAGE_SIZE));
-	const paged = $derived(filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE));
-
-	const pageNumbers = $derived.by(() => {
-		const range: (number | '...')[] = [];
-		for (let i = 1; i <= totalPages; i++) {
-			if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-				range.push(i);
-			} else if (range[range.length - 1] !== '...') {
-				range.push('...');
-			}
-		}
-		return range;
-	});
-
-	function filterTo(url: string) {
-		return (e: MouseEvent) => {
-			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-
-			e.preventDefault();
-
-			const next = new URL(url, window.location.origin);
-
-			selectedGame = next.searchParams.get('game') ?? '';
-			selectedMember = next.searchParams.get('member') ?? '';
-			currentPage = Math.max(1, parseInt(next.searchParams.get('p') ?? '1'));
-
-			replaceGalleryUrl(`${next.pathname}${next.search}`);
-		};
-	}
-
-	function setPage(p: number) {
-		const clamped = Math.min(Math.max(1, p), Math.max(1, totalPages));
-		if (clamped === currentPage) return;
-
-		currentPage = clamped;
-		replaceGalleryUrl(buildUrl(selectedGame, selectedMember, clamped));
-	}
-
-	function jump(p: number) {
-		return (e: MouseEvent) => {
-			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-			e.preventDefault();
-			setPage(p);
-		};
-	}
-
-	function handleWheel(e: WheelEvent) {
-		if (!wheelEnabled) return;
-		e.preventDefault();
-		if (wheelCooldown) return;
-		if (e.deltaY > 0 && currentPage < totalPages) {
-			wheelCooldown = true;
-			setPage(currentPage + 1);
-		} else if (e.deltaY < 0 && currentPage > 1) {
-			wheelCooldown = true;
-			setPage(currentPage - 1);
-		}
-		if (wheelCooldown) setTimeout(() => { wheelCooldown = false; }, WHEEL_COOLDOWN_MS);
-	}
-
 	$effect(() => {
 		if (!browser || !galleryEl) return;
+
 		const el = galleryEl;
+
 		el.addEventListener('wheel', handleWheel, { passive: false });
-		return () => el.removeEventListener('wheel', handleWheel);
+
+		return () => {
+			el.removeEventListener('wheel', handleWheel);
+		};
 	});
 </script>
 
@@ -377,24 +475,36 @@
 							<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{shots.length}</span>
 						</a>
 
-						{#each games as g (g)}
-							{@const appId = appIdFor(g)}
-							<a href={buildUrl(selectedGame === g ? '' : g, '', 1)}
-								class="menu-item {selectedGame === g ? 'active' : ''}"
-								onclick={(e) => { filterTo(buildUrl(selectedGame === g ? '' : g, '', 1))(e); gameMenuOpen = false; }}
+						{#each visibleGames as g (g.app_id)}
+							<a href={buildUrl(selectedApp === g.app_id ? '' : g.app_id, '', 1)}
+								class="menu-item {selectedApp === g.app_id ? 'active' : ''}"
+								onclick={(e) => { filterTo(buildUrl(selectedApp === g.app_id ? '' : g.app_id, '', 1))(e); gameMenuOpen = false; }}
 							>
-								{#if appId}
-									<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
-										alt=""
-										class="h-6 shrink-0 rounded-sm"
-									/>
-								{/if}
-								<span class="truncate">{g}</span>
+								<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{g.app_id}/capsule_sm_120.jpg"
+									alt=""
+									class="h-6 shrink-0 rounded-sm"
+								/>
+								<span class="truncate">{g.name}</span>
 								<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">
-									{gameCounts.get(g) ?? 0}
+									{g.count}
 								</span>
 							</a>
 						{/each}
+						{#if hiddenGameCount > 0}
+							<button
+								type="button"
+								class="menu-item w-full border-t border-border-faint/60 text-left"
+								onclick={(e) => {
+									e.stopPropagation();
+									showAllGames = true;
+								}}
+							>
+								<span class="truncate">Show More Games</span>
+								<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">
+									≤ {MIN_GAME_MENU_COUNT}
+								</span>
+							</button>
+						{/if}						
 					</div>
 				{/if}
 			</div>
@@ -660,5 +770,19 @@
 			color-mix(in srgb, var(--orb-highlight) 45%, var(--orb-bg-mid)),
 			color-mix(in srgb, var(--orb-accent) 75%, var(--orb-bg-base))
 		);
+	}
+
+	.menu-item {
+		background: transparent;
+		border-left: 0;
+		border-right: 0;
+		border-bottom: 0;
+		box-shadow: none;
+		text-shadow: none;
+		width: 100%;
+	}
+
+	.menu-item::before {
+		display: none;
 	}
 </style>
