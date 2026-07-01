@@ -61,7 +61,8 @@
 	const preloadedImages = new Set<string>();
 	let nextImagePreloading = $state(false);
 	let imageTransitions = $state(true);
-	
+	let slideshowProgressKey = $state(0);
+
 	// URL builders
 	const backUrl = $derived.by(() => {
 		const u = new URLSearchParams();
@@ -242,9 +243,12 @@
 		if (!prevId) return;
 
 		slideshowActive = true;
+		slideshowProgressKey++;
+
 		slideshowTimer = setInterval(() => {
 			if (prevId) {
 				goNext();
+				slideshowProgressKey++;
 			} else {
 				stopSlideshow();
 			}
@@ -253,6 +257,7 @@
 
 	function stopSlideshow() {
 		slideshowActive = false;
+		slideshowProgressKey++;
 
 		if (slideshowTimer) {
 			clearInterval(slideshowTimer);
@@ -568,6 +573,17 @@
 					onload={handleImageLoad}
 					style="transform: translate3d({panX}px, {panY}px, 0) scale({zoom}); cursor: {zoom > 1 ? (dragState ? 'grabbing' : 'grab') : 'zoom-in'};"
 				/>
+
+				{#if slideshowActive}
+					<div class="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-[2px] bg-white/10">
+						{#key slideshowProgressKey}
+							<div
+								class="viewer-slideshow-progress h-full bg-white/45"
+								style="animation-duration: {slideshowInterval}s;"
+							></div>
+						{/key}
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -693,7 +709,12 @@
 						bind:value={slideshowInterval}
 						class="viewer-interval-select"
 						aria-label="Slideshow interval"
-						onchange={() => { if (slideshowActive) { stopSlideshow(); startSlideshow(); } }}
+						onchange={() => {
+							if (slideshowActive) {
+								stopSlideshow();
+								startSlideshow();
+							}
+						}}
 					>
 						<option value={3}>3s</option>
 						<option value={5}>5s</option>
@@ -809,6 +830,23 @@
 			1px 1px 0 #000,
 			0 2px 0 #000,
 			0 0 8px rgba(0, 0, 0, 0.9);
+	}
+
+	.viewer-slideshow-progress {
+		width: 0%;
+		animation-name: viewer-slideshow-progress-fill;
+		animation-timing-function: linear;
+		animation-fill-mode: forwards;
+	}
+
+	@keyframes viewer-slideshow-progress-fill {
+		from {
+			width: 0%;
+		}
+
+		to {
+			width: 100%;
+		}
 	}
 
 	@keyframes viewer-next-spinner-spin {
