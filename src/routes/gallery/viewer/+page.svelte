@@ -523,7 +523,7 @@
 				role="presentation"
 			>
 				<a href={backUrl}
-					class="btn-link absolute top-3 left-3 z-20 rounded bg-black/45 px-3 py-2 font-mono text-xs uppercase tracking-wider text-orb-highlight/70 opacity-30 backdrop-blur transition hover:text-white hover:no-underline hover:opacity-100 focus-visible:opacity-100"
+					class="btn-link absolute top-3 left-3 z-20 font-mono text-xs uppercase tracking-wider text-orb-highlight/70 opacity-30 transition hover:text-white hover:no-underline hover:opacity-100 focus-visible:opacity-100"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => e.stopPropagation()}
 				>
@@ -531,7 +531,7 @@
 				</a>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-prev viewer-text-shadow-strong absolute bottom-4 left-3 z-10 px-3 py-2 font-mono text-xs uppercase tracking-wider text-white/80 opacity-60 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-3"
+					class="btn-link viewer-stage-nav viewer-stage-nav-prev viewer-text-shadow-strong absolute bottom-4 left-3 z-10 px-3 py-1 font-mono text-xs uppercase tracking-wider text-white/80 opacity-60 transition hover:text-white hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:bottom-auto sm:left-4 sm:-translate-y-1/2 sm:px-4 sm:py-2"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goPrev(); }}
 					disabled={!nextId}
@@ -541,7 +541,7 @@
 				</button>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-next viewer-text-shadow-strong absolute right-3 bottom-4 z-10 inline-flex items-center text-white/80 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-3"
+					class="btn-link viewer-stage-nav viewer-stage-nav-next viewer-text-shadow-strong absolute right-3 bottom-4 z-10 inline-flex items-center text-white/80 px-3 py-1 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-2"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goNext(); }}
 					disabled={!prevId}
