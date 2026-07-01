@@ -44,6 +44,14 @@
 
 	let wheelCooldown = false;
 
+	const shareImageUrl = $derived(paged[0]?.preview_url ?? '');
+	const shareTitle = $derived(selectedGame ? `${selectedGame} Screenshots | Clan Orb` : 'Steam Image Gallery | Clan Orb');
+	const shareDescription = $derived(
+		selectedGame
+			? `${filtered.length} ${selectedGame} screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
+			: `${filtered.length} Steam screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
+	);
+
 	// URL state
 	function isGalleryRoute(): boolean {
 		return browser && window.location.pathname === '/gallery';
@@ -425,8 +433,20 @@
 </script>
 
 <svelte:head>
-	<title>Orb - Steam Image Gallery</title>
-	<meta name="description" content="Community screenshot gallery" />
+	<title>{shareTitle}</title>
+	<meta name="description" content={shareDescription} />
+
+	<meta property="og:title" content={shareTitle} />
+	<meta property="og:description" content={shareDescription} />
+	<meta property="og:type" content="website" />
+
+	{#if shareImageUrl}
+		<meta property="og:image" content={shareImageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content={shareImageUrl} />
+	{:else}
+		<meta name="twitter:card" content="summary" />
+	{/if}
 </svelte:head>
 
 {#snippet pagination()}

@@ -63,6 +63,32 @@
 	let imageTransitions = $state(true);
 	let slideshowProgressKey = $state(0);
 
+	const pageTitle = $derived.by(() => {
+		const author = shot?.steam_name ? ` by ${shot.steam_name}` : '';
+
+		if (shot?.app_name && shot?.steam_file_id) {
+			return `${shot.app_name} Screenshot ${author} | ${shot.steam_file_id} | Clan Orb`;
+		}
+
+		if (shot?.steam_file_id) {
+			return `Screenshot ${shot.steam_file_id}${author} | Clan Orb`;
+		}
+
+		return 'Screenshot | Clan Orb';
+	});
+
+	const pageDescription = $derived.by(() => {
+		const author = shot?.steam_name ? ` by ${shot.steam_name}` : '';
+
+		if (shot?.app_name) {
+			return `${shot.app_name} screenshot${author} from Clan Orb.`;
+		}
+
+		return `Steam screenshot${author} from Clan Orb.`;
+	});
+
+	const shareImageUrl = $derived(shot?.image_url ?? shot?.preview_url ?? '');	
+
 	// URL builders
 	const backUrl = $derived.by(() => {
 		const u = new URLSearchParams();
@@ -506,8 +532,21 @@
 </script>
 
 <svelte:head>
-	<title>Orb - Screenshot Viewer</title>
-	<meta name="description" content="Screenshot viewer" />
+	<title>{pageTitle}</title>
+	<meta name="description" content={pageDescription} />
+
+	<meta property="og:title" content={pageTitle} />
+	<meta property="og:description" content={pageDescription} />
+	<meta property="og:type" content="article" />
+
+	{#if shareImageUrl}
+		<meta property="og:image" content={shareImageUrl} />
+		<meta property="og:image:secure_url" content={shareImageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content={shareImageUrl} />
+	{:else}
+		<meta name="twitter:card" content="summary" />
+	{/if}
 </svelte:head>
 
 {#if !shot}
