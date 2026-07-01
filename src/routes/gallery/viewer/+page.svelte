@@ -19,6 +19,7 @@
 	let panY = $state(0);
 	let imageStage: HTMLDivElement | undefined = $state();
 	let imageEl: HTMLImageElement | undefined = $state();
+	let imageLoaded = $state(false);
 
 	type DragState = {
 		pointerId: number;
@@ -130,6 +131,11 @@
 		} else {
 			startSlideshow();
 		}
+	}
+
+	function handleImageLoad() {
+		imageLoaded = true;
+		resetImageView();
 	}
 
 	function clamp(n: number, min: number, max: number): number {
@@ -308,6 +314,7 @@
 	$effect(() => {
 		if (!browser) return;
 		if (shot?.steam_file_id) {
+			imageLoaded = false;
 			resetImageView();
 		}
 	});
@@ -375,7 +382,7 @@
 
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
 			<div bind:this={imageStage}
-				class="viewer-stage relative flex h-[72vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[78vh] sm:min-h-[460px] xl:h-[min(82vh,960px)]"
+				class="viewer-stage viewer-stage-large relative flex h-[72vh] min-h-80 select-none items-center justify-center overflow-hidden bg-black sm:h-[78vh] sm:min-h-[460px] xl:h-[min(82vh,960px)]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -404,13 +411,19 @@
 					Next →
 				</button>
 
+				{#if !imageLoaded}
+					<div class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center">
+						<div class="viewer-loader" aria-label="Loading image"></div>
+					</div>
+				{/if}
+
 				<img bind:this={imageEl}
 					src={shot.image_url ?? shot.preview_url}
 					alt={shot.title ?? 'Screenshot'}
 					class="block max-h-full max-w-full select-none object-contain transition-transform duration-75 ease-out will-change-transform"
 					draggable="false"
 					onwheel={handleImageWheel}
-					onload={resetImageView}
+					onload={handleImageLoad}
 					style="transform: translate3d({panX}px, {panY}px, 0) scale({zoom}); cursor: {zoom > 1 ? (dragState ? 'grabbing' : 'grab') : 'zoom-in'};"
 				/>
 			</div>
@@ -501,5 +514,27 @@
 
 	.viewer-stage:active img {
 		transition: none;
+	}
+
+	.viewer-loader {
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 1px solid color-mix(in srgb, var(--orb-highlight) 20%, transparent);
+		border-top-color: color-mix(in srgb, var(--orb-highlight) 85%, white);
+		border-radius: 9999px;
+		box-shadow: 0 0 18px color-mix(in srgb, var(--orb-highlight) 18%, transparent);
+		animation: viewer-loader-spin 0.75s linear infinite;
+	}
+
+	@keyframes viewer-loader-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (min-width: 2400px) and (min-height: 1500px) {
+		.viewer-stage-large {
+			height: min(82vh, 1440px);
+		}
 	}
 </style>
