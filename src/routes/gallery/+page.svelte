@@ -4,7 +4,8 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
-
+	import { galleryFocus } from '$lib/stores/galleryState';
+	
 	let { data } = $props();
 
 	type Shot = {
@@ -33,6 +34,7 @@
 
 	let selectedApp = $state('');
 	let selectedMember = $state('');
+	let focusedShotId = $state('');
 	let currentPage = $state(1);
 
 	let gameMenuOpen = $state(false);
@@ -59,14 +61,25 @@
 		return match?.app_id ? String(match.app_id) : '';
 	}
 
+	function normalizeMemberParam(value: string | null): string {
+		if (!value) return '';
+
+		const exactId = shots.find(s => String(s.steam_id) === value);
+		if (exactId) return value;
+
+		const nameMatch = shots.find(s => s.steam_name === value && s.steam_id);
+		return nameMatch?.steam_id ? String(nameMatch.steam_id) : '';
+	}	
+
 	function readUrl() {
 		const search = browser ? window.location.search : '';
 		const p = new URLSearchParams(search);
 		const app = normalizeAppParam(p.get('app') ?? p.get('game'));
+		const member = normalizeMemberParam(p.get('member'));
 
 		return {
 			app,
-			member: p.get('member') ?? '',
+			member,
 			page: Math.max(1, parseInt(p.get('p') ?? '1', 10))
 		};
 	}
@@ -79,11 +92,14 @@
 		selectedApp = s.app;
 		selectedMember = s.member;
 		currentPage = s.page;
+
+		restoreFocusFromSharedState();
 	}
 
-	function buildUrl(appOrName: string, member: string, p: number) {
+	function buildUrl(appOrName: string, memberOrName: string, p: number) {
 		const u = new URLSearchParams();
 		const app = normalizeAppParam(appOrName);
+		const member = normalizeMemberParam(memberOrName);
 
 		if (app) {
 			u.set('app', app);
@@ -120,6 +136,28 @@
 
 		return `/gallery/viewer?${u.toString()}`;
 	}
+
+
+	function applyFocusedShotPage(focusId: string): boolean {
+		const index = filtered.findIndex(shot => shot.steam_file_id === focusId);
+
+		if (index < 0) return false;
+
+		focusedShotId = focusId;
+		currentPage = Math.floor(index / PAGE_SIZE) + 1;
+
+		return true;
+	}
+
+	function restoreFocusFromSharedState() {
+		const focus = galleryFocus.readSnapshot();
+
+		if (!focus) return;
+
+		if (focus.app !== selectedApp || focus.member !== selectedMember) return;
+
+		applyFocusedShotPage(focus.id);
+	}	
 
 	// Data helpers
 	const selectedGame = $derived.by(() => {
@@ -159,16 +197,6 @@
 
 	const hiddenGameCount = $derived(games.length - visibleGames.length);	
 
-	const gameCounts = $derived.by(() => {
-		const map = new Map<string, number>();
-
-		for (const g of games) {
-			map.set(g.app_id, g.count);
-		}
-
-		return map;
-	});
-
 	const topGames = $derived.by(() =>
 		[...games]
 			.sort((a, b) => b.count - a.count)
@@ -189,41 +217,46 @@
 		let list = gameFiltered;
 
 		if (selectedMember) {
-			list = list.filter(s => s.steam_name === selectedMember);
+			list = list.filter(s => String(s.steam_id) === selectedMember);
 		}
 
 		return list;
 	});
 
 	const members = $derived.by(() => {
-		const totalMap = new Map<string, { name: string; steam_id: string | null; totalCount: number }>();
+		const totalMap = new Map<string, { id: string; name: string; steam_id: string; totalCount: number }>();
 
 		for (const s of shots) {
-			if (!s.steam_name) continue;
+			if (!s.steam_id || !s.steam_name) continue;
 
-			if (!totalMap.has(s.steam_name)) {
-				totalMap.set(s.steam_name, {
+			const id = String(s.steam_id);
+
+			if (!totalMap.has(id)) {
+				totalMap.set(id, {
+					id,
 					name: s.steam_name,
-					steam_id: s.steam_id,
+					steam_id: id,
 					totalCount: 0
 				});
 			}
 
-			totalMap.get(s.steam_name)!.totalCount++;
+			totalMap.get(id)!.totalCount++;
 		}
 
 		const countMap = new Map<string, number>();
 
 		for (const s of gameFiltered) {
-			if (!s.steam_name) continue;
-			countMap.set(s.steam_name, (countMap.get(s.steam_name) ?? 0) + 1);
+			if (!s.steam_id) continue;
+
+			const id = String(s.steam_id);
+			countMap.set(id, (countMap.get(id) ?? 0) + 1);
 		}
 
 		return [...totalMap.values()]
 			.sort((a, b) => b.totalCount - a.totalCount)
 			.map(m => ({
 				...m,
-				count: countMap.get(m.name) ?? 0
+				count: countMap.get(m.id) ?? 0
 			}));
 	});
 
@@ -553,11 +586,11 @@
 						<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{gameFiltered.length}</span>
 					</a>
 
-					{#each members as m (m.name)}
+					{#each members as m (m.id)}
 						{@const avatar = avatarFor(m.steam_id)}
-						<a href={buildUrl(selectedGame, selectedMember === m.name ? '' : m.name, 1)}
-							class="filter-item {selectedMember === m.name ? 'active' : ''} {m.count === 0 ? 'is-empty' : ''}"
-							onclick={filterTo(buildUrl(selectedGame, selectedMember === m.name ? '' : m.name, 1))}
+						<a href={buildUrl(selectedApp, selectedMember === m.id ? '' : m.id, 1)}
+							class="filter-item {selectedMember === m.id ? 'active' : ''} {m.count === 0 ? 'is-empty' : ''}"
+							onclick={filterTo(buildUrl(selectedApp, selectedMember === m.id ? '' : m.id, 1))}
 						>
 							{#if avatar}
 								<img src={avatar} alt="" class="h-6 w-6 shrink-0 rounded-full object-cover" />
@@ -602,7 +635,7 @@
 				<div class="grid grid-cols-2 content-start gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 xl:grid-cols-5">
 					{#each paged as shot (shot.steam_file_id)}
 						<a href={galleryViewerUrl(shot)}
-							class="gallery-item group relative block aspect-video overflow-hidden bg-black no-underline transition hover:no-underline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-border-strong"
+							class="gallery-item group relative block aspect-video overflow-hidden bg-black no-underline transition hover:no-underline focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-border-strong {focusedShotId === shot.steam_file_id ? 'gallery-item-focused' : ''}"
 						>
 							<img src={shot.preview_url}
 								alt={shot.title ?? 'Screenshot'}
@@ -784,5 +817,49 @@
 
 	.menu-item::before {
 		display: none;
+	}
+
+	.gallery-item-focused {
+		position: relative;
+		z-index: 1;
+		box-shadow:
+			0 0 0 1px color-mix(in srgb, var(--orb-highlight) 85%, white),
+			0 0 16px color-mix(in srgb, var(--orb-highlight) 45%, transparent),
+			0 0 32px color-mix(in srgb, var(--orb-accent) 28%, transparent);
+		transform: translateY(-1px);
+	}
+
+	.gallery-item-focused::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		background:
+			linear-gradient(
+				110deg,
+				transparent 0%,
+				color-mix(in srgb, var(--orb-highlight) 12%, transparent) 42%,
+				color-mix(in srgb, white 18%, transparent) 50%,
+				color-mix(in srgb, var(--orb-highlight) 12%, transparent) 58%,
+				transparent 100%
+			);
+		opacity: 0;
+		animation: gallery-focus-sweep 1.25s ease-out 1;
+	}
+
+	@keyframes gallery-focus-sweep {
+		0% {
+			opacity: 0;
+			transform: translateX(-120%);
+		}
+
+		18% {
+			opacity: 1;
+		}
+
+		100% {
+			opacity: 0;
+			transform: translateX(120%);
+		}
 	}
 </style>

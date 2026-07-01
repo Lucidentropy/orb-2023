@@ -3,6 +3,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
+	import { galleryFocus } from '$lib/stores/galleryState';
 
 	let { data } = $props();
 
@@ -54,6 +55,7 @@
 	let suppressNextClick = $state(false);
 
 	const preloadedImages = new Set<string>();
+	let nextImagePreloading = $state(false);
 
 	// URL builders
 	const backUrl = $derived.by(() => {
@@ -131,25 +133,66 @@
 			u.set('p', pageParam);
 		}
 
+		u.set('focus', id);
+
 		return `/gallery/viewer?${u.toString()}`;
 	}
 
+	function rememberViewedShot() {
+		if (!browser || !shot?.steam_file_id) return;
+
+		const payload = {
+			id: shot.steam_file_id,
+			app,
+			member
+		};
+
+		sessionStorage.setItem('gallery:lastViewedShot', JSON.stringify(payload));
+	}
+
 	// Image preloading
-	function preloadImage(url: string | null | undefined) {
-		if (!browser || !url || preloadedImages.has(url)) return;
+	function preloadImage(url: string | null | undefined, trackNext = false) {
+		if (!browser || !url || preloadedImages.has(url)) {
+			if (trackNext) nextImagePreloading = false;
+			return;
+		}
 
 		preloadedImages.add(url);
 
+		if (trackNext) {
+			nextImagePreloading = true;
+		}
+
 		const img = new Image();
 		img.decoding = 'async';
+
+		img.onload = () => {
+			if (trackNext) nextImagePreloading = false;
+		};
+
+		img.onerror = () => {
+			if (trackNext) nextImagePreloading = false;
+		};
+
 		img.src = url;
 	}
 
 	$effect(() => {
 		if (!browser || !shot?.steam_file_id) return;
 
-		preloadImage(prevShot?.image_url ?? prevShot?.preview_url);
-		preloadImage(nextShot?.image_url ?? nextShot?.preview_url);
+		const likelyNextUrl = prevShot?.image_url ?? prevShot?.preview_url;
+		const likelyPrevUrl = nextShot?.image_url ?? nextShot?.preview_url;
+
+		preloadImage(likelyNextUrl, true);
+		preloadImage(likelyPrevUrl);
+
+		galleryFocus.setFocus({
+			id: String(shot.steam_file_id),
+			app,
+			member
+		});
+
+		rememberViewedShot();
 	});
 
 	// Navigation
@@ -448,7 +491,7 @@
 			<a href={backUrl}
 				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/65 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 			>
-				← Gallery
+				← Back to Gallery
 			</a>
 
 			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
@@ -480,7 +523,7 @@
 				rel="noopener noreferrer"
 				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
 			>
-				Steam ↗
+				View on Steam ↗
 			</a>
 		</div>
 
@@ -506,13 +549,16 @@
 				</button>
 
 				<button type="button"
-					class="btn-link viewer-stage-nav viewer-stage-nav-next absolute right-3 bottom-4 z-10 rounded-full border border-border-faint bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:bg-bg-deep/90 hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-3"
+					class="btn-link viewer-stage-nav viewer-stage-nav-next absolute right-3 bottom-4 z-10 inline-flex items-center rounded-full border border-border-faint bg-black/60 px-3 py-2 font-mono text-xs uppercase tracking-wider opacity-50 backdrop-blur transition hover:bg-bg-deep/90 hover:opacity-100 hover:no-underline disabled:cursor-default disabled:opacity-20 sm:top-1/2 sm:right-4 sm:bottom-auto sm:-translate-y-1/2 sm:px-4 sm:py-3"
 					onpointerdown={(e) => e.stopPropagation()}
 					onclick={(e) => { e.stopPropagation(); goNext(); }}
 					disabled={!prevId}
 					aria-label="Next screenshot"
 				>
-					Next →
+					<span class="viewer-next-spinner-slot {nextImagePreloading ? 'is-visible' : ''}" aria-hidden="true">
+						<span class="viewer-next-spinner"></span>
+					</span>
+					<span>Next →</span>
 				</button>
 
 				{#if !imageLoaded}
@@ -639,6 +685,38 @@
 		border-radius: 9999px;
 		box-shadow: 0 0 18px color-mix(in srgb, var(--orb-highlight) 18%, transparent);
 		animation: viewer-loader-spin 0.75s linear infinite;
+	}
+
+	.viewer-next-spinner-slot {
+		display: inline-flex;
+		width: 0;
+		opacity: 0;
+		overflow: hidden;
+		transition:
+			width 0.18s ease,
+			opacity 0.12s ease,
+			margin-right 0.18s ease;
+	}
+
+	.viewer-next-spinner-slot.is-visible {
+		width: 0.8rem;
+		margin-right: 0.4rem;
+		opacity: 1;
+	}
+
+	.viewer-next-spinner {
+		width: 0.65rem;
+		height: 0.65rem;
+		border: 1px solid color-mix(in srgb, var(--orb-highlight) 28%, transparent);
+		border-top-color: color-mix(in srgb, var(--orb-highlight) 90%, white);
+		border-radius: 9999px;
+		animation: viewer-next-spinner-spin 0.7s linear infinite;
+	}
+
+	@keyframes viewer-next-spinner-spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	@keyframes viewer-loader-spin {
