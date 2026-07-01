@@ -518,7 +518,7 @@
 	<div class="flex flex-col">
 		<div class="min-h-0 overflow-hidden border-b border-border-faint bg-[color-mix(in_srgb,var(--orb-bg-base)_82%,var(--orb-bg-deep))]">
 			<div bind:this={imageStage}
-				class="viewer-stage viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-80 lg:min-h-[460px]"
+				class="viewer-stage viewer-stage-large relative flex aspect-video min-h-0 select-none items-center justify-center overflow-hidden bg-black md:aspect-auto md:min-h-50 lg:min-h-[460px]"
 				onpointerdown={handleImagePointerDown}
 				onpointermove={handleImagePointerMove}
 				onpointerup={handleImagePointerUp}
@@ -567,7 +567,7 @@
 				<img bind:this={imageEl}
 					src={shot.image_url ?? shot.preview_url}
 					alt={shot.title ?? 'Screenshot'}
-					class="block max-h-full max-w-full select-none object-contain will-change-transform {imageTransitions ? 'transition-[opacity,transform,filter] duration-150 ease-out' : ''} {imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'}"
+					class="block max-h-[80vh] max-w-full select-none object-contain will-change-transform {imageTransitions ? 'transition-[opacity,transform,filter] duration-150 ease-out' : ''} {imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-[2px]'}"
 					draggable="false"
 					onwheel={handleImageWheel}
 					onload={handleImageLoad}
