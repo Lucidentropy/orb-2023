@@ -5,6 +5,7 @@
 	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
 	import { galleryFocus } from '$lib/stores/galleryState';
+	import { fade, fly } from 'svelte/transition';
 	
 	let { data } = $props();
 
@@ -201,8 +202,7 @@
 	});
 
 	const visibleGames = $derived.by(() => {
-		if (showAllGames) return games;
-		return games.filter(g => g.count > MIN_GAME_MENU_COUNT);
+		return games;
 	});
 
 	const hiddenGameCount = $derived(games.length - visibleGames.length);	
@@ -210,7 +210,7 @@
 	const topGames = $derived.by(() =>
 		[...games]
 			.sort((a, b) => b.count - a.count)
-			.slice(0, 10)
+			.slice(0, 20)
 	);
 
 	const gameFiltered = $derived.by(() => {
@@ -269,6 +269,12 @@
 				count: countMap.get(m.id) ?? 0
 			}));
 	});
+
+	const visibleMembers = $derived.by(() => {
+		if (!selectedApp) return members;
+
+		return members.filter(m => m.count > 0);
+	});	
 
 	const totalPages = $derived(Math.ceil(filtered.length / PAGE_SIZE));
 	const paged = $derived(filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE));
@@ -375,6 +381,29 @@
 			wheelCooldown = false;
 		}, WHEEL_COOLDOWN_MS);
 	}
+
+	function cycleGame(direction: -1 | 1) {
+		if (!visibleGames.length) return;
+
+		const currentIndex = visibleGames.findIndex(g => g.app_id === selectedApp);
+		const nextIndex =
+			currentIndex < 0
+				? direction > 0
+					? 0
+					: visibleGames.length - 1
+				: (currentIndex + direction + visibleGames.length) % visibleGames.length;
+
+		const nextGame = visibleGames[nextIndex];
+
+		if (!nextGame) return;
+
+		gameMenuOpen = false;
+
+		void goto(buildUrl(nextGame.app_id, '', 1), {
+			noScroll: true,
+			keepFocus: true
+		});
+	}	
 
 	// Lifecycle
 	onMount(() => {
@@ -511,7 +540,7 @@
 		<aside class="filter-sidebar flex shrink-0 flex-col gap-5 rounded border border-border-faint/70 bg-black/20 p-3 sm:p-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:w-64 lg:overflow-y-auto" aria-label="Gallery filters">
 			<div class="game-menu-wrap relative">
 				<div class="mb-1 flex items-center justify-between gap-3">
-					<span class="field-label mb-0">Game</span>
+					<span class="field-label mb-0">Select Game</span>
 					{#if selectedGame}
 						<a href={buildUrl('', selectedMember, 1)}
 							class="text-xs text-orb-highlight/35 no-underline transition hover:text-orb-highlight hover:no-underline"
@@ -521,26 +550,68 @@
 						</a>
 					{/if}
 				</div>
-
-				<button
-					type="button"
-					class="btn-ghost flex w-full items-center gap-2 text-left"
-					onclick={() => gameMenuOpen = !gameMenuOpen}
-				>
+				
+				<div class="flex h-12 w-full items-center justify-center gap-2">
 					{#if selectedGame}
-						{@const appId = appIdFor(selectedGame)}
-						{#if appId}
-							<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
-								alt=""
-								class="shrink-0 mx-auto rounded-sm"
-							/>
-						{/if}
-						<!-- <span class="truncate text-white">{selectedGame}</span> -->
-					{:else}
-						<span>All Games</span>
+						<button
+							type="button"
+							class="btn-link flex h-12 w-8 shrink-0 items-center justify-center font-mono text-xl leading-none text-orb-highlight/70 transition hover:text-white hover:no-underline disabled:cursor-default disabled:opacity-25"
+							onclick={(e) => {
+								e.stopPropagation();
+								cycleGame(-1);
+							}}
+							disabled={!visibleGames.length}
+							aria-label="Previous game"
+						>
+							‹
+						</button>
 					{/if}
-					<span class="ml-auto shrink-0 text-orb-highlight/40" aria-hidden="true">▾</span>
-				</button>
+
+					<button
+						type="button"
+						class="btn-link flex h-12 min-w-0 flex-1 items-center justify-center text-left hover:no-underline"
+						onclick={() => gameMenuOpen = !gameMenuOpen}
+						aria-expanded={gameMenuOpen}
+					>
+						{#if selectedGame}
+							{@const appId = appIdFor(selectedGame)}
+							<span class="flex h-[45px] w-[120px] shrink-0 items-center justify-center overflow-hidden rounded-sm">
+								{#if appId}
+									<img
+										src="https://cdn.cloudflare.steamstatic.com/steam/apps/{appId}/capsule_sm_120.jpg"
+										alt=""
+										class="h-[45px] w-[120px] object-none"
+									/>
+								{:else}
+									<span class="px-2 text-center font-mono text-[0.68rem] uppercase tracking-wider text-orb-highlight/55">
+										{selectedGame}
+									</span>
+								{/if}
+							</span>
+						{:else}
+							<span class="flex h-[45px] w-[120px] items-center justify-center rounded-sm border border-border-faint/50 bg-black/15 px-3 text-center font-mono text-xs uppercase tracking-wider text-orb-highlight/70">
+								All Games
+							</span>
+
+							<span class="ml-2 shrink-0 text-orb-highlight/40" aria-hidden="true">▾</span>
+						{/if}
+					</button>
+
+					{#if selectedGame}
+						<button
+							type="button"
+							class="btn-link flex h-12 w-8 shrink-0 items-center justify-center font-mono text-xl leading-none text-orb-highlight/70 transition hover:text-white hover:no-underline disabled:cursor-default disabled:opacity-25"
+							onclick={(e) => {
+								e.stopPropagation();
+								cycleGame(1);
+							}}
+							disabled={!visibleGames.length}
+							aria-label="Next game"
+						>
+							›
+						</button>
+					{/if}
+				</div>
 
 				{#if gameMenuOpen}
 					<div class="game-menu absolute left-0 right-0 top-[calc(100%+0.25rem)] z-50 flex max-h-96 flex-col overflow-y-auto border border-border-default shadow-panel">
@@ -566,29 +637,14 @@
 									{g.count}
 								</span>
 							</a>
-						{/each}
-						{#if hiddenGameCount > 0}
-							<button
-								type="button"
-								class="menu-item w-full border-t border-border-faint/60 text-left"
-								onclick={(e) => {
-									e.stopPropagation();
-									showAllGames = true;
-								}}
-							>
-								<span class="truncate">Show More Games</span>
-								<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">
-									≤ {MIN_GAME_MENU_COUNT}
-								</span>
-							</button>
-						{/if}						
+						{/each}					
 					</div>
 				{/if}
 			</div>
 
 			<div>
-				<span class="field-label">Popular</span>
-				<div class="flex flex-col gap-0.5">
+				<span class="field-label">Top 20 Games</span>
+				<div class="orb-scrollbar flex max-h-[18.5rem] flex-col gap-0.5 overflow-y-auto pr-1">
 					{#each topGames as g (g.name)}
 						{@const appId = appIdFor(g.name)}
 						<a href={buildUrl(selectedGame === g.name ? '' : g.name, '', 1)}
@@ -621,7 +677,7 @@
 					{/if}
 				</div>
 
-				<div class="orb-scrollbar flex max-h-[18.5rem] flex-col gap-0.5 overflow-y-auto pr-1">
+				<div class="orb-scrollbar flex min-h-[15rem] max-h-[260px] flex-col gap-2 overflow-y-scroll pr-1" data-wheel-scroll>
 					<a href={buildUrl(selectedGame, '', 1)}
 						class="filter-item {!selectedMember ? 'active' : ''}"
 						onclick={filterTo(buildUrl(selectedGame, '', 1))}
@@ -630,11 +686,12 @@
 						<span class="ml-auto shrink-0 font-mono text-[0.68rem] text-orb-highlight/40">{gameFiltered.length}</span>
 					</a>
 
-					{#each members as m (m.id)}
+					{#each visibleMembers as m (m.id)}
 						{@const avatar = avatarFor(m.steam_id)}
 						<a href={buildUrl(selectedApp, selectedMember === m.id ? '' : m.id, 1)}
-							class="filter-item {selectedMember === m.id ? 'active' : ''} {m.count === 0 ? 'is-empty' : ''}"
+							class="filter-item {selectedMember === m.id ? 'active' : ''}"
 							onclick={filterTo(buildUrl(selectedApp, selectedMember === m.id ? '' : m.id, 1))}
+							out:fade={{ duration: 490 }}
 						>
 							{#if avatar}
 								<img src={avatar} alt="" class="h-6 w-6 shrink-0 rounded-full object-cover" />
