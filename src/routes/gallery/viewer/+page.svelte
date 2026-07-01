@@ -48,6 +48,23 @@
 		return `/gallery${qs ? '?' + qs : ''}`;
 	});
 
+	const shotGameUrl = $derived.by(() => {
+		const u = new URLSearchParams();
+
+		if (shot?.app_name) {
+			u.set('game', shot.app_name);
+		}
+
+		const qs = u.toString();
+		return `/gallery${qs ? '?' + qs : ''}`;
+	});
+
+	const steamUrl = $derived.by(() =>
+		shot?.steam_file_id
+			? `https://steamcommunity.com/sharedfiles/filedetails/?id=${encodeURIComponent(String(shot.steam_file_id))}`
+			: 'https://steamcommunity.com/'
+	);
+
 	const prevShot = $derived(data.prevShot);
 	const nextShot = $derived(data.nextShot);	
 
@@ -87,9 +104,18 @@
 	});
 
 	function buildViewerUrl(id: string) {
-		const u = new URLSearchParams({ id });
-		if (game) u.set('game', game);
-		if (member) u.set('member', member);
+		const u = new URLSearchParams();
+
+		u.set('id', id);
+
+		if (game) {
+			u.set('game', game);
+		}
+
+		if (member) {
+			u.set('member', member);
+		}
+
 		return `/gallery/viewer?${u.toString()}`;
 	}
 
@@ -349,7 +375,7 @@
 
 			<div class="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden text-center">
 				{#if shot.app_name}
-					<a href="/gallery?game={encodeURIComponent(shot.app_name)}"
+					<a href={shotGameUrl}
 						class="truncate whitespace-nowrap font-semibold text-white no-underline transition-opacity hover:no-underline hover:opacity-70"
 					>
 						{shot.app_name}
@@ -371,7 +397,7 @@
 				{/if}
 			</div>
 
-			<a href="https://steamcommunity.com/sharedfiles/filedetails/?id={shot.steam_file_id}"
+			<a href={steamUrl}
 				target="_blank"
 				rel="noopener noreferrer"
 				class="rounded border border-border-faint bg-black/25 px-3 py-1 font-mono uppercase tracking-wider text-orb-highlight/55 no-underline transition hover:border-border-default hover:bg-bg-deep/80 hover:text-white hover:no-underline"
