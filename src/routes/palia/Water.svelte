@@ -10,6 +10,7 @@
 		maxFps?: number;
 		gridWidth?: number;
         verticalAnchor?: number;
+        topOffset?: number;        
 	}
 
 	let {
@@ -20,7 +21,8 @@
 		shade = 0.15,
 		maxFps = 60,
 		gridWidth = 480,
-        verticalAnchor = -0.9
+        verticalAnchor = 1,
+        topOffset = 240,
 	}: Props = $props();
 
 	let canvas: HTMLCanvasElement;
@@ -142,28 +144,28 @@
 			gl!.uniform2f(uOffset, (1 - sx) * 0.5, (1 - sy) * verticalAnchor);
 		}
 
-		function setup() {
-			cssW = window.innerWidth;
-			cssH = window.innerHeight;
-			const dpr = Math.min(window.devicePixelRatio || 1, 2);
-			canvas.width = Math.round(cssW * dpr);
-			canvas.height = Math.round(cssH * dpr);
-			gl!.viewport(0, 0, canvas.width, canvas.height);
+        function setup() {
+            cssW = window.innerWidth;
+            cssH = window.innerHeight - topOffset;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(cssW * dpr);
+            canvas.height = Math.round(cssH * dpr);
+            gl!.viewport(0, 0, canvas.width, canvas.height);
 
-			cols = gridWidth;
-			rows = Math.max(2, Math.round(cols * (cssH / cssW)));
-			const n = cols * rows;
-			cur = new Float32Array(n);
-			prev = new Float32Array(n);
-			disp = new Uint8Array(n * 4);
+            cols = gridWidth;
+            rows = Math.max(2, Math.round(cols * (cssH / cssW)));
+            const n = cols * rows;
+            cur = new Float32Array(n);
+            prev = new Float32Array(n);
+            disp = new Uint8Array(n * 4);
 
-			gl!.activeTexture(gl!.TEXTURE1);
-			gl!.bindTexture(gl!.TEXTURE_2D, dispTex);
-			gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, cols, rows, 0, gl!.RGBA, gl!.UNSIGNED_BYTE, disp);
+            gl!.activeTexture(gl!.TEXTURE1);
+            gl!.bindTexture(gl!.TEXTURE_2D, dispTex);
+            gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, cols, rows, 0, gl!.RGBA, gl!.UNSIGNED_BYTE, disp);
 
-			setCover();
-			ready = true;
-		}
+            setCover();
+            ready = true;
+        }
 
 		function touch(cx: number, cy: number, radius: number, pressure: number) {
 			for (let dy = -radius; dy <= radius; dy++) {
@@ -250,10 +252,12 @@
 			drawFrame();
 		}
 
-		function onPointerMove(e: PointerEvent) {
+        function onPointerMove(e: PointerEvent) {
 			if (!ready) return;
+			const y = e.clientY - topOffset;
+			if (y < 0) return;
 			const gx = Math.floor((e.clientX / cssW) * cols);
-			const gy = Math.floor((e.clientY / cssH) * rows);
+			const gy = Math.floor((y / cssH) * rows);
 			touch(gx, gy, 2, 55);
 		}
 
@@ -288,23 +292,31 @@
 	});
 </script>
 
-<canvas bind:this={canvas} class="water" aria-hidden="true"></canvas>
-<div class="water-tint" aria-hidden="true"></div>
+<canvas
+	bind:this={canvas}
+	class="water"
+	style="top:{topOffset}px; height:calc(100dvh - {topOffset}px);"
+	aria-hidden="true"
+></canvas>
+<div
+	class="water-tint"
+	style="top:{topOffset}px; height:calc(100dvh - {topOffset}px);"
+	aria-hidden="true"
+></div>
 
 <style>
-	.water {
+.water {
 		position: fixed;
-		inset: 0;
+		left: 0;
 		z-index: -1;
 		display: block;
 		width: 100vw;
-		height: 100vh;
 		pointer-events: none;
 	}
 
 	.water-tint {
 		position: fixed;
-		inset: 0;
+		left: 0;
 		z-index: -1;
 		pointer-events: none;
 		background: linear-gradient(

@@ -58,7 +58,7 @@
 </svelte:head>
 
 <!-- <div class="palia-bg" aria-hidden="true"></div> -->
- <Water src="/images/palia/Palia_ConceptRuinsPast.jpg" />
+ <Water src="/images/palia/Palia_promobg1.png" />
 
 <div class="palia-root">
 	<header class="hero">

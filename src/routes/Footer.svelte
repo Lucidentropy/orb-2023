@@ -1,19 +1,3 @@
-<script>
-    import Webamp from '$lib/components/Webamp.svelte';
-    import { activeTheme } from '$lib/stores/themeStore';
-
-	let isWebampLoaded = false;
-
-    const loadWebamp = () => (isWebampLoaded = !isWebampLoaded);
-
-    const themes = [
-        { value: '', label: 'Default' },
-        { value: 'matrix', label: 'Matrix' },
-        { value: 'halflife', label: 'Half-Life' },
-        { value: 'crimson', label: 'Crimson' },
-        { value: 'vapor', label: 'Vapor' }
-    ];
-</script>
 
 <svelte:head>
 	<style lang="scss">
@@ -96,42 +80,63 @@
 	</style>
 </svelte:head>
 
+<script>
+    import Webamp from '$lib/components/Webamp.svelte';
+    import { activeTheme } from '$lib/stores/themeStore';
+
+    let isWebampLoaded = false;
+
+    const loadWebamp = () => (isWebampLoaded = !isWebampLoaded);
+
+    const themes = [
+        { value: '', label: 'Default' },
+        { value: 'matrix', label: 'Matrix' },
+        { value: 'halflife', label: 'Half-Life' },
+        { value: 'crimson', label: 'Crimson' },
+        { value: 'vapor', label: 'Vapor' }
+    ];
+</script>
+
 {#if isWebampLoaded}
     <div class="fixed top-0 left-0 w-screen h-screen z-50 pointer-events-none">
         <Webamp />
     </div>
 {/if}
 
-<footer class="mt-24 px-4 text-xs z-100 text-shadow-xs">
-	<p class="tagline">
-		<span>Clan Orb, a gaming community founded in 2000.</span>
-	</p>
-	<div class="drawer-row pb-4">
-		<a href="https://svelte.dev/" target="_blank" rel="noopener noreferrer">
-			<img src="/images/layout/svelte-logo.svg" alt="" class="h-4 w-4 object-contain saturate-0" />
-			Powered by Svelte
-		</a>
+<footer class="group mt-24 flex flex-col items-center px-4 text-xs text-shadow-xs">
+    <p class="flex items-center justify-center text-center font-bold text-orb-highlight/70">
+        Clan Orb, a gaming community founded in 2000.
+    </p>
 
-		<a href="https://github.com/Lucidentropy/orb-2023" target="_blank" rel="noopener noreferrer">
-			<img src="/images/layout/github.svg" alt="" class="h-4 w-4 object-contain invert" />
-			GitHub
-		</a>
+    <div class="w-full overflow-hidden">
+        <div
+            class="flex translate-y-full items-center justify-center gap-5 pb-4 text-orb-highlight/60 transition-transform duration-300 ease-out group-hover:translate-y-0 group-focus-within:translate-y-0"
+        >
+            <a class="inline-flex items-center gap-1.5 transition-colors hover:text-orb-highlight" href="https://svelte.dev/" target="_blank" rel="noopener noreferrer">
+                <img src="/images/layout/svelte-logo.svg" alt="" class="h-4 w-4 object-contain saturate-0" />
+                Powered by Svelte
+            </a>
 
-		{#if !isWebampLoaded}
-			<button class="btn-row" onclick={loadWebamp} title="A relic of an ancient time." style="gap:7px; display:inline-flex;">
-				<img src="/images/layout/winamp-icon.svg" alt="" class="h-4 w-4 object-contain saturate-50" />
-				Llama Time
-			</button>
-		{/if}
+            <a class="inline-flex items-center gap-1.5 transition-colors hover:text-orb-highlight" href="https://github.com/Lucidentropy/orb-2023" target="_blank" rel="noopener noreferrer">
+                <img src="/images/layout/github.svg" alt="" class="h-4 w-4 object-contain invert" />
+                GitHub
+            </a>
 
-		<div class="theme-select">
-			<label for="theme-select" class="field-label">Theme</label>
-			<select id="theme-select" class="field-input" bind:value={$activeTheme}>
-				{#each themes as option (option.value)}
-					<option value={option.value}>{option.label}</option>
-				{/each}
-			</select>
-		</div>
-	</div>
+            {#if !isWebampLoaded}
+                <button type="button" class="btn-row inline-flex items-center gap-[7px] transition-colors hover:text-orb-highlight" onclick={loadWebamp} title="A relic of an ancient time.">
+                    <img src="/images/layout/winamp-icon.svg" alt="" class="h-4 w-4 object-contain saturate-50" />
+                    Llama Time
+                </button>
+            {/if}
+
+            <div class="flex items-center gap-2">
+                <label for="theme-select" class="field-label m-0 whitespace-nowrap">Theme</label>
+                <select id="theme-select" class="field-input min-w-[100px] px-2 py-1 text-[0.65rem]" bind:value={$activeTheme}>
+                    {#each themes as option (option.value)}
+                        <option value={option.value}>{option.label}</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
+    </div>
 </footer>
-
