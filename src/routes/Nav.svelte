@@ -64,8 +64,9 @@
 			text: 'Games',
 			subItems: [
 				{ text: 'GTA Online', url: '/gta' },
-				{ text: 'Tribes', url: '/tribes' },
 				{ text: 'Elite', url: '/elite' },
+				{ text: 'Palia', url: '/palia' },
+				{ text: 'Tribes', url: '/tribes' },
 				{ text: 'WoW', url: '/wow' },
 				{ text: 'Warframe', url: '/warframe' }
 			]

@@ -95,11 +95,6 @@
 		return `Steam screenshot${author} from Clan Orb.`;
 	});
 
-	const playlistPositionLabel = $derived.by(() => {
-		if (!playlistIndex || !playlistTotal) return '';
-		return `${playlistIndex} of ${playlistTotal}`;
-	});	
-
 	const shareImageUrl = $derived(shot?.image_url ?? shot?.preview_url ?? '');	
 
 	// URL builders

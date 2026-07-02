@@ -5,7 +5,7 @@
 	import { browser } from '$app/environment';
 	import Container from '$lib/ThemeHandler.svelte';
 	import { galleryFocus } from '$lib/stores/galleryState';
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	
 	let { data } = $props();
 
@@ -28,7 +28,6 @@
 
 	const PAGE_SIZE = 30;
 	const WHEEL_COOLDOWN_MS = 150;
-	const MIN_GAME_MENU_COUNT = 20;
 
 	const shots = $derived(data.screenshots as unknown as Shot[]);
 	let steamMembers = $derived(data.steamMembers);
@@ -40,20 +39,10 @@
 	let shouldRestoreFocusedShot = $state(false);
 	let gameMenuOpen = $state(false);
 	let wheelEnabled = $state(true);
-	let showAllGames = $state(false);
 	let isDev = $state(false);
 
 	let wheelCooldown = false;
 
-	const shareImageUrl = $derived(paged[0]?.preview_url ?? '');
-	const shareTitle = $derived(selectedGame ? `${selectedGame} Screenshots | Clan Orb` : 'Steam Image Gallery | Clan Orb');
-	const shareDescription = $derived(
-		selectedGame
-			? `${filtered.length} ${selectedGame} screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
-			: `${filtered.length} Steam screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
-	);
-
-	// URL state
 	function isGalleryRoute(): boolean {
 		return browser && window.location.pathname === '/gallery';
 	}
@@ -148,7 +137,6 @@
 		return `/gallery/viewer?${u.toString()}`;
 	}
 
-
 	function applyFocusedShotPage(focusId: string): boolean {
 		const index = filtered.findIndex(shot => shot.steam_file_id === focusId);
 
@@ -170,7 +158,6 @@
 		applyFocusedShotPage(focus.id);
 	}	
 
-	// Data helpers
 	const selectedGame = $derived.by(() => {
 		if (!selectedApp) return '';
 
@@ -204,8 +191,6 @@
 	const visibleGames = $derived.by(() => {
 		return games;
 	});
-
-	const hiddenGameCount = $derived(games.length - visibleGames.length);	
 
 	const topGames = $derived.by(() =>
 		[...games]
@@ -293,6 +278,14 @@
 		return range;
 	});
 
+	const shareImageUrl = $derived(paged[0]?.preview_url ?? '');
+	const shareTitle = $derived(selectedGame ? `${selectedGame} Screenshots | Clan Orb` : 'Steam Image Gallery | Clan Orb');
+	const shareDescription = $derived(
+		selectedGame
+			? `${filtered.length} ${selectedGame} screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
+			: `${filtered.length} Steam screenshot${filtered.length === 1 ? '' : 's'} from Clan Orb.`
+	);
+
 	function avatarFor(steam_id: string | null): string | null {
 		if (!steam_id) return null;
 		return steamMembers.find(m => m.steamid === String(steam_id))?.avatarfull ?? null;
@@ -303,7 +296,6 @@
 		return shot?.app_id ?? null;
 	}
 
-	// Navigation
 	function filterTo(url: string) {
 		return (e: MouseEvent) => {
 			if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
@@ -339,7 +331,6 @@
 		};
 	}
 
-	// Wheel paging
 	function handleWheel(e: WheelEvent) {
 		if (!wheelEnabled) return;
 
@@ -405,14 +396,12 @@
 		});
 	}	
 
-	// Lifecycle
 	onMount(() => {
 		isDev = window.location.hostname === 'localhost';
 
 		const closeMenu = (e: MouseEvent) => {
 			if (!(e.target as Element).closest('.game-menu-wrap')) {
 				gameMenuOpen = false;
-				showAllGames = false;
 			}
 		};
 
