@@ -1,5 +1,8 @@
 <script lang="ts">
 	// routes/palia/+page.svelte
+
+    import Water from './Water.svelte';
+
 	interface PaliaMember {
 		name: string;
 		role: 'leader' | 'officer' | 'member';
@@ -54,7 +57,8 @@
 	/>
 </svelte:head>
 
-<div class="palia-bg" aria-hidden="true"></div>
+<!-- <div class="palia-bg" aria-hidden="true"></div> -->
+ <Water src="/images/palia/Palia_ConceptRuinsPast.jpg" />
 
 <div class="palia-root">
 	<header class="hero">
