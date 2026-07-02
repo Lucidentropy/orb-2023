@@ -324,6 +324,7 @@
 		background: #000;
 		display: flex;
 		flex-direction: column;
+		mix-blend-mode:overlay;
 	}
 
     .video-bg {
@@ -344,6 +345,7 @@
 		flex-shrink: 0;
 		background: rgba(0, 0, 0, 0.5);
 		border-top: 1px solid rgba(102, 204, 255, 0.1);
+		/* opacity: 0.35; */
 		transition: opacity 0.2s;
         position: relative; 
         z-index: 1 
