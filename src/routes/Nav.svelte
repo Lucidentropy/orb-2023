@@ -4,6 +4,7 @@
 	import { fly } from 'svelte/transition';
 	import Icon from 'svelte-awesome/components/Icon.svelte';
 	import { arrowCircleOLeft, angleDown, bars, times } from 'svelte-awesome/icons';
+	import NavDiscord from '$lib/components/NavDiscord.svelte';
 
     let subListEl = $state<HTMLUListElement | null>(null);
 	let caretLeft = $state(0);
@@ -19,25 +20,36 @@
         devOnly?: boolean;
     }
 
+	function measureCaretCenter(): number | null {
+		const el = subListEl;
+		if (!el || activeItem === null) return null;
+		const active = el.querySelector('[data-sub][aria-current="page"]') as HTMLElement | null;
+		if (!active) return null;
+		return active.offsetLeft + active.offsetWidth / 2;
+	}
+
+	function repositionCaret() {
+		const center = measureCaretCenter();
+		if (center === null) {
+			caretVisible = false;
+			return;
+		}
+		caretLeft = center;
+		caretVisible = true;
+	}
+
 	$effect(() => {
 		const path = page.url.pathname;
 		const group = activeItem;
-		const el = subListEl;
-		if (!el || group === null) {
+		void path;
+		const center = measureCaretCenter();
+		if (center === null) {
 			caretVisible = false;
 			prevGroup = group;
 			return;
 		}
-		const active = el.querySelector('[data-sub][aria-current="page"]') as HTMLElement | null;
-		if (!active) {
-			caretVisible = false;
-			prevGroup = group;
-			return;
-		}
-		const center = active.offsetLeft + active.offsetWidth / 2;
 		const sameGroup = group === prevGroup;
 		prevGroup = group;
-		void path;
 		if (sameGroup) {
 			caretLeft = center;
 		} else {
@@ -84,6 +96,7 @@
 
 	let isDev = $state(false);
 	let mobileOpen = $state(false);
+	let discordOpen = $state(false);
 	let activeItem = $state<NavItem | null>(
 		navItems.find((item) =>
 			item.subItems?.some((sub) => page.url.pathname.startsWith(sub.url ?? ''))
@@ -95,11 +108,18 @@
 
 	onMount(() => {
 		isDev = location.hostname === 'localhost';
+		const onResize = () => repositionCaret();
+		window.addEventListener('resize', onResize);
+		return () => window.removeEventListener('resize', onResize);
 	});
 
 	function toggleSubMenu(item: NavItem | null) {
 		activeItem = activeItem === item ? null : item;
 		mobileOpen = true;
+	}
+
+	function toggleDiscord() {
+		discordOpen = !discordOpen;
 	}
 
 	function closeMobile() {
@@ -181,9 +201,25 @@
 						{/if}
 					</li>
 				{/each}
+				<li class="relative h-full">
+					<button
+						type="button"
+						onclick={toggleDiscord}
+						aria-expanded={discordOpen}
+						class="btn-link nav-link flex h-full items-center gap-2 px-2 text-xs font-bold uppercase tracking-widest hover:text-white {discordOpen ? 'text-white' : 'text-orb-highlight'}"
+					>
+						<img src="/images/discord.svg" alt="" class="h-4 w-4" />
+						Discord
+						<span class="inline-flex transition-transform duration-200 {discordOpen ? 'rotate-180' : ''}">
+							<Icon data={angleDown} class="opacity-60" />
+						</span>
+					</button>
+				</li>
 			</ul>
 		{/if}
 	</div>
+
+	<NavDiscord open={discordOpen} />
 </nav>
 
 {#if mobileOpen}
@@ -229,6 +265,17 @@
 						{/if}
 					</li>
 				{/each}
+				<li class="border-b border-white/10">
+					<button
+						type="button"
+						onclick={() => { toggleDiscord(); mobileOpen = false; }}
+						aria-expanded={discordOpen}
+						class="btn-link nav-link flex w-full items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-widest text-orb-highlight hover:text-white"
+					>
+						<span class="flex items-center gap-2"><img src="/images/discord.svg" alt="" class="h-4 w-4" /> Discord</span>
+						<span class="inline-flex transition-transform duration-200 {discordOpen ? 'rotate-180' : ''}"><Icon data={angleDown} class="opacity-50" /></span>
+					</button>
+				</li>
 			</ul>
 		{/if}
 	</div>
